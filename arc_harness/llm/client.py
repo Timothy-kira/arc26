@@ -21,11 +21,11 @@ class LLMConfig:
     model: str = field(default_factory=lambda: os.getenv("ARC26_LLM_MODEL", "qwen3.8-27b"))
     api_key: str = field(default_factory=lambda: os.getenv("ARC26_LLM_API_KEY", "EMPTY"))
     max_concurrency: int = field(default_factory=lambda: int(os.getenv("ARC26_LLM_CONCURRENCY", "16")))
-    timeout_s: float = 300.0
+    timeout_s: float = 900.0
     temperature: float = 0.6
     top_p: float = 0.95
     max_tokens: int = 2048
-    thinking_max_tokens: int = 8192
+    thinking_max_tokens: int = 6144
 
 
 @dataclass

@@ -59,50 +59,94 @@ print("rerun:", RERUN, "| comp:", COMP, "| inputs:", sorted(glob.glob("/kaggle/i
 '''
 
 VLLM = r'''
+def assert_rtx_pro_6000():
+    # Hard requirement: this notebook must run on the competition's RTX PRO 6000.
+    r = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"], capture_output=True, text=True)
+    print("nvidia-smi:", r.stdout.strip(), r.stderr.strip())
+    names = [l.lower() for l in r.stdout.splitlines() if l.strip()]
+    if r.returncode != 0 or not names or not all(CFG["expected_gpu"] in n for n in names):
+        raise RuntimeError(f"expected GPU {CFG['expected_gpu']!r}, got {r.stdout.strip() or r.stderr.strip()}")
+
 def _find_model_dir():
-    for top in sorted(glob.glob("/kaggle/input/*")) + sorted(glob.glob("/kaggle/input/*/*")):
-        for root, _, files in os.walk(top):
+    for base in ("/kaggle/input/models", "/kaggle/input"):
+        for root, _, files in os.walk(base):
             if "config.json" in files and any(f.endswith(".safetensors") for f in files):
                 return root
     return None
 
 def _find_wheelhouse():
     for root, _, files in os.walk("/kaggle/input"):
+        if "requirements.lock" in files and any(f.startswith("vllm-") and f.endswith(".whl") for f in files):
+            return root
+    for root, _, files in os.walk("/kaggle/input"):
         if any(f.startswith("vllm-") and f.endswith(".whl") for f in files):
             return root
     return None
 
+VLLM_SITE = "/tmp/vllm-site-packages"
+def vllm_env():
+    env = os.environ.copy()
+    env["PYTHONPATH"] = VLLM_SITE
+    env.update({"USE_TF": "0", "TRANSFORMERS_NO_TF": "1", "TRANSFORMERS_NO_TORCHVISION": "1",
+                "VLLM_NO_USAGE_STATS": "1", "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1"})
+    return env
+
 VLLM_PROC = None
-def start_vllm():
+def start_vllm(wait=True):
     global VLLM_PROC
+    assert_rtx_pro_6000()
     model_dir, wh = _find_model_dir(), _find_wheelhouse()
     print("model:", model_dir, "| wheelhouse:", wh)
-    if not model_dir:
-        print("no model mounted -> the agent will run as the pure explorer")
+    if not model_dir or not wh:
+        print("model or wheelhouse missing -> the agent will run as the pure explorer")
         return False
-    try:
-        import vllm  # noqa: F401
-    except Exception:
-        if wh:
-            r = subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--no-index", "--find-links", wh, "vllm"],
-                               capture_output=True, text=True)
-            print("pip vllm:", r.returncode, r.stdout[-500:], r.stderr[-1500:])
+    lock = os.path.join(wh, "requirements.lock")
+    t0 = time.time()
+    cmd = [sys.executable, "-m", "pip", "install", "--no-index", "--find-links", wh,
+           *(["--requirement", lock] if os.path.exists(lock) else ["vllm"]),
+           "--target", VLLM_SITE, "--upgrade", "--ignore-installed", "--only-binary", ":all:",
+           "--no-compile", "--disable-pip-version-check", "--no-warn-conflicts", "-q"]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    print(f"pip vllm rc={r.returncode} in {time.time() - t0:.0f}s", r.stderr[-1500:])
     v = CFG["vllm"]
     cmd = [sys.executable, "-m", "vllm.entrypoints.openai.api_server", "--model", model_dir,
-           "--served-model-name", v["served_model_name"], "--port", "8000",
+           "--served-model-name", v["served_model_name"], "--host", "127.0.0.1", "--port", "8000",
            "--max-model-len", str(v["max_model_len"]), "--gpu-memory-utilization", str(v["gpu_memory_utilization"]),
            "--max-num-seqs", str(v["max_num_seqs"]), *v["extra_args"]]
     log = open("/kaggle/working/vllm.log", "w")
-    VLLM_PROC = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)
+    VLLM_PROC = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=vllm_env())
     os.environ["ARC26_LLM_BASE_URL"] = "http://127.0.0.1:8000/v1"
     os.environ["ARC26_LLM_MODEL"] = v["served_model_name"]
     print("vLLM starting:", " ".join(cmd))
+    if not wait:
+        return True
+    import urllib.request
+    t0 = time.time()
+    while time.time() - t0 < 1500:
+        if VLLM_PROC.poll() is not None:
+            print("vLLM exited:", open("/kaggle/working/vllm.log").read()[-4000:])
+            return False
+        try:
+            urllib.request.urlopen("http://127.0.0.1:8000/v1/models", timeout=5)
+            break
+        except Exception:
+            time.sleep(5)
+    else:
+        print("vLLM not ready:", open("/kaggle/working/vllm.log").read()[-4000:])
+        return False
+    print(f"vLLM ready after {time.time() - t0:.0f}s")
+    body = json.dumps({"model": v["served_model_name"], "max_tokens": 64, "temperature": 0,
+                       "messages": [{"role": "user", "content": "In one sentence: what is 2 + 2?"}],
+                       "chat_template_kwargs": {"enable_thinking": False}}).encode()
+    req = urllib.request.Request("http://127.0.0.1:8000/v1/chat/completions", data=body,
+                                 headers={"Content-Type": "application/json"})
+    print("smoke test:", json.loads(urllib.request.urlopen(req, timeout=300).read())["choices"][0]["message"]["content"])
     return True
 '''
 
 SUBMIT_RUN = r'''
 if RERUN:
-    have_llm = start_vllm()
+    have_llm = start_vllm(wait=False)
     subprocess.run("curl -s --fail --retry 999 --retry-all-errors --retry-delay 5 --retry-max-time 900 "
                    "http://gateway:8001/api/games > /dev/null", shell=True)
     env = {**os.environ, "ARC_BASE_URL": "http://gateway:8001", "ARC_API_KEY": "test-key-123",
@@ -125,7 +169,7 @@ else:
 DEV_RUN = r'''
 have_llm = start_vllm()
 cmd = [sys.executable, "-m", "arc_harness.run", "--mode", "offline", "--llm", "vllm" if have_llm else "none",
-       "--hours", os.getenv("ARC26_DEV_HOURS", "3"), "--concurrency", str(CFG["concurrency"]),
+       "--hours", str(CFG.get("dev_hours", 2.5)), "--concurrency", str(CFG["concurrency"]),
        "--games", os.getenv("ARC26_DEV_GAMES", "all"), "--tag", "dev", "--out", "/kaggle/working/dev_run"]
 env = {**os.environ, "ARC26_LLM_WAIT": "1500"}
 print(" ".join(cmd))
@@ -134,7 +178,10 @@ import pandas as pd
 pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(
     "/kaggle/working/submission.parquet", index=False)
 if os.path.exists("/kaggle/working/dev_run/summary.json"):
-    print(open("/kaggle/working/dev_run/summary.json").read()[:3000])
+    summ = json.load(open("/kaggle/working/dev_run/summary.json"))
+    print(json.dumps({"totals": summ["totals"], "llm": summ.get("llm"), "wall": summ.get("wall_seconds")}, indent=2))
+if VLLM_PROC is not None:
+    VLLM_PROC.terminate()
 '''
 
 EVOLVE_RUN = r'''
@@ -188,7 +235,7 @@ def build(variant: str, out: Path) -> Path:
             "kernelspec": {"language": "python", "display_name": "Python 3", "name": "python3"},
             "language_info": {"name": "python"},
             "kaggle": {
-                "accelerator": cfg["accelerator"],
+                "accelerator": cfg["notebook_accelerator"],
                 "isInternetEnabled": False,
                 "isGpuEnabled": True,
                 "language": "python",
@@ -202,7 +249,6 @@ def build(variant: str, out: Path) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     (out / "notebook.ipynb").write_text(json.dumps(nb, indent=1))
     slug = cfg["kernel_slug"] + ("" if variant == "submit" else f"-{variant}")
-    datasets = [cfg["model_dataset"], cfg["wheelhouse_dataset"], *cfg.get("extra_datasets", [])]
     meta = {
         "id": f"{cfg['username']}/{slug}",
         "title": slug,
@@ -213,10 +259,11 @@ def build(variant: str, out: Path) -> Path:
         "enable_gpu": True,
         "enable_tpu": False,
         "enable_internet": False,
-        "dataset_sources": datasets,
+        "machine_shape": cfg["machine_shape"],
+        "dataset_sources": cfg["dataset_sources"],
         "competition_sources": [cfg["competition"]],
         "kernel_sources": [],
-        "model_sources": [],
+        "model_sources": cfg["model_sources"],
     }
     (out / "kernel-metadata.json").write_text(json.dumps(meta, indent=2))
     return out
