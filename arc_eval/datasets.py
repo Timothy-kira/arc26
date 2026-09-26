@@ -1,7 +1,9 @@
 """Game sets behind one environment interface (``arc_agi.Arcade`` over an environments dir).
 
-- ``official``: the 25 public ARC-AGI-3 games. Same designers as the hidden set, so they are
-  the validation set: evaluate on them, never tune on them.
+- ``official``: the 25 public ARC-AGI-3 games (same designers as the hidden set), split into
+  ``official_dev`` (20, used for development) and ``official_val`` (5, validation only: never
+  inspected or tuned on). The 5 are drawn once with a fixed seed, stratified by tag family
+  (1 keyboard, 2 click, 2 keyboard_click), not by how well anything plays them.
 - ``community``: arc-interactive (github.com/theredbluepill/arc-interactive, MIT), 252 games
   in the same format; the development set. Its ``baseline_actions`` are not per-level human
   counts, so only levels and actions are reported there.
@@ -30,7 +32,32 @@ class GameInfo:
     baseline: Optional[tuple[int, ...]]
 
 
+VAL_SEED = 2026
+VAL_PER_FAMILY = {"keyboard": 1, "click": 2, "keyboard_click": 2}
+
+
+def family(g: GameInfo) -> str:
+    return next((t for t in g.tags if t in VAL_PER_FAMILY), "click")
+
+
+def official_val_ids() -> set[str]:
+    import random
+
+    allg = games("official")
+    rng = random.Random(VAL_SEED)
+    out: set[str] = set()
+    for fam, n in VAL_PER_FAMILY.items():
+        pool = sorted(g.game_id for g in allg if family(g) == fam)
+        out |= set(rng.sample(pool, n))
+    return out
+
+
 def games(name: str) -> list[GameInfo]:
+    if name in ("official_dev", "official_val"):
+        val = official_val_ids()
+        return [g for g in games("official") if (g.game_id in val) == (name == "official_val")]
+    if name == "dev":  # everything we may tune on
+        return games("official_dev") + games("community")
     env_dir = SETS[name]
     out = []
     for meta in sorted(env_dir.glob("*/*/metadata.json")):

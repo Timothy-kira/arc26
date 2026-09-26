@@ -135,7 +135,7 @@ def _result(info, s, t0, arc, card):
 
 def main(argv: Optional[list[str]] = None) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--set", default="official", choices=["official", "community"])
+    p.add_argument("--set", default="official", choices=["official", "official_dev", "official_val", "community", "dev"])
     p.add_argument("--agent", default="explorer", choices=["explorer", "memory", "novelty", "random"])
     p.add_argument("--max-actions", type=int, default=2000)
     p.add_argument("--limit", type=int, default=0, help="play a random subset of this many games")
