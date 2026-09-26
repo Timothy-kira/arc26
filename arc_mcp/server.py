@@ -170,7 +170,7 @@ def request(path: str, req: dict[str, Any], timeout: float = 900) -> dict[str, A
 
 PYTHON_DOC = (
     "Run Python in this game's live REPL (variables persist across calls and across restarts of the agent). "
-    "The game state is in variables: grid (np.ndarray 64x64, grid[y, x], colours 0-15), prev (frame before the last "
+    "The game state is in variables: grid (np.ndarray 64x64, grid[y, x], colours 0-15), prev_grid (frame before the last "
     "action), frames (animation frames of the last action), state ('NOT_FINISHED'|'GAME_OVER'|'WIN'), level "
     "(levels completed), win_levels, available (action ids usable now), actions_used, level_actions_used, history "
     "(one dict per action). Functions: act(a, x=None, y=None) plays one action and returns {changed, level_up, "
@@ -179,7 +179,7 @@ PYTHON_DOC = (
     "[(y, x, old, new)]; objects(g=None) -> connected components [{color, size, bbox, center}]; anim() -> diff "
     "between the animation frames of the last action; action_stats(level=None) -> what each action id did so far (moves "
     "with vectors, no-ops): check it before re-testing a direction; regions(a, b) -> changed regions between two frames "
-    "(several regions = side effects: a counter, a key, a door elsewhere); look() attaches an image; journal / dag() = this game's live "
+    "(several regions = side effects: a counter, a key, a door elsewhere); cells(step=None, ox=None, oy=None) -> the frame as a map of lattice cells (dominant colour per cell, lattice inferred from how far actions moved objects; array in lattice_cells), use it for maps and path search instead of decoding pixels; look() attaches an image; grid, prev_grid and frames are copies (grid is reset to the current frame after every cell); journal / dag() = this game's live "
     "record of RIGHT and WRONG expectations and the DAG; np is numpy. After every cell that plays actions the "
     "reply carries the perception block: a 4x image of the frame, the objects and the animation diff. Write your own helpers (simulators, BFS, solvers) and reuse them; do not inspect or "
     "rewire the REPL itself (its built-ins are restored automatically if you overwrite them). "

@@ -192,3 +192,61 @@ def moves_text(a: np.ndarray, b: np.ndarray) -> str:
     return "moved objects: " + "; ".join(
         f"{NAMES[m['color']]}#{m['color']} {m['size'][0]}x{m['size'][1]} ({m['from'][0]},{m['from'][1]})->"
         f"({m['to'][0]},{m['to'][1]}) d=({m['d'][0]:+d},{m['d'][1]:+d})" for m in ms)
+
+
+def lattice(grid: np.ndarray, step: int, ox: int = 0, oy: int = 0) -> np.ndarray:
+    """The frame on a lattice of ``step`` x ``step`` cells starting at (ox, oy): the dominant colour of
+    each cell, shape (rows, cols); cell (r, c) covers grid[oy + r*step : ..., ox + c*step : ...]."""
+    g = np.asarray(grid)
+    rows, cols = (g.shape[0] - oy) // step, (g.shape[1] - ox) // step
+    out = np.zeros((rows, cols), dtype=np.int64)
+    for r in range(rows):
+        for c in range(cols):
+            blk = g[oy + r * step: oy + (r + 1) * step, ox + c * step: ox + (c + 1) * step]
+            out[r, c] = np.bincount(blk.ravel(), minlength=16).argmax()
+    return out
+
+
+def infer_lattice(history: list, grid: np.ndarray) -> Optional[tuple[int, int, int]]:
+    """(step, ox, oy) of the board's lattice. Two cues: the gcd of the displacements the actions caused
+    (origin = top-left of the moved object modulo the step), and a square tile size repeated across the
+    board (origin from those tiles). The tile wins when it divides the move step (a move that jumps over
+    a wall tile) or when nothing has moved yet. None when neither cue exists."""
+    from math import gcd
+
+    objs = objects(grid)
+    tiles = Counter((o["bbox"][3] - o["bbox"][1] + 1) for o in objs
+                    if o["bbox"][3] - o["bbox"][1] == o["bbox"][2] - o["bbox"][0] and o["size"] > 1)
+    tile = next((t for t, n in tiles.most_common() if t >= 2 and n >= 8), None)
+    step = 0
+    for h in history:
+        for _, _, d in h.get("moves") or []:
+            for v in d:
+                step = gcd(step, abs(int(v)))
+    if tile and (step < 2 or step % tile == 0):
+        xs = Counter(o["bbox"][1] % tile for o in objs if o["bbox"][3] - o["bbox"][1] + 1 == tile)
+        ys = Counter(o["bbox"][0] % tile for o in objs if o["bbox"][2] - o["bbox"][0] + 1 == tile)
+        return tile, xs.most_common(1)[0][0], ys.most_common(1)[0][0]
+    if step < 2:
+        return None
+    last = next((h["moves"] for h in reversed(history) if h.get("moves")), [])
+    kinds = {(c, tuple(sz)) for c, sz, _ in last}
+    xs_, ys_ = [], []
+    for o in objs:  # the moved object (possibly several parts): top-left of their union
+        y0, x0, y1, x1 = o["bbox"]
+        if (o["color"], (x1 - x0 + 1, y1 - y0 + 1)) in kinds:
+            xs_.append(x0)
+            ys_.append(y0)
+    return step, (min(xs_) % step if xs_ else 0), (min(ys_) % step if ys_ else 0)
+
+
+def lattice_text(cells: np.ndarray, step: int, ox: int, oy: int) -> str:
+    """Hex map of the lattice cells, cropped to the cells that are not background (indices stay absolute)."""
+    bg = background(cells)
+    ys, xs = np.where(cells != bg)
+    r0, r1, c0, c1 = (ys.min(), ys.max(), xs.min(), xs.max()) if len(ys) else (0, cells.shape[0] - 1, 0, cells.shape[1] - 1)
+    head = f"lattice step {step}, origin x={ox} y={oy}: cell (r, c) = pixels x={ox}+c*{step}, y={oy}+r*{step}; " \
+           f"hex colour per cell, {cells.shape[0]}x{cells.shape[1]} cells, rows {r0}-{r1} x cols {c0}-{c1} shown"
+    cols = "    " + "".join(str(c % 10) for c in range(c0, c1 + 1))
+    rows = [f"{r:3d} " + "".join("0123456789abcdef"[int(v)] for v in cells[r, c0:c1 + 1]) for r in range(r0, r1 + 1)]
+    return head + "\n" + cols + "\n" + "\n".join(rows)

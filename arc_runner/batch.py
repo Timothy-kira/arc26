@@ -43,7 +43,7 @@ AGENTS_MD = """# Playing an ARC-AGI-3 game as an interactive programming problem
 
 You play an unknown turn-based puzzle game (64x64 grid, 16 colours). Nobody tells you the rules or
 the goal. The game lives in a Python REPL that you drive with the `arc_python` tool: the state is in
-variables (`grid`, `prev`, `frames`, `state`, `level`, `available`, `history`, ...) and `act(a, x, y)`
+variables (`grid`, `prev_grid`, `frames`, `state`, `level`, `available`, `history`, ...) and `act(a, x, y)`
 plays one action. Score per level = (human_actions / your_actions)^2: every action counts, thinking and
 code that does not act are free.
 

@@ -51,7 +51,7 @@ OUT_LIMIT = int(os.getenv("ARC_OUT_LIMIT", "6000"))
 
 
 PROTECTED = ("act", "reset", "show", "changes", "objects", "anim", "look", "regions", "node", "rerun", "dag",
-             "journal", "np", "action_stats")
+             "journal", "np", "action_stats", "cells")
 
 
 class CellBudget(Exception):
@@ -88,7 +88,7 @@ class Game:
 
 
 def show(g: Optional[np.ndarray] = None, y0: int = 0, y1: int = 64, x0: int = 0, x1: int = 64) -> str:
-    g = NS["grid"] if g is None else np.asarray(g)
+    g = KSTATE["grid"] if g is None else np.asarray(g)
     sub = g[y0:y1, x0:x1]
     head = "   " + "".join(str((x // 10) % 10) for x in range(x0, x0 + sub.shape[1])) + "\n" + \
            "   " + "".join(str(x % 10) for x in range(x0, x0 + sub.shape[1]))
@@ -97,8 +97,8 @@ def show(g: Optional[np.ndarray] = None, y0: int = 0, y1: int = 64, x0: int = 0,
 
 
 def changes(a: Optional[np.ndarray] = None, b: Optional[np.ndarray] = None, limit: int = 200) -> list:
-    a = NS["prev"] if a is None else np.asarray(a)
-    b = NS["grid"] if b is None else np.asarray(b)
+    a = KSTATE["prev"] if a is None else np.asarray(a)
+    b = KSTATE["grid"] if b is None else np.asarray(b)
     ys, xs = np.where(a != b)
     return [(int(y), int(x), int(a[y, x]), int(b[y, x])) for y, x in list(zip(ys, xs))[:limit]]
 
@@ -123,11 +123,12 @@ class Kernel:
                 self.journal = json.load(open(self.journal_path))
             except (OSError, ValueError):
                 self.journal = []
-        NS.update(regions=lambda a=None, b=None: percept.change_regions(NS["prev"] if a is None else a,
-                                                                          NS["grid"] if b is None else b),
-                  objects=lambda g=None: percept.objects(NS["grid"] if g is None else g),
-                  anim=lambda: percept.anim(NS["frames"], NS["prev"]), look=self._look, journal=self.journal,
-                  dag=lambda last=20: self.dag(last), action_stats=self.action_stats)
+        NS.update(regions=lambda a=None, b=None: percept.change_regions(KSTATE["prev"] if a is None else a,
+                                                                          KSTATE["grid"] if b is None else b),
+                  objects=lambda g=None: percept.objects(KSTATE["grid"] if g is None else g),
+                  anim=lambda: percept.anim(KSTATE["frames"], KSTATE["prev"]), look=self._look, journal=self.journal,
+                  dag=lambda last=20: self.dag(last), action_stats=self.action_stats,
+                  cells=self.cells)
         NS.update(np=np, show=show, changes=changes, act=self.act, reset=lambda: self.act(0), history=[],
                   node=self.node, rerun=self.rerun)
         NS["nodes"] = self.nodes
@@ -137,9 +138,14 @@ class Kernel:
 
     def _sync(self, r: dict[str, Any], first: bool = False) -> None:
         g = np.array(r["grid"], dtype=np.int64)
-        NS["prev"] = NS.get("grid", g) if not first else g
-        NS["grid"] = g
-        NS["frames"] = [np.array(f, dtype=np.int64) for f in r.get("frames") or [r["grid"]]]
+        # The kernel keeps its own frames: a model variable named like ours never corrupts perception,
+        # and the model's copies (grid, prev_grid, frames) are fresh arrays it may modify freely.
+        KSTATE["prev"] = KSTATE.get("grid", g) if not first else g
+        KSTATE["grid"] = g
+        KSTATE["frames"] = [np.array(f, dtype=np.int64) for f in r.get("frames") or [r["grid"]]]
+        NS["prev_grid"] = KSTATE["prev"].copy()
+        NS["grid"] = g.copy()
+        NS["frames"] = [f.copy() for f in KSTATE["frames"]]
         NS.update(state=r["state"], level=r["level"], win_levels=r["win_levels"], available=r["available"],
                   actions_used=r["actions"], level_actions_used=r["level_so_far"])
         self.status = r["status"]
@@ -154,16 +160,16 @@ class Kernel:
             raise RuntimeError(r["error"])
         self._sync(r)
         self.cell_actions += int(r.get("counted", 1))
-        changed = int((NS["prev"] != NS["grid"]).sum())
+        changed = int((KSTATE["prev"] != KSTATE["grid"]).sum())
         note = r.get("note", "")
         if note:
             self.cell_events.append(note)
-        mv = percept.moves(NS["prev"], NS["grid"], limit=3) if changed and NS["level"] == before else []
+        mv = percept.moves(KSTATE["prev"], KSTATE["grid"], limit=3) if changed and NS["level"] == before else []
         rec = {"n": NS["actions_used"], "action": int(a), "x": x, "y": y, "level": NS["level"], "state": NS["state"],
                "changed": changed, "note": note, "moves": [(m["color"], m["size"], m["d"]) for m in mv]}
         NS["history"].append(rec)
         return {"changed": changed, "state": NS["state"], "level": NS["level"], "level_up": NS["level"] > before,
-                "game_over": NS["state"] == "GAME_OVER", "note": note, "frames": len(NS["frames"])}
+                "game_over": NS["state"] == "GAME_OVER", "note": note, "frames": len(KSTATE["frames"])}
 
     def action_stats(self, level: Optional[int] = None) -> str:
         """Facts from the history: for each action id, how often it was played and what it moved."""
@@ -183,6 +189,22 @@ class Kernel:
                            for (c, (w, hh), d), n in r["moves"].most_common(3))
             out.append(f"ACTION{a}: played {r['n']}, no change {r['noop']}" + (f"; moved {mv}" if mv else ""))
         return "\n".join(out) or "no actions yet"
+
+    def cells(self, step: Optional[int] = None, ox: Optional[int] = None, oy: Optional[int] = None,
+              g: Optional[np.ndarray] = None) -> str:
+        """The frame as a map of lattice cells (dominant colour per cell). Without arguments the lattice
+        is inferred from how far the actions moved objects; the array itself is left in `lattice_cells`."""
+        g = KSTATE["grid"] if g is None else np.asarray(g)
+        guess = percept.infer_lattice(NS["history"], g)
+        if step is None:
+            if guess is None:
+                return "no lattice yet: no action has moved an object; pass step (and ox, oy) explicitly"
+            step = guess[0]
+        ox = ox if ox is not None else (guess[1] if guess and guess[0] == step else 0)
+        oy = oy if oy is not None else (guess[2] if guess and guess[0] == step else 0)
+        arr = percept.lattice(g, step, ox, oy)
+        NS["lattice_cells"] = arr
+        return percept.lattice_text(arr, step, ox, oy)
 
     def _look(self) -> str:
         """Attach the current frame (4x image) to this cell's reply."""
@@ -213,7 +235,7 @@ class Kernel:
         self.cell_actions, self.cell_events, self.want_image = 0, [], False
         builtins_before = {k: NS.get(k) for k in PROTECTED}
         level0, t0 = NS["level"], time.time()
-        grid0, state0, deaths0 = NS["grid"].copy(), NS["state"], sum(1 for h in NS["history"] if h["state"] == "GAME_OVER")
+        grid0, state0, deaths0 = KSTATE["grid"].copy(), NS["state"], sum(1 for h in NS["history"] if h["state"] == "GAME_OVER")
         buf = io.StringIO()
         err = None
 
@@ -242,6 +264,10 @@ class Kernel:
         clobbered = [k for k, v in builtins_before.items() if v is not None and NS.get(k) is not v]
         for k in clobbered:  # the game API must survive the model's own variable names
             NS[k] = builtins_before[k]
+        g = NS.get("grid")
+        if not isinstance(g, np.ndarray) or g.shape != KSTATE["grid"].shape or (g != KSTATE["grid"]).any():
+            clobbered.append("grid")  # grid always holds the current frame at the start of a cell
+            NS["grid"] = KSTATE["grid"].copy()
         if clobbered:
             out += (f"\nNOTE: this cell overwrote {', '.join(clobbered)}; the REPL restored the built-in version. "
                     "Use other names for your variables.")
@@ -255,7 +281,7 @@ class Kernel:
         outcome = {  # what actually happened, recorded next to what the cell expected
             "actions": self.cell_actions, "levels": NS["level"] - level0, "deaths": deaths,
             "state": f"{state0}->{NS['state']}" if NS["state"] != state0 else NS["state"],
-            "cells_changed": int((grid0 != NS["grid"]).sum()), "error": err.splitlines()[-1] if err else None,
+            "cells_changed": int((grid0 != KSTATE["grid"]).sum()), "error": err.splitlines()[-1] if err else None,
         }
         # verdict: the cell's own check expression if given, else the obvious failure signals
         verdict, why = None, ""
@@ -291,16 +317,22 @@ class Kernel:
         parts = [self.status, head, self.journal_text()]
         images: list[str] = []
         if self.cell_actions > 0 or self.want_image:
-            images.append(percept.png4x(NS["grid"]))
-            per = ["PERCEPTION (4x image of the current frame attached):", percept.objects_text(NS["grid"])]
+            images.append(percept.png4x(KSTATE["grid"]))
+            per = ["PERCEPTION (4x image of the current frame attached):", percept.objects_text(KSTATE["grid"])]
             if self.cell_actions > 0:
-                per.append("last action " + percept.regions_text(NS["prev"], NS["grid"]))
-                mt = percept.moves_text(NS["prev"], NS["grid"])
+                per.append("last action " + percept.regions_text(KSTATE["prev"], KSTATE["grid"]))
+                mt = percept.moves_text(KSTATE["prev"], KSTATE["grid"])
                 if mt:
                     per.append("last action " + mt)
                 if self.cell_actions > 1:
-                    per.append("whole cell " + percept.regions_text(grid0, NS["grid"]))
-            at = percept.anim_text(NS["frames"], NS["prev"]) if self.cell_actions > 0 else ""
+                    per.append("whole cell " + percept.regions_text(grid0, KSTATE["grid"]))
+            lat = percept.infer_lattice(NS["history"], KSTATE["grid"])
+            if lat and lat[0] >= 3 and getattr(self, "lattice_shown", None) != (NS["level"], lat):
+                self.lattice_shown = (NS["level"], lat)  # once per level and lattice; cells() any time
+                arr = percept.lattice(KSTATE["grid"], *lat)
+                NS["lattice_cells"] = arr
+                per.append(percept.lattice_text(arr, *lat))
+            at = percept.anim_text(KSTATE["frames"], KSTATE["prev"]) if self.cell_actions > 0 else ""
             if at:
                 per.append(at)
             parts.append("\n".join(per))
@@ -360,6 +392,7 @@ class Kernel:
 
 
 NS: dict[str, Any] = {"__name__": "__arc__"}
+KSTATE: dict[str, Any] = {}  # the kernel's own frames (grid, prev, frames), never read back from NS
 
 
 def guard(blocked: list[str]) -> None:
