@@ -3,11 +3,11 @@
   "kernel_slug": "arc26-mcode-qwen38",
   "competition": "arc-prize-2026-arc-agi-3",
   "model_sources": [
-    "foysalemonshanto/qwen3-8-27b-fp8-repacked-v1/PyTorch/hf-fp8/1"
+    "foysalemonshanto/qwen3-8-27b-fp8-repacked-v1/PyTorch/hf-fp8/1",
+    "xishengfeng/mcode-offline/Other/v0-5-4/1"
   ],
   "dataset_sources": [
-    "driessmit1/arc3-vllm-h100-wheelhouse-v3",
-    "xishengfeng/mcode-offline-v2"
+    "driessmit1/arc3-vllm-h100-wheelhouse-v3"
   ],
   "machine_shape": "NvidiaRtxPro6000",
   "notebook_accelerator": "nvidiaRtxPro6000",
