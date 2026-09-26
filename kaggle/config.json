@@ -15,7 +15,7 @@
   "concurrency": 12,
   "vllm": {
     "served_model_name": "qwen3.8-27b",
-    "max_model_len": 65536,
+    "max_model_len": 131072,
     "gpu_memory_utilization": 0.9,
     "max_num_seqs": 64,
     "extra_args": [
@@ -38,5 +38,5 @@
   "kernel_sources": [
     "xishengfeng/arc26-mcode-build"
   ],
-  "output_limit": 16384
+  "output_limit": 8192
 }
