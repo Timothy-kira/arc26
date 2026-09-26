@@ -125,6 +125,7 @@ while time.time() - t0 < 1500:
     except Exception:
         time.sleep(5)
 print(f"vLLM ready after {time.time() - t0:.0f}s")
+print("".join(l for l in open(WORK + "/vllm.log", errors="replace") if "KV cache" in l or "Maximum concurrency" in l))
 '''
 
 def batch_cmd(extra: str) -> str:

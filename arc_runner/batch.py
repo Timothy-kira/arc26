@@ -186,7 +186,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--gateway", default=None)
     p.add_argument("--base-url", default="http://127.0.0.1:8000/v1")
     p.add_argument("--model", default="qwen3.8-27b")
-    p.add_argument("--context", type=int, default=131072)
+    p.add_argument("--context", type=int, default=262144)
     p.add_argument("--output-limit", type=int, default=8192)
     p.add_argument("--reasoning", action="store_true",
                    help="let the model think before each step (off: long reasoning exhausted the output budget)")

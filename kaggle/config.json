@@ -15,10 +15,12 @@
   "concurrency": 12,
   "vllm": {
     "served_model_name": "qwen3.8-27b",
-    "max_model_len": 131072,
+    "max_model_len": 262144,
     "gpu_memory_utilization": 0.9,
     "max_num_seqs": 64,
     "extra_args": [
+      "--kv-cache-dtype",
+      "fp8",
       "--enable-prefix-caching",
       "--generation-config",
       "vllm",
