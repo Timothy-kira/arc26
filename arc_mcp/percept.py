@@ -250,3 +250,48 @@ def lattice_text(cells: np.ndarray, step: int, ox: int, oy: int) -> str:
     cols = "    " + "".join(str(c % 10) for c in range(c0, c1 + 1))
     rows = [f"{r:3d} " + "".join("0123456789abcdef"[int(v)] for v in cells[r, c0:c1 + 1]) for r in range(r0, r1 + 1)]
     return head + "\n" + cols + "\n" + "\n".join(rows)
+
+
+def small_changes(a: np.ndarray, b: np.ndarray, max_cells: int = 8) -> list[tuple]:
+    """Small changed regions of one action as (y0, x0, y1, x1, cells, before, after), dominant colours."""
+    out = []
+    for r in change_regions(a, b):
+        if r["cells"] <= max_cells:
+            y0, x0, y1, x1 = r["bbox"]
+            out.append((y0, x0, y1, x1, r["cells"], next(iter(r["before"])), next(iter(r["after"]))))
+    return out
+
+
+def meters(history: list, grid: np.ndarray, level: int, window: int = 14) -> list[dict]:
+    """Bars that shrink or grow as actions are played (a move budget, a timer, a progress bar): small
+    changes of one colour into another, action after action, along one row band or column band.
+    [{line: 'row y=..' | 'col x=..', colour, into, per_action, left, actions}] where ``left`` counts the
+    cells of ``colour`` still on that band (what remains to be consumed)."""
+    recent = [h for h in history if h.get("level") == level and h.get("small")][-window:]
+    groups: dict = {}
+    for i, h in enumerate(recent):
+        for y0, x0, y1, x1, n, bef, aft in h["small"]:
+            if y1 - y0 <= 2:
+                groups.setdefault(("row", y0, y1, bef, aft), []).append((i, x0, n))
+            if x1 - x0 <= 2:
+                groups.setdefault(("col", x0, x1, bef, aft), []).append((i, y0, n))
+    out, g = [], np.asarray(grid)
+    for (kind, p0, p1, bef, aft), hits in groups.items():
+        acts = {i for i, _, _ in hits}
+        if len(acts) < 3 or len({pos for _, pos, _ in hits}) < 3 or bef == aft:
+            continue
+        band = g[p0:p1 + 1, :] if kind == "row" else g[:, p0:p1 + 1]
+        per = sorted(n for _, _, n in hits)[len(hits) // 2]
+        left = int((band == bef).sum())
+        out.append({"line": f"{kind} {'y' if kind == 'row' else 'x'}={p0}" + (f"..{p1}" if p1 != p0 else ""),
+                    "colour": int(bef), "into": int(aft), "per_action": per, "left": left,
+                    "actions": len(acts), "of": len(recent)})
+    return sorted(out, key=lambda m: -m["actions"])[:2]
+
+
+def meters_text(ms: list[dict]) -> str:
+    return "; ".join(
+        f"meter on {m['line']}: {NAMES[m['colour']]}#{m['colour']} -> {NAMES[m['into']]}#{m['into']} "
+        f"{m['per_action']} cell(s) per action in {m['actions']} of the last {m['of']} actions, {m['left']} "
+        f"{NAMES[m['colour']]} cells left (~{m['left'] // max(1, m['per_action'])} actions if it is a budget)"
+        for m in ms)

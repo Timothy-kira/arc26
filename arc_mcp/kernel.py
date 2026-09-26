@@ -51,7 +51,7 @@ OUT_LIMIT = int(os.getenv("ARC_OUT_LIMIT", "6000"))
 
 
 PROTECTED = ("act", "reset", "show", "changes", "objects", "anim", "look", "regions", "node", "rerun", "dag",
-             "journal", "np", "action_stats", "cells")
+             "journal", "np", "action_stats", "cells", "deaths")
 
 
 class CellBudget(Exception):
@@ -128,7 +128,7 @@ class Kernel:
                   objects=lambda g=None: percept.objects(KSTATE["grid"] if g is None else g),
                   anim=lambda: percept.anim(KSTATE["frames"], KSTATE["prev"]), look=self._look, journal=self.journal,
                   dag=lambda last=20: self.dag(last), action_stats=self.action_stats,
-                  cells=self.cells)
+                  cells=self.cells, deaths=self.deaths)
         NS.update(np=np, show=show, changes=changes, act=self.act, reset=lambda: self.act(0), history=[],
                   node=self.node, rerun=self.rerun)
         NS["nodes"] = self.nodes
@@ -165,11 +165,36 @@ class Kernel:
         if note:
             self.cell_events.append(note)
         mv = percept.moves(KSTATE["prev"], KSTATE["grid"], limit=3) if changed and NS["level"] == before else []
+        same = NS["level"] == before and NS["state"] != "GAME_OVER"
         rec = {"n": NS["actions_used"], "action": int(a), "x": x, "y": y, "level": NS["level"], "state": NS["state"],
-               "changed": changed, "note": note, "moves": [(m["color"], m["size"], m["d"]) for m in mv]}
+               "changed": changed, "note": note, "moves": [(m["color"], m["size"], m["d"]) for m in mv],
+               "small": percept.small_changes(KSTATE["prev"], KSTATE["grid"]) if same and changed else []}
+        if NS["state"] == "GAME_OVER" and NS["level"] == before:
+            rec["death"] = self._death_report(rec)
+            self.cell_events.append("DEATH " + rec["death"])
         NS["history"].append(rec)
         return {"changed": changed, "state": NS["state"], "level": NS["level"], "level_up": NS["level"] > before,
                 "game_over": NS["state"] == "GAME_OVER", "note": note, "frames": len(KSTATE["frames"])}
+
+    def _death_report(self, rec: dict[str, Any]) -> str:
+        """What the dying action did: the objects its animation moved (before the game-over screen) and
+        the state of any budget meter just before it."""
+        seq = [KSTATE["prev"]] + KSTATE["frames"]
+        while len(seq) > 2 and (seq[-1] != seq[-2]).mean() > 0.3:  # drop a full-screen game-over overlay
+            seq.pop()
+        seq = [f for i, f in enumerate(seq) if i == 0 or (f != seq[i - 1]).any()]
+        mv = percept.moves_text(seq[0], seq[-1]) if len(seq) > 1 else ""
+        where = f" at ({rec['x']},{rec['y']})" if rec["action"] == 6 else ""
+        ms = percept.meters(NS["history"], KSTATE["prev"], NS["level"])
+        dies = sum(1 for h in NS["history"] if h.get("death") and h["level"] == NS["level"]) + 1
+        return (f"L{NS['level'] + 1} death #{dies} on ACTION{rec['action']}{where} after {NS['level_actions_used']} "
+                f"actions this level; " + (mv or "nothing moved in its frames") +
+                ("; " + percept.meters_text(ms) if ms else "; no budget meter seen"))
+
+    def deaths(self, level: Optional[int] = None) -> str:
+        """Every death so far (or on one level): what the dying action did and the meter state."""
+        ds = [h["death"] for h in NS["history"] if h.get("death") and (level is None or h["level"] == level)]
+        return "\n".join(ds) or "no deaths yet"
 
     def action_stats(self, level: Optional[int] = None) -> str:
         """Facts from the history: for each action id, how often it was played and what it moved."""
@@ -326,6 +351,9 @@ class Kernel:
                     per.append("last action " + mt)
                 if self.cell_actions > 1:
                     per.append("whole cell " + percept.regions_text(grid0, KSTATE["grid"]))
+                ms = percept.meters(NS["history"], KSTATE["grid"], NS["level"])
+                if ms:
+                    per.append(percept.meters_text(ms))
             lat = percept.infer_lattice(NS["history"], KSTATE["grid"])
             if lat and lat[0] >= 3 and getattr(self, "lattice_shown", None) != (NS["level"], lat):
                 self.lattice_shown = (NS["level"], lat)  # once per level and lattice; cells() any time
