@@ -20,6 +20,17 @@ from arcengine import GameState
 from .session import Obs, Session
 
 NOTEBOOK_SECTIONS = ("rules", "goal", "levels", "plan")
+# Soft per-level budget marks. A level scores (human / yours)^2 and human baselines are typically a
+# few dozen actions, so past these marks each further action is worth very little on this level.
+BUDGET_MARKS = (100, 200, 400)
+
+
+def budget_hint(level_actions: int) -> str:
+    over = [m for m in BUDGET_MARKS if level_actions >= m]
+    if not over:
+        return ""
+    return (f"\nBUDGET: {level_actions} actions on this level (past the {over[-1]} mark): the level score is shrinking "
+            "fast; stop probing blindly, re-read your notebook and plan the shortest way to finish.")
 NOTEBOOK_LIMIT = 1500  # characters per section: re-sent verbatim, so it stays short
 
 
@@ -55,10 +66,8 @@ class GameLedger:
         note = ""
         if obs.levels_completed > prev.levels_completed:
             n = self.session.level_actions[-1]
-            k = len(self.session.level_actions) - 1
-            base = self.baseline[k] if self.baseline and k < len(self.baseline) else None
-            note = f"LEVEL {prev.levels_completed + 1} COMPLETED in {n} actions" + (
-                f" (human {base}, level score {min(115.0, 100 * (base / n) ** 2):.0f})" if base else "")
+            # no human baseline here: the competition does not reveal it, so the agent never sees it
+            note = f"LEVEL {prev.levels_completed + 1} COMPLETED in {n} actions"
             self.events.append(note)
             self.by_source = Counter()
         elif obs.state == GameState.GAME_OVER and prev.state != GameState.GAME_OVER:
@@ -94,10 +103,14 @@ class GameLedger:
 
     def status(self) -> str:
         s, o = self.session, self.obs
-        src = "/".join(f"{k} {v}" for k, v in sorted(self.by_source.items())) or "none"
         acts = ",".join("RESET" if a == 0 else str(a) for a in o.available_actions)
-        return (f"L{o.levels_completed + 1}/{s.win_levels} {o.state.name} | this level {s.level_so_far} actions ({src}) "
+        line = (f"L{o.levels_completed + 1}/{s.win_levels} {o.state.name} | this level {s.level_so_far} actions "
                 f"| total {s.actions} | per level {s.level_actions} | deaths {s.deaths} resets {s.resets} | actions [{acts}]")
+        deadline = float(os.getenv("ARC_DEADLINE", "0") or 0)
+        if deadline:
+            left = max(0, int(deadline - time.time()))
+            line += f" | time left {left // 60}m{left % 60:02d}s"
+        return line + budget_hint(s.level_so_far)
 
     def ledger(self) -> dict[str, Any]:
         s = self.session

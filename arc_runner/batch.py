@@ -221,6 +221,7 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
     }
     if args.gateway:
         env.update(ARC_GATEWAY=args.gateway, ARC_CARD_ID=card or "")
+    env["ARC_DEADLINE"] = str(time.time() + time_limit)  # shown as "time left" in every tool reply
     # One game daemon per attempt: every mcode exec round (and any MCP server restart) plays the
     # same game instead of starting a new one. Unix socket paths must stay short.
     sock = Path("/tmp") / f"arc26-{os.getpid()}-{game[:12]}-{k}.sock"
