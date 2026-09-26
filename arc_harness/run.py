@@ -57,7 +57,8 @@ async def run(args: argparse.Namespace) -> dict:
         llm = client
 
     memory = MemoryHub(out / "memory", llm, [Path(p) for p in args.skills_dir.split(",") if p])
-    budget = GlobalBudget(args.hours * 3600, len(games), args.concurrency, reserve_seconds=args.reserve)
+    total = args.hours * 3600
+    budget = GlobalBudget(total, len(games), args.concurrency, reserve_seconds=min(args.reserve, 0.1 * total))
     agent_cfg = AgentConfig(max_actions=args.max_actions)
     if args.no_image:
         agent_cfg.hypothesizers = tuple(h for h in agent_cfg.hypothesizers if h != "image")
@@ -68,7 +69,7 @@ async def run(args: argparse.Namespace) -> dict:
     async def one(gid: str) -> None:
         async with sem:
             try:
-                session = await asyncio.to_thread(env.make, gid)
+                session = await asyncio.to_thread(env.make, gid, args.seed)
             except Exception as exc:
                 logger.error("make %s failed: %s", gid, exc)
                 return
@@ -110,6 +111,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--skills-dir", default=str(Path(__file__).resolve().parents[1] / "skills"))
     ap.add_argument("--no-image", action="store_true")
     ap.add_argument("--tag", default="dev")
+    ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="")
     return ap
 
