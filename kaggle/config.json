@@ -46,11 +46,12 @@
     "model": "dots3-note-prev",
     "games": "ls20,vc33,tu93",
     "conc": 3,
-    "hours": 1.0,
+    "hours": 0.9,
     "game_seconds": 1200,
     "community": false,
     "dataset_sources": [
       "xishengfeng/arc26-secrets"
-    ]
+    ],
+    "k": 2
   }
 }

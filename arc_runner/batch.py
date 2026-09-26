@@ -65,7 +65,13 @@ Method (a scientist with a programmable lab):
    to build, what to play), exactly one item in progress, and update it as results come in. Compute
    paths or click sequences in code first, then play them.
 5. After GAME_OVER call reset() (action 0) and change what killed you.
-6. Keep the notebook up to date with `arc_note` (rules, goal, levels, plan): the server hands it back
+6. Novelty first: every distinct kind of object on screen is a candidate interaction (a key, a switch,
+   a door, a paint pot). Before concluding how to win, touch or click each kind once, cheapest first,
+   and record what it did. Never write "unreachable", "static" or "useless" about an object you have
+   not actually tried to reach or click.
+7. Do not re-test what the notebook already marks as confirmed: build on it. Re-probing known rules
+   wastes actions that count against the level.
+8. Keep the notebook up to date with `arc_note` (rules, goal, levels, plan): the server hands it back
    verbatim after every restart or context compaction, so it is your reliable memory.
 
 The REPL cannot read files or start processes; do not use the shell or other tools to look at game
@@ -74,7 +80,7 @@ description matches what you see. When the game ends (won, or told to stop), wri
 there: `.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the
 observable cues) and a short procedure plus reusable helper code. Never mention game ids.
 You work in goal mode: the session keeps going until the game is won, so never end a turn with a plan
-in words only; always continue with a tool call. Every reply shows the budget (actions this level, total,
+in words only: every turn ends with a tool call (think, then call arc_python). Every reply shows the budget (actions this level, total,
 time left): spend actions only when a cell has a clear question or a computed plan.
 """
 

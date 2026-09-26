@@ -195,7 +195,8 @@ shutil.copytree(env_dir, "/tmp/games", dirs_exist_ok=True); os.chmod("/tmp/games
 cmd = [sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8012/v1", "--model", A["model"],
        "--context", "131072", "--output-limit", "8192", "--agent-user", "arcagent", "--node", NODE, "--mcode", MCODE,
        "--server-python", sys.executable, "--out-dir", WORK + "/api_run", "--games", A["games"], "--conc", str(A["conc"]),
-       "--hours", str(A["hours"]), "--max-game-seconds", str(A["game_seconds"]), "--env-dir", "/tmp/games"]
+       "--hours", str(A["hours"]), "--max-game-seconds", str(A["game_seconds"]), "--env-dir", "/tmp/games",
+       "--k", str(A.get("k", 1))]
 print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localhost"})
 os.makedirs(CODE + "/data", exist_ok=True)  # arc_eval reads the human baselines from data/environment_files
 if not os.path.exists(CODE + "/data/environment_files"):
