@@ -98,9 +98,21 @@ assert ok.returncode == 0, "MiniMax Code does not start; stopping before the GPU
 
 VLLM = r'''
 VLLM_SITE = "/tmp/vllm-site-packages"
+def cuda_link_dir():
+    """A dir with libcuda.so for FlashInfer's JIT link step (the image has only the driver's libcuda.so.1)."""
+    d = "/tmp/cuda-link"
+    os.makedirs(d, exist_ok=True)
+    cands = glob.glob("/usr/local/cuda*/lib64/stubs/libcuda.so") + glob.glob("/usr/local/cuda*/targets/*/lib/stubs/libcuda.so") \
+        + glob.glob("/usr/lib/x86_64-linux-gnu/libcuda.so*") + glob.glob("/usr/local/nvidia/lib64/libcuda.so*")
+    if cands and not os.path.exists(d + "/libcuda.so"):
+        os.symlink(cands[0], d + "/libcuda.so")
+    print("libcuda for linking:", cands[:1])
+    return d
+
 def vllm_env():
     env = os.environ.copy()
     env["PYTHONPATH"] = VLLM_SITE
+    env["LIBRARY_PATH"] = ":".join(filter(None, [cuda_link_dir(), env.get("LIBRARY_PATH")]))
     env.update({"USE_TF": "0", "TRANSFORMERS_NO_TF": "1", "VLLM_NO_USAGE_STATS": "1", "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1"})
     return env
 
@@ -119,7 +131,8 @@ print("starting:", " ".join(cmd))
 VLLM_PROC = subprocess.Popen(cmd, stdout=open(WORK + "/vllm.log", "w"), stderr=subprocess.STDOUT, env=vllm_env())
 t0 = time.time()
 while time.time() - t0 < 1500:
-    assert VLLM_PROC.poll() is None, "vLLM exited:\n" + open(WORK + "/vllm.log").read()[-4000:]
+    assert VLLM_PROC.poll() is None, "vLLM exited:\n" + "".join(
+        l[-300:] for l in open(WORK + "/vllm.log", errors="replace") if " ERROR " in l or "error:" in l.lower())[-6000:]
     try:
         urllib.request.urlopen("http://127.0.0.1:8000/v1/models", timeout=5); break
     except Exception:
