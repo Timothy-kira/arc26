@@ -113,3 +113,49 @@ def anim_text(frames: list, prev: Optional[np.ndarray] = None, limit: int = 10) 
         b = a["bbox"]
         parts.append(f"f{a['frame']}: {a['changed']} cells" + (f" in y={b[0]}..{b[2]} x={b[1]}..{b[3]}" if b else ""))
     return f"animation of the last action, {len(frames)} frames: " + "; ".join(parts)
+
+
+def change_regions(a: np.ndarray, b: np.ndarray, gap: int = 2) -> list[dict]:
+    """Changed cells between two frames grouped into regions (cells within ``gap`` of each other),
+    largest first: {bbox: (y0, x0, y1, x1), cells, before: {colour: n}, after: {colour: n}}."""
+    a, b = np.asarray(a), np.asarray(b)
+    d = a != b
+    if not d.any():
+        return []
+    h, w = d.shape
+    seen = np.zeros_like(d)
+    out = []
+    for y0, x0 in zip(*np.where(d)):
+        if seen[y0, x0]:
+            continue
+        q = deque([(y0, x0)])
+        seen[y0, x0] = True
+        cells = []
+        while q:
+            y, x = q.popleft()
+            cells.append((y, x))
+            for yy in range(max(0, y - gap), min(h, y + gap + 1)):
+                for xx in range(max(0, x - gap), min(w, x + gap + 1)):
+                    if d[yy, xx] and not seen[yy, xx]:
+                        seen[yy, xx] = True
+                        q.append((yy, xx))
+        ys, xs = [c[0] for c in cells], [c[1] for c in cells]
+        out.append({"bbox": (min(ys), min(xs), max(ys), max(xs)), "cells": len(cells),
+                    "before": dict(Counter(int(a[y, x]) for y, x in cells).most_common(3)),
+                    "after": dict(Counter(int(b[y, x]) for y, x in cells).most_common(3))})
+    return sorted(out, key=lambda r: -r["cells"])
+
+
+def regions_text(a: np.ndarray, b: np.ndarray, limit: int = 6) -> str:
+    regs = change_regions(a, b)
+    if not regs:
+        return "no cells changed"
+    lines = [f"changed regions ({len(regs)}; several regions = side effects worth a look):"]
+    for r in regs[:limit]:
+        y0, x0, y1, x1 = r["bbox"]
+        bef = ",".join(f"{NAMES[c]}#{c}" for c in r["before"])
+        aft = ",".join(f"{NAMES[c]}#{c}" for c in r["after"])
+        lines.append(f"  {r['cells']} cells at x={x0}..{x1} y={y0}..{y1}: {bef} -> {aft}")
+    if len(regs) > limit:
+        lines.append(f"  ... {len(regs) - limit} smaller regions")
+    return "\n".join(lines)

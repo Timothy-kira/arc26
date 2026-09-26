@@ -119,7 +119,9 @@ class Kernel:
                 self.journal = json.load(open(self.journal_path))
             except (OSError, ValueError):
                 self.journal = []
-        NS.update(objects=lambda g=None: percept.objects(NS["grid"] if g is None else g),
+        NS.update(regions=lambda a=None, b=None: percept.change_regions(NS["prev"] if a is None else a,
+                                                                          NS["grid"] if b is None else b),
+                  objects=lambda g=None: percept.objects(NS["grid"] if g is None else g),
                   anim=lambda: percept.anim(NS["frames"], NS["prev"]), look=self._look, journal=self.journal,
                   dag=lambda last=20: self.dag(last))
         NS.update(np=np, show=show, changes=changes, act=self.act, reset=lambda: self.act(0), history=[],
@@ -260,6 +262,10 @@ class Kernel:
         if self.cell_actions > 0 or self.want_image:
             images.append(percept.png4x(NS["grid"]))
             per = ["PERCEPTION (4x image of the current frame attached):", percept.objects_text(NS["grid"])]
+            if self.cell_actions > 0:
+                per.append("last action " + percept.regions_text(NS["prev"], NS["grid"]))
+                if self.cell_actions > 1:
+                    per.append("whole cell " + percept.regions_text(grid0, NS["grid"]))
             at = percept.anim_text(NS["frames"], NS["prev"]) if self.cell_actions > 0 else ""
             if at:
                 per.append(at)
