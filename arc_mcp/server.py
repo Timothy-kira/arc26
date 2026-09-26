@@ -12,6 +12,8 @@ Environment:
   ARC_GAME        game id (prefix ok)                 ARC_RESULT   path of the progress JSON
   ARC_ENV_DIR     local environment_files dir         ARC_MAX_ACTIONS  action budget (default 2000)
   ARC_GATEWAY     gateway base URL (competition)      ARC_CARD_ID  scorecard id from the parent
+  ARC_SOCKET      unix socket of a game daemon (``server.py --daemon``); the MCP server then only
+                  forwards tool calls, so the game outlives any one agent process
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ import io
 import json
 import logging
 import os
+import socket
 import sys
 import time
 from typing import Any, Optional
@@ -257,12 +260,70 @@ TOOLS = [
 ]
 
 
+def call_tool(game: "Game", name: str, args: dict[str, Any]) -> list[dict[str, Any]]:
+    if name == "arc_observe":
+        content = game.observe()
+    elif name == "arc_act":
+        content = game.act(list(args.get("actions") or []))
+    else:
+        raise ValueError(f"unknown tool {name}")
+    game.record()
+    return content
+
+
+def daemon(path: str) -> None:
+    """Own one game and serve tool calls on a unix socket, one JSON line per request and reply."""
+    game = Game()
+    game.record()
+    if os.path.exists(path):
+        os.unlink(path)
+    srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    srv.bind(path)
+    srv.listen(8)
+    while True:
+        conn, _ = srv.accept()
+        with conn, conn.makefile("rw") as f:
+            for line in f:
+                try:
+                    req = json.loads(line)
+                    reply = {"content": call_tool(game, req.get("name"), req.get("arguments") or {}), "isError": False}
+                except Exception as exc:
+                    reply = {"content": [{"type": "text", "text": f"error: {type(exc).__name__}: {exc}"}], "isError": True}
+                f.write(json.dumps(reply) + "\n")
+                f.flush()
+
+
+class Remote:
+    """Forwards tool calls to the game daemon at ``path``."""
+
+    def __init__(self, path: str) -> None:
+        self.path, self.f = path, None
+
+    def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
+        for attempt in range(2):
+            try:
+                if self.f is None:
+                    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                    s.connect(self.path)
+                    self.f = s.makefile("rw")
+                self.f.write(json.dumps({"name": name, "arguments": args}) + "\n")
+                self.f.flush()
+                line = self.f.readline()
+                if line:
+                    return json.loads(line)
+            except OSError:
+                pass
+            self.f = None
+        raise RuntimeError("game daemon unreachable")
+
+
 def main() -> None:
     # The engine logs to stdout; keep fd 1 for JSON-RPC only and send everything else to stderr.
     out = os.fdopen(os.dup(1), "w")
     os.dup2(2, 1)
     sys.stdout = sys.stderr
     game: Optional[Game] = None
+    remote = Remote(os.environ["ARC_SOCKET"]) if os.getenv("ARC_SOCKET") else None
 
     def reply(msg_id: Any, result: Any = None, error: Optional[dict] = None) -> None:
         msg: dict[str, Any] = {"jsonrpc": "2.0", "id": msg_id}
@@ -296,17 +357,13 @@ def main() -> None:
             elif method == "tools/list":
                 reply(msg_id, {"tools": TOOLS})
             elif method == "tools/call":
+                name, args = params.get("name"), params.get("arguments") or {}
+                if remote is not None:
+                    reply(msg_id, remote.call(name, args))
+                    continue
                 if game is None:
                     game = Game()
-                name, args = params.get("name"), params.get("arguments") or {}
-                if name == "arc_observe":
-                    content = game.observe()
-                elif name == "arc_act":
-                    content = game.act(list(args.get("actions") or []))
-                else:
-                    raise ValueError(f"unknown tool {name}")
-                game.record()
-                reply(msg_id, {"content": content, "isError": False})
+                reply(msg_id, {"content": call_tool(game, name, args), "isError": False})
             elif method in ("resources/list", "prompts/list"):
                 reply(msg_id, {method.split("/")[0]: []})
             else:
@@ -319,4 +376,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 3 and sys.argv[1] == "--daemon":
+        daemon(sys.argv[2])
+    else:
+        main()

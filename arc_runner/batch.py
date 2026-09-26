@@ -149,8 +149,24 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
     }
     if args.gateway:
         env.update(ARC_GATEWAY=args.gateway, ARC_CARD_ID=card or "")
+    # One game daemon per attempt: every mcode exec round (and any MCP server restart) plays the
+    # same game instead of starting a new one. Unix socket paths must stay short.
+    sock = Path("/tmp") / f"arc26-{os.getpid()}-{game[:12]}-{k}.sock"
+    sock.unlink(missing_ok=True)
+    daemon = subprocess.Popen([args.server_python, str(SERVER), "--daemon", str(sock)], env={**os.environ, **env},
+                              stdout=subprocess.DEVNULL, stderr=(ws / "daemon.stderr").open("w"))
+    for _ in range(600):
+        if sock.exists() or daemon.poll() is not None:
+            break
+        time.sleep(0.1)
+    if not sock.exists():
+        daemon.kill()
+        res = {"game": game, "k": k, "rounds": 0, "infra_error": "game daemon failed: " + (ws / "daemon.stderr").read_text()[-500:]}
+        final.write_text(json.dumps(res, indent=1))
+        return res
     (ws / ".mcp.json").write_text(json.dumps(
-        {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)], "env": env, "timeout": 120000}}}, indent=1))
+        {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)], "env": {**env, "ARC_SOCKET": str(sock)},
+                                "timeout": 120000}}}, indent=1))
     data_dir = ws / ".mcode-data"
     write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning)
     # The model server is local: no proxy (its dispatcher has 300 s timeouts), and no fetch timeouts at all.
@@ -188,6 +204,12 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         idle = idle + 1 if int(read_json(result).get("actions") or 0) == before else 0
         if idle >= 2 and rounds > 2:
             break  # two rounds in a row without an action: the agent stopped acting
+    daemon.terminate()
+    try:
+        daemon.wait(10)
+    except subprocess.TimeoutExpired:
+        daemon.kill()
+    sock.unlink(missing_ok=True)
     res = {"game": game, "k": k, "rounds": rounds, **read_json(result), "exec": log}
     res["infra_error"] = None if result.exists() else "no game progress recorded"
     final.write_text(json.dumps(res, indent=1))
