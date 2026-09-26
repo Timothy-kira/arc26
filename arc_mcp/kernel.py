@@ -62,6 +62,10 @@ class CellTimeout(Exception):
     pass
 
 
+class KnownDeath(Exception):
+    pass
+
+
 class Game:
     """Client side of the game daemon."""
 
@@ -150,10 +154,53 @@ class Kernel:
                   actions_used=r["actions"], level_actions_used=r["level_so_far"])
         self.status = r["status"]
 
-    def act(self, a: int, x: Optional[int] = None, y: Optional[int] = None) -> dict[str, Any]:
+    def _masked(self, g: np.ndarray) -> np.ndarray:
+        """The frame with this level's budget-meter bands blanked (they differ between otherwise equal frames)."""
+        m = np.array(g, copy=True)
+        for kind, p0, p1 in KSTATE.get("bands", {}).get(NS["level"], []):
+            if kind == "row":
+                m[p0:p1 + 1, :] = -1
+            else:
+                m[:, p0:p1 + 1] = -1
+        return m
+
+    def _key(self, g: np.ndarray, a: int, x: Optional[int], y: Optional[int]) -> tuple:
+        return (NS["level"], hash(self._masked(g).tobytes()), int(a), (x, y) if int(a) == 6 else None)
+
+    def _update_bands(self) -> list[dict]:
+        ms = percept.meters(NS["history"], KSTATE["prev"], NS["level"])
+        bands = KSTATE.setdefault("bands", {}).setdefault(NS["level"], [])
+        for m in ms:
+            kind, rest = m["line"].split(" ", 1)
+            lo, _, hi = rest.split("=", 1)[1].partition("..")
+            band = (kind, int(lo), int(hi or lo))
+            if band not in bands:
+                bands.append(band)
+        return ms
+
+    def _known_death(self, g: np.ndarray, a: int, x: Optional[int], y: Optional[int]) -> Optional[int]:
+        """The number of an earlier death of this level caused by the same action from the same frame, when
+        that action from that frame never went well (hidden state can make the same move safe at other times)."""
+        xy = (x, y) if int(a) == 6 else None
+        if self._key(g, a, x, y) in KSTATE.get("survived", set()):
+            return None
+        m = None
+        for d in KSTATE.get("deadly", []):
+            if d["level"] == NS["level"] and d["a"] == int(a) and d["xy"] == xy:
+                m = self._masked(g) if m is None else m
+                if np.array_equal(self._masked(d["grid"]), m):
+                    return d["n"]
+        return None
+
+    def act(self, a: int, x: Optional[int] = None, y: Optional[int] = None, force: bool = False) -> dict[str, Any]:
         if self.cell_actions >= CELL_ACTIONS:
             raise CellBudget(f"this cell already played {CELL_ACTIONS} actions; look at the results first")
         before = NS["level"]
+        known = None if force else self._known_death(KSTATE["grid"], a, x, y)
+        if known is not None:
+            raise KnownDeath(f"refused (no action spent): ACTION{a} from exactly this frame already killed you "
+                             f"(death #{known} of this level, see deaths()). Change the plan; "
+                             "act(..., force=True) plays it anyway.")
         r = self.game.call({"op": "step", "action": int(a), "x": None if x is None else int(x),
                             "y": None if y is None else int(y), "source": "code"})
         if "error" in r:
@@ -171,8 +218,22 @@ class Kernel:
                "small": percept.small_changes(KSTATE["prev"], KSTATE["grid"]) if same and changed else []}
         if NS["state"] == "GAME_OVER" and NS["level"] == before:
             rec["death"] = self._death_report(rec)
+            ms = self._update_bands()
+            budget = any(m["left"] <= m["per_action"] for m in ms)  # ran out of moves: not the move's fault
+            n = sum(1 for h in NS["history"] if h.get("death") and h["level"] == NS["level"]) + 1
+            same = self._known_death(KSTATE["prev"], a, x, y)
+            if budget:
+                rec["death"] += "; the meter ran out: this death is the level's move budget"
+            elif same is not None:
+                rec["death"] += f"; SAME action from the SAME frame as death #{same}"
+            else:
+                KSTATE.setdefault("deadly", []).append({"level": NS["level"], "grid": KSTATE["prev"], "a": int(a),
+                                                        "xy": (x, y) if int(a) == 6 else None, "n": n})
             self.cell_events.append("DEATH " + rec["death"])
         NS["history"].append(rec)
+        if same:  # an action that did not end the level either way: that move from that frame is survivable
+            self._update_bands()
+            KSTATE.setdefault("survived", set()).add(self._key(KSTATE["prev"], a, x, y))
         return {"changed": changed, "state": NS["state"], "level": NS["level"], "level_up": NS["level"] > before,
                 "game_over": NS["state"] == "GAME_OVER", "note": note, "frames": len(KSTATE["frames"])}
 
@@ -278,7 +339,7 @@ class Kernel:
                     val = eval(compile(ast.Expression(last.value), "<cell>", "eval"), NS)
                     if val is not None:
                         print(val if isinstance(val, str) else repr(val))
-        except (CellBudget, CellTimeout) as e:
+        except (CellBudget, CellTimeout, KnownDeath) as e:
             err = str(e)
         except Exception:
             tb = traceback.format_exc().strip().splitlines()
