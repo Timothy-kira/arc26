@@ -54,7 +54,9 @@ Method (a scientist with a programmable lab):
 3. Turn what you learn into code: helpers that find the avatar, list objects, simulate a move, run BFS
    to a target. Keep them in the REPL and reuse them; later levels usually share the rules and only
    change the layout, so a working solver from level 1 often solves level 2 with few actions.
-4. Act with a plan: compute the path or click sequence in code first, then play it.
+4. Plan with the `todowrite` tool: keep a short task list for the current level (what to test, what
+   to build, what to play), exactly one item in progress, and update it as results come in. Compute
+   paths or click sequences in code first, then play them.
 5. After GAME_OVER call reset() (action 0) and change what killed you.
 6. Keep the notebook up to date with `arc_note` (rules, goal, levels, plan): the server hands it back
    verbatim after every restart or context compaction, so it is your reliable memory.
@@ -64,10 +66,14 @@ files. Skills in `.minimax/skills/` come from OTHER games played earlier in this
 description matches what you see. When the game ends (won, or told to stop), write or update ONE skill
 there: `.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the
 observable cues) and a short procedure plus reusable helper code. Never mention game ids.
-There is no time limit you need to track and no budget besides the status line: never stop on your own
-while the game is unfinished.
+You work in goal mode: the session keeps going until the game is won, so never end a turn with a plan
+in words only; always continue with a tool call. Every reply shows the budget (actions this level, total,
+time left): spend actions only when a cell has a clear question or a computed plan.
 """
 
+GOAL_OBJECTIVE = ("Win every level of the ARC game in this workspace, using as few game actions as possible. Follow "
+                  "AGENTS.md: plan with todowrite, play through the arc_python REPL, keep the notebook with arc_note. "
+                  "The goal is complete only when the tools say the game is won.")
 FIRST_PROMPT = "Play the ARC game. Start by looking at the state in the REPL with arc_python (looking costs no actions). Keep playing until the game is won or the tools tell you to stop."
 
 
@@ -86,6 +92,10 @@ def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, 
         compat: {{ thinkingFormat: qwen-chat-template, supportsDeveloperRole: false, maxTokensField: max_tokens }}
 defaultModel: custom_provider:vllm/{model}
 permissionMode: bypassPermissions
+beta: {{ threadGoal: true }}
+goal:
+  verification: none
+  breaker: {{ repeatedReplyLimit: 3 }}
 telemetry: {{ enabled: false, metrics: false, diagnostics: false }}
 agents:
   default:
@@ -249,7 +259,31 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
                 NODE_OPTIONS=(penv.get("NODE_OPTIONS", "") + f" --require {PRELOAD}").strip())
     deadline = time.monotonic() + time_limit
     rounds, idle, log = 0, 0, []
-    while rounds < args.max_rounds:
+    if args.driver == "acp":
+        from acp_driver import run_goal
+
+        mcp = [{"name": "arc", "command": args.server_python, "args": [str(SERVER)],
+                "env": [{"name": "ARC_SOCKET", "value": str(sock)}, {"name": "ARC_KERNEL", "value": str(ksock)}]}]
+
+        def done() -> bool:
+            st = read_json(result)
+            return st.get("state") == "WIN" or int(st.get("actions") or 0) >= args.max_actions
+
+        # One goal session after another: a session ends when its goal ends (complete / blocked /
+        # breaker); the REPL, notebook and DAG persist, so the next session picks up from them.
+        while rounds < args.max_rounds and deadline - time.monotonic() > 60 and not done():
+            before = int(read_json(result).get("actions") or 0)
+            objective = GOAL_OBJECTIVE if rounds == 0 else next_prompt(ws, idle)
+            r = run_goal(args.node, args.mcode, ws, penv, mcp, objective, deadline, done, ws / f"acp_{rounds}.log")
+            acted = int(read_json(result).get("actions") or 0) - before
+            log.append({"round": rounds, **r, "actions": acted})
+            sys.stderr.write(f"[goal] {game} session {rounds} actions+={acted} stop={r.get('stop')} "
+                             f"tokens={r.get('tokens_used')} err={r.get('error')}\n")
+            rounds += 1
+            idle = idle + 1 if acted == 0 else 0
+            if idle >= args.max_idle:
+                break
+    while args.driver == "exec" and rounds < args.max_rounds:
         left = deadline - time.monotonic()
         if left < 60:
             break
@@ -313,6 +347,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--max-actions", type=int, default=100000)
     p.add_argument("--max-steps", type=int, default=150)
     p.add_argument("--max-rounds", type=int, default=100)
+    p.add_argument("--driver", default="acp", choices=["acp", "exec"],
+                   help="acp: MiniMax Code goal mode over ACP (auto-continuation); exec: one mcode exec per round")
     p.add_argument("--max-idle", type=int, default=6, help="give a game up after this many rounds in a row without an action")
     p.add_argument("--skills-dir", default=None, help="shared skills directory (default <out-dir>/skills)")
     p.add_argument("--node", default=shutil.which("node") or "node")
