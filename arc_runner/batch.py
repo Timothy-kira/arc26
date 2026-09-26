@@ -38,42 +38,37 @@ ROOT = Path(__file__).resolve().parents[1]
 SERVER = ROOT / "arc_mcp" / "server.py"
 PRELOAD = ROOT / "arc_runner" / "no_fetch_timeouts.cjs"
 
-AGENTS_MD = """# Playing an ARC-AGI-3 game
+AGENTS_MD = """# Playing an ARC-AGI-3 game as an interactive programming problem
 
-You play an unknown turn-based puzzle game (64x64 grid, 16 colours) through the `arc` MCP tools.
-Nobody tells you the rules or the goal. Score per level = (human_actions / your_actions)^2, so every
-action counts; thinking and free tools (arc_observe, arc_model, arc_todo, arc_hypothesize) cost nothing.
+You play an unknown turn-based puzzle game (64x64 grid, 16 colours). Nobody tells you the rules or
+the goal. The game lives in a Python REPL that you drive with the `arc_python` tool: the state is in
+variables (`grid`, `prev`, `frames`, `state`, `level`, `available`, `history`, ...) and `act(a, x, y)`
+plays one action. Score per level = (human_actions / your_actions)^2: every action counts, thinking and
+code that does not act are free.
 
-The MCP server remembers everything for you (state, step counts, learned rules, todo) across restarts:
-every tool reply starts with a status line like `L2/7 NOT_FINISHED | this level 14 actions (...) | total 90`.
+Method (a scientist with a programmable lab):
+1. Look first, for free: print `show()` or regions of it, count colours, find objects with numpy.
+2. Ask one question per cell and spend as few actions as that question needs (e.g. "what does
+   ACTION1 do?" = one act() and a look at changes()). Give every cell a `purpose`, and `parents` =
+   the cells it builds on, so your exploration DAG stays readable (`arc_dag`).
+3. Turn what you learn into code: helpers that find the avatar, list objects, simulate a move, run BFS
+   to a target. Keep them in the REPL and reuse them; later levels usually share the rules and only
+   change the layout, so a working solver from level 1 often solves level 2 with few actions.
+4. Act with a plan: compute the path or click sequence in code first, then play it.
+5. After GAME_OVER call reset() (action 0) and change what killed you.
+6. Keep the notebook up to date with `arc_note` (rules, goal, levels, plan): the server hands it back
+   verbatim after every restart or context compaction, so it is your reliable memory.
 
-Work like a scientist, cheapest first:
-1. `arc_model` (free): what is already known, and the todo list.
-2. `arc_explore` with a small budget (10-30) when basic mechanics are unknown: it finds the avatar, what each
-   action does, what blocks, what clicks do. Do not explore blindly for long.
-3. `arc_observe` (free): the objects on screen. Form a hypothesis about the GOAL (what must be reached,
-   collected, matched or cleared) and record it with `arc_hypothesize`.
-4. Test the hypothesis with the fewest actions: `arc_plan` ({"reach": {"color": c}}, {"click_all": {"color": c}})
-   or a few precise `arc_act` actions.
-5. When a level is completed, the next level usually has the same rules with a harder layout: reuse what
-   won (arc_model shows it) and plan directly.
-6. After GAME_OVER use RESET (action 0) and avoid what killed you (arc_model lists it).
-
-Keep your notebook with `arc_note` (rules, goal, levels, plan): the server stores it and hands it back
-verbatim after every restart or context compaction, so it is your reliable memory. Update it whenever you
-confirm a rule or finish a level.
-
-Skills in `.minimax/skills/` come from OTHER games played earlier in this run: read the ones whose
-description matches what you see. When the game ends (won, or told to stop), write or update ONE skill there:
-`.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the observable cues:
-available actions, avatar or not, colours) and a short numbered procedure using these tools that would solve
-that kind of game with fewer actions. Never mention game ids. Do not use the shell or other files otherwise.
-There is no time limit you need to track and no budget besides the status line: never stop on your own while
-the game is unfinished.
+The REPL cannot read files or start processes; do not use the shell or other tools to look at game
+files. Skills in `.minimax/skills/` come from OTHER games played earlier in this run: read the ones whose
+description matches what you see. When the game ends (won, or told to stop), write or update ONE skill
+there: `.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the
+observable cues) and a short procedure plus reusable helper code. Never mention game ids.
+There is no time limit you need to track and no budget besides the status line: never stop on your own
+while the game is unfinished.
 """
 
-FIRST_PROMPT = "Play the ARC game. Start with arc_model and arc_observe. Keep playing until the game is won or the tools tell you to stop."
-NEXT_PROMPT = "Continue playing the same game from where you are (arc_model shows what is known). Stop only when the game is won or the tools tell you to stop."
+FIRST_PROMPT = "Play the ARC game. Start by looking at the state in the REPL with arc_python (looking costs no actions). Keep playing until the game is won or the tools tell you to stop."
 
 
 def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False,
@@ -177,33 +172,23 @@ def merge_skills(ws: Path, shared: Path, key: str, t_start: float) -> None:
         (dest / ".origin").write_text(key)
 
 
-def daemon_call(sock: Path, name: str, arguments: dict[str, Any]) -> str:
-    """Call a tool on the game daemon directly (same socket protocol as the MCP server)."""
-    import socket as _socket
-
-    try:
-        with _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM) as c:
-            c.settimeout(600)
-            c.connect(str(sock))
-            f = c.makefile("rw")
-            f.write(json.dumps({"name": name, "arguments": arguments}) + "\n")
-            f.flush()
-            reply = json.loads(f.readline() or "{}")
-        return "\n".join(x.get("text", "") for x in reply.get("content", []))
-    except (OSError, ValueError) as exc:
-        return f"daemon call failed: {exc}"
-
-
 def next_prompt(ws: Path, idle: int) -> str:
-    """Continuation prompt with the notebook and status copied verbatim from the MCP ledger, so
-    nothing the agent wrote down depends on how the conversation was compacted."""
+    """Continuation prompt with the notebook, status and recent DAG copied verbatim from disk, so
+    nothing the agent recorded depends on how the conversation was compacted."""
     led = read_json(ws / "ledger.json")
     book = led.get("notebook") or {}
     notes = "\n".join(f"[{k}]\n{v}" for k, v in book.items() if v) or "(empty)"
-    nudge = ("Your last turn ended without playing. Do not narrate: call a tool now (arc_model, then "
-             "arc_explore or arc_plan or arc_act).\n") if idle else ""
-    return (f"{nudge}Continue playing the same game from where you are.\nStatus: {led.get('status', '?')}\n"
-            f"Your notebook (verbatim):\n{notes}\nStop only when the game is won or the tools tell you to stop.")
+    try:
+        nodes = json.loads((ws / "dag.json").read_text())[-10:]
+    except (OSError, ValueError):
+        nodes = []
+    dag = "\n".join(f"[{n['id']}] <- {n['parents']} {n['actions']}a {'ERR ' if n['error'] else ''}{n['purpose'][:100]}"
+                    for n in nodes) or "(no cells yet)"
+    nudge = "Your last turn ended without playing. Do not narrate: call arc_python now.\n" if idle else ""
+    return (f"{nudge}Continue playing the same game from where you are. The REPL still holds your variables and "
+            f"helper functions.\nStatus: {led.get('status', '?')}\nYour notebook (verbatim):\n{notes}\n"
+            f"Your last REPL cells (arc_dag for more; node(i)['code'] to read one):\n{dag}\n"
+            "Stop only when the game is won or the tools tell you to stop.")
 
 
 def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str], time_limit: float) -> dict[str, Any]:
@@ -241,9 +226,21 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         res = {"game": game, "k": k, "rounds": 0, "infra_error": "game daemon failed: " + (ws / "daemon.stderr").read_text()[-500:]}
         final.write_text(json.dumps(res, indent=1))
         return res
+    # The REPL kernel: its own process, talks to the daemon, never sees the engine or game files.
+    ksock = Path("/tmp") / f"arc26-{os.getpid()}-{game[:12]}-{k}.k.sock"
+    ksock.unlink(missing_ok=True)
+    blocked = [str(Path(args.env_dir).resolve()), str(ROOT / "data")]
+    kenv = {**os.environ, "ARC_DAG": str(ws / "dag.json"), "ARC_BLOCK_PATHS": os.pathsep.join(blocked),
+            "PYTHONPATH": str(ROOT)}
+    kernel = subprocess.Popen([args.server_python, "-m", "arc_mcp.kernel", str(ksock), str(sock)], env=kenv, cwd=str(ws),
+                              stdout=subprocess.DEVNULL, stderr=(ws / "kernel.stderr").open("w"))
+    for _ in range(300):
+        if ksock.exists() or kernel.poll() is not None:
+            break
+        time.sleep(0.1)
     (ws / ".mcp.json").write_text(json.dumps(
-        {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)], "env": {**env, "ARC_SOCKET": str(sock)},
-                                "timeout": 120000}}}, indent=1))
+        {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)],
+                                "env": {"ARC_SOCKET": str(sock), "ARC_KERNEL": str(ksock)}, "timeout": 300000}}}, indent=1))
     data_dir = ws / ".mcode-data"
     write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning, args.api_key)
     # The model server is local: no proxy (its dispatcher has 300 s timeouts), and no fetch timeouts at all.
@@ -279,19 +276,17 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
                 log.append({"round": rounds, "exit": "timeout"})
         rounds += 1
         idle = idle + 1 if int(read_json(result).get("actions") or 0) == before else 0
-        if idle and args.autopilot > 0 and deadline - time.monotonic() > 60:
-            # the model ended its turn without playing: let the MCP's explorer use the time meanwhile
-            reply = daemon_call(sock, "arc_explore", {"budget": args.autopilot})
-            sys.stderr.write(f"[autopilot] {game} round {rounds}: {reply.splitlines()[0][:160] if reply else 'no reply'}\n")
         if idle >= args.max_idle:
             break  # the agent keeps stopping without acting
     merge_skills(ws, Path(args.skills_dir).resolve(), game_key(game), t_attempt)
-    daemon.terminate()
-    try:
-        daemon.wait(10)
-    except subprocess.TimeoutExpired:
-        daemon.kill()
+    for proc in (kernel, daemon):
+        proc.terminate()
+        try:
+            proc.wait(10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
     sock.unlink(missing_ok=True)
+    ksock.unlink(missing_ok=True)
     res = {"game": game, "k": k, "rounds": rounds, **read_json(result), "exec": log}
     res["infra_error"] = None if result.exists() else "no game progress recorded"
     final.write_text(json.dumps(res, indent=1))
@@ -319,7 +314,6 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--max-steps", type=int, default=150)
     p.add_argument("--max-rounds", type=int, default=100)
     p.add_argument("--max-idle", type=int, default=6, help="give a game up after this many rounds in a row without an action")
-    p.add_argument("--autopilot", type=int, default=40, help="explorer actions played on the model's behalf after an idle round (0 = off)")
     p.add_argument("--skills-dir", default=None, help="shared skills directory (default <out-dir>/skills)")
     p.add_argument("--node", default=shutil.which("node") or "node")
     p.add_argument("--mcode", default=str(ROOT.parent / "minimax-code" / "dist" / "cli.js"))

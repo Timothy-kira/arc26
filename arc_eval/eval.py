@@ -1,7 +1,6 @@
 """Competition-faithful local evaluation: one play per game, RESET rules as on the gateway.
 
-    python -m arc_eval.eval --set official --agent explorer --max-actions 2000
-    python -m arc_eval.eval --set community --agent explorer --limit 60 --seed 0
+    python -m arc_eval.eval --set official_dev --agent random --max-actions 600
 
 Per game: levels completed, actions per level and (official set) the RHAE game score,
 computed like ``arc_agi.scorecard``: level score min(115, 100 * (human/agent)^2) for completed
@@ -43,9 +42,6 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int, max_seconds: f
     from arc_agi import Arcade, OperationMode
     from arcengine import GameAction, GameState
 
-    import numpy as np
-
-    from arc_mcp.explorer import play_explore
     from arc_mcp.session import Session
 
     arc = Arcade(operation_mode=OperationMode.OFFLINE, environments_dir=str(info.env_dir))
@@ -70,39 +66,10 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int, max_seconds: f
 
 
 def _run(agent, s, info, max_actions, seed):
-    import numpy as np
+    """LLM-free reference agents (the LLM agent is evaluated through arc_runner/batch.py)."""
     from arcengine import GameState
 
-    from arc_mcp.explorer import play_explore
-
-    if agent == "explorer":
-        play_explore(s, max_actions=max_actions)
-    elif agent == "memory":  # the MCP's own curiosity policy (arc_explore) with the rule model
-        from arc_mcp.memory import GameMemory
-        m = GameMemory(s, baseline=list(info.baseline) if info.baseline else None)
-        while s.actions < max_actions and s.last.state != GameState.WIN:
-            m.explore(min(50, max_actions - s.actions), stop_on_event=False)
-    elif agent == "novelty":  # explore, then walk the avatar to every colour it has not entered yet
-        from arc_mcp.memory import GameMemory
-        from arc_mcp.planner import plan
-        m = GameMemory(s, baseline=list(info.baseline) if info.baseline else None)
-        tried: dict[int, set] = {}
-        while s.actions < max_actions and s.last.state != GameState.WIN:
-            lvl = s.last.levels_completed
-            m.explore(min(30, max_actions - s.actions))
-            if s.last.levels_completed != lvl or not m.model.avatar():
-                continue
-            g = s.last.grid
-            bg = int(np.bincount(g.ravel()).argmax())
-            av = m.model.avatar()[0][0]
-            cand = [c for c in np.unique(g).tolist() if c not in (bg, av) and m.model.entered.get(c, 0) == 0
-                    and c not in tried.setdefault(lvl, set())]
-            if not cand:
-                continue
-            c = min(cand, key=lambda c: int((g == c).sum()))  # rarest colour first
-            tried[lvl].add(c)
-            plan(m, {"reach": {"color": int(c)}}, max_actions=min(80, max_actions - s.actions))
-    elif agent == "random":
+    if agent == "random":
         rng = random.Random(seed)
         while s.actions < max_actions and s.last.state != GameState.WIN:
             if s.last.state == GameState.GAME_OVER:
@@ -136,7 +103,7 @@ def _result(info, s, t0, arc, card):
 def main(argv: Optional[list[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--set", default="official", choices=["official", "official_dev", "official_val", "community", "dev"])
-    p.add_argument("--agent", default="explorer", choices=["explorer", "memory", "novelty", "random"])
+    p.add_argument("--agent", default="random", choices=["random"])
     p.add_argument("--max-actions", type=int, default=2000)
     p.add_argument("--limit", type=int, default=0, help="play a random subset of this many games")
     p.add_argument("--seed", type=int, default=0)
