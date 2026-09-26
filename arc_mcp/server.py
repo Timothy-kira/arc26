@@ -178,14 +178,19 @@ PYTHON_DOC = (
     "5 interact, 6 click at (x, y), 7 undo); show(g=None, y0, y1, x0, x1) -> hex text of a region; changes(a, b) -> "
     "[(y, x, old, new)]; np is numpy. Write your own helpers (object finding, BFS, simulators) and reuse them. "
     "Every action counts against the score: probe with few actions, then act with a plan. The last expression "
-    "is printed. Each call becomes a node of your exploration DAG (purpose = the question it answers; parents = "
-    "the node ids it builds on, default the previous node). At most 300 actions and 120 s per call."
+    "is printed. Each call becomes a node of your exploration DAG: purpose = the question it answers; parents = "
+    "the node ids it builds on (default the previous node); expect = what you expect to happen, recorded next to "
+    "what actually happened; revises = the node whose surprise this cell corrects. At most 300 actions and 120 s "
+    "per call."
 )
 
 TOOLS = [
     {"name": "arc_python", "description": PYTHON_DOC, "inputSchema": {"type": "object", "properties": {
         "code": {"type": "string"}, "purpose": {"type": "string", "description": "one line: the question this cell answers"},
-        "parents": {"type": "array", "items": {"type": "integer"}}}, "required": ["code", "purpose"]}},
+        "parents": {"type": "array", "items": {"type": "integer"}},
+        "expect": {"type": "string", "description": "what you expect to happen (e.g. 'the avatar reaches the door and the level completes')"},
+        "revises": {"type": "integer", "description": "id of the node whose surprise this cell corrects"}},
+        "required": ["code", "purpose"]}},
     {"name": "arc_note", "description": (
         "Your notebook for this game, kept by the server and handed back verbatim after every restart or context "
         "compaction. Sections: rules (confirmed mechanics), goal (what wins a level), levels (one line per level: what "
@@ -195,7 +200,8 @@ TOOLS = [
         "mode": {"type": "string", "enum": ["replace", "append"]}}}},
     {"name": "arc_dag", "description": (
         "Your exploration DAG so far: one line per REPL cell (id, parents, level, actions used, purpose; * = an event "
-        "such as a level-up, ERR = it failed). node(i)['code'] in the REPL gives a cell's code; rerun(i) runs it "
+        "such as a level-up, ! = a surprise: an error, a death or an expected level-up that did not happen), with "
+        "expected vs actual outcome and the list of surprises no cell has revised yet. node(i)['code'] in the REPL gives a cell's code; rerun(i) runs it "
         "again. Free."), "inputSchema": {"type": "object", "properties": {
         "last": {"type": "integer", "minimum": 1, "maximum": 60}}}},
 ]
@@ -205,7 +211,8 @@ def call_tool(name: str, args: dict[str, Any]) -> str:
     game, kernel = os.environ["ARC_SOCKET"], os.environ["ARC_KERNEL"]
     if name == "arc_python":
         return request(kernel, {"code": args.get("code", ""), "purpose": args.get("purpose", ""),
-                                "parents": args.get("parents")})["text"]
+                                "parents": args.get("parents"), "expect": args.get("expect", ""),
+                                "revises": args.get("revises")})["text"]
     if name == "arc_dag":
         return request(kernel, {"op": "dag", "last": int(args.get("last", 12))})["text"]
     if name == "arc_note":

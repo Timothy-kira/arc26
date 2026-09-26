@@ -160,9 +160,11 @@ class Kernel:
 
     # ------------------------------------------------------------------ cells
 
-    def run(self, code: str, purpose: str = "", parents: Optional[list[int]] = None) -> str:
+    def run(self, code: str, purpose: str = "", parents: Optional[list[int]] = None, expect: str = "",
+            revises: Optional[int] = None) -> str:
         self.cell_actions, self.cell_events = 0, []
         level0, t0 = NS["level"], time.time()
+        grid0, state0, deaths0 = NS["grid"].copy(), NS["state"], sum(1 for h in NS["history"] if h["state"] == "GAME_OVER")
         buf = io.StringIO()
         err = None
 
@@ -192,12 +194,27 @@ class Kernel:
             out = out[:2000] + f"\n... [{len(out) - OUT_LIMIT} chars cut] ...\n" + out[-(OUT_LIMIT - 2000):]
         nid = len(self.nodes)
         parents = parents if parents is not None else ([nid - 1] if nid else [])
-        self.nodes.append({"id": nid, "parents": parents, "purpose": purpose, "code": code,
-                           "actions": self.cell_actions, "level_before": level0, "level_after": NS["level"],
-                           "events": self.cell_events, "error": err.splitlines()[-1] if err else None,
-                           "out": out[:400], "seconds": round(time.time() - t0, 1)})
+        if revises is not None and revises not in parents:
+            parents = [revises] + parents
+        deaths = sum(1 for h in NS["history"] if h["state"] == "GAME_OVER") - deaths0
+        outcome = {  # what actually happened, recorded next to what the cell expected
+            "actions": self.cell_actions, "levels": NS["level"] - level0, "deaths": deaths,
+            "state": f"{state0}->{NS['state']}" if NS["state"] != state0 else NS["state"],
+            "cells_changed": int((grid0 != NS["grid"]).sum()), "error": err.splitlines()[-1] if err else None,
+        }
+        flag = bool(err) or deaths > 0 or (bool(expect) and "level" in expect.lower() and outcome["levels"] <= 0
+                                           and self.cell_actions > 0)
+        self.nodes.append({"id": nid, "parents": parents, "purpose": purpose, "expect": expect, "outcome": outcome,
+                           "flag": flag, "revises": revises, "code": code, "actions": self.cell_actions,
+                           "level_before": level0, "level_after": NS["level"], "events": self.cell_events,
+                           "error": outcome["error"], "out": out[:400], "seconds": round(time.time() - t0, 1)})
         self._save()
-        parts = [self.status, f"[node {nid}] {self.cell_actions} actions" + (f"; events: {'; '.join(self.cell_events[-4:])}" if self.cell_events else "")]
+        got = f"{self.cell_actions}a, levels {outcome['levels']:+d}, deaths {deaths}, {outcome['state']}, " \
+              f"{outcome['cells_changed']} cells changed" + (", error" if err else "")
+        head = f"[node {nid}] {got}" + (f"; events: {'; '.join(self.cell_events[-4:])}" if self.cell_events else "")
+        if expect:
+            head += f"\nexpected: {expect[:200]}" + ("  <- did not happen: revise (revises=%d)" % nid if flag else "")
+        parts = [self.status, head]
         if out.strip():
             parts.append(out.rstrip())
         if err:
@@ -210,8 +227,17 @@ class Kernel:
         lines = []
         for n in self.nodes[-last:]:
             lv = f"L{n['level_before'] + 1}" + (f"->L{n['level_after'] + 1}" if n["level_after"] != n["level_before"] else "")
-            tag = "ERR" if n["error"] else ("*" if n["events"] else "")
-            lines.append(f"[{n['id']}] <- {n['parents']} {lv} {n['actions']}a {tag} {n['purpose'][:90]}")
+            tag = "!" if n.get("flag") else ("*" if n["events"] else "")
+            rev = f" revises {n['revises']}" if n.get("revises") is not None else ""
+            line = f"[{n['id']}]{tag} <- {n['parents']}{rev} {lv} {n['actions']}a {n['purpose'][:80]}"
+            if n.get("expect"):
+                o = n.get("outcome") or {}
+                line += f"\n     expected: {n['expect'][:90]} | got: levels {o.get('levels', 0):+d}, deaths {o.get('deaths', 0)}" \
+                        + (f", {o['error'][:60]}" if o.get("error") else "")
+            lines.append(line)
+        open_ = [n["id"] for n in self.nodes if n.get("flag") and not any(m.get("revises") == n["id"] for m in self.nodes)]
+        if open_:
+            lines.append(f"unresolved surprises (no cell revises them yet): {open_[-8:]}")
         return "\n".join(lines)
 
 
@@ -251,7 +277,8 @@ def main() -> None:
                     if req.get("op") == "dag":
                         text = k.status + "\n" + k.dag(int(req.get("last", 12)))
                     else:
-                        text = k.run(str(req.get("code", "")), str(req.get("purpose", "")), req.get("parents"))
+                        text = k.run(str(req.get("code", "")), str(req.get("purpose", "")), req.get("parents"),
+                                     str(req.get("expect", "") or ""), req.get("revises"))
                     reply = {"text": text}
                 except Exception as exc:  # the kernel itself must survive
                     reply = {"text": f"kernel error: {type(exc).__name__}: {exc}"}

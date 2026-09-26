@@ -49,8 +49,10 @@ code that does not act are free.
 Method (a scientist with a programmable lab):
 1. Look first, for free: print `show()` or regions of it, count colours, find objects with numpy.
 2. Ask one question per cell and spend as few actions as that question needs (e.g. "what does
-   ACTION1 do?" = one act() and a look at changes()). Give every cell a `purpose`, and `parents` =
-   the cells it builds on, so your exploration DAG stays readable (`arc_dag`).
+   ACTION1 do?" = one act() and a look at changes()). Give every cell a `purpose`, `parents` = the
+   cells it builds on, and `expect` = what you think will happen; the DAG records it next to what
+   actually happened and flags surprises (`!` in `arc_dag`). When a result contradicts you, fix your
+   understanding in the next cell with `revises` = that node's id.
 3. Turn what you learn into code: helpers that find the avatar, list objects, simulate a move, run BFS
    to a target. Keep them in the REPL and reuse them; later levels usually share the rules and only
    change the layout, so a working solver from level 1 often solves level 2 with few actions.
@@ -192,8 +194,8 @@ def next_prompt(ws: Path, idle: int) -> str:
         nodes = json.loads((ws / "dag.json").read_text())[-10:]
     except (OSError, ValueError):
         nodes = []
-    dag = "\n".join(f"[{n['id']}] <- {n['parents']} {n['actions']}a {'ERR ' if n['error'] else ''}{n['purpose'][:100]}"
-                    for n in nodes) or "(no cells yet)"
+    dag = "\n".join(f"[{n['id']}]{'!' if n.get('flag') else ''} <- {n['parents']} {n['actions']}a {n['purpose'][:100]}"
+                    + (f" | expected: {n['expect'][:80]}" if n.get("expect") else "") for n in nodes) or "(no cells yet)"
     nudge = "Your last turn ended without playing. Do not narrate: call arc_python now.\n" if idle else ""
     return (f"{nudge}Continue playing the same game from where you are. The REPL still holds your variables and "
             f"helper functions.\nStatus: {led.get('status', '?')}\nYour notebook (verbatim):\n{notes}\n"
