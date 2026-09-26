@@ -29,16 +29,6 @@
      }
     ]
    }
-  ],
-  "Stop": [
-   {
-    "hooks": [
-     {
-      "type": "command",
-      "command": "python3 \"$MINIMAX_PLUGIN_ROOT\"/hooks/arc_hooks.py stop"
-     }
-    ]
-   }
   ]
  }
 }

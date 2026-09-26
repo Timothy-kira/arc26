@@ -10,8 +10,9 @@ Hook I/O is the Claude-compatible command-hook contract: the event arrives as JS
            search and web tools are denied; write/edit only inside .minimax/skills.
   record   PostToolUse: every non-REPL tool call (todowrite plans, notes, skill reads, goal calls)
            becomes an event in dag_events.jsonl, so the DAG shows the whole trajectory.
-  stop     Stop: while the game is unfinished and time is left, stopping is blocked once per turn
-           with a reason that points the model back to the game.
+  stop     (not registered) blocking Stop leaves the turn in a settling phase where MiniMax Code
+           rejects every further tool call ("Tool-result delivery seam is closed"); goal mode's own
+           auto-continuation keeps the session going instead.
 """
 
 from __future__ import annotations

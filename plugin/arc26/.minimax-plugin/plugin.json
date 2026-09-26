@@ -1,16 +1,20 @@
 {
-  "schemaVersion": 1,
-  "name": "arc26",
-  "displayName": "ARC-AGI-3 harness",
-  "version": "0.2.0",
-  "description": "Hooks for playing ARC-AGI-3 games: restore game state after start and compaction, guard tools, log the trajectory into the DAG, keep going while the game is unfinished.",
-  "author": "arc26",
-  "icon": "icon.png",
-  "category": "Code",
-  "exampleQueries": ["Play the ARC game in this workspace"],
-  "apps": [],
-  "mcpServers": [],
-  "skills": [],
-  "hooks": ["hooks/hooks.json"],
-  "hostBindings": []
+ "schemaVersion": 1,
+ "name": "arc26",
+ "displayName": "ARC-AGI-3 harness",
+ "version": "0.2.1",
+ "description": "Hooks for playing ARC-AGI-3 games: restore game state after start and compaction, guard tools, log the trajectory into the DAG.",
+ "author": "arc26",
+ "icon": "icon.png",
+ "category": "Code",
+ "exampleQueries": [
+  "Play the ARC game in this workspace"
+ ],
+ "apps": [],
+ "mcpServers": [],
+ "skills": [],
+ "hooks": [
+  "hooks/hooks.json"
+ ],
+ "hostBindings": []
 }
