@@ -95,10 +95,13 @@ WH = unpacked("wheels", lambda f: f.startswith("raven-") and f.endswith(".whl"))
 TIKTOKEN = unpacked("tiktoken_cache", lambda f: True)
 print("raven wheelhouse:", WH, "| tiktoken cache:", TIKTOKEN)
 RAVEN_PY = "/tmp/ravenv/bin/python"
-sh([sys.executable, "-m", "venv", "/tmp/ravenv"])
-sh([RAVEN_PY, "-m", "pip", "install", "-q", "--no-index", "--find-links", WH, "--find-links", COMP + "/arc_agi_3_wheels",
-    "raven", "everos-memory", "arc-agi"])
-sh([RAVEN_PY, "-c", "import raven, raven_everos, everos, arc_agi; print('raven ok')"])
+# Kaggle's python cannot ensurepip into a fresh venv, and its sitecustomize imports wrapt:
+# inherit pip/wrapt from the system site, and install Raven's exact pins into the venv (they shadow the base).
+sh([sys.executable, "-m", "venv", "--system-site-packages", "--without-pip", "/tmp/ravenv"])
+sh([RAVEN_PY, "-m", "pip", "install", "-q", "--no-index", "--ignore-installed", "--no-warn-conflicts",
+    "--find-links", WH, "--find-links", COMP + "/arc_agi_3_wheels", "raven", "everos-memory", "arc-agi"])
+ok = sh([RAVEN_PY, "-c", "import raven, raven_everos, everos, arc_agi; print('raven ok')"])
+assert ok.returncode == 0, "Raven offline install failed; stopping before the GPU is used"
 '''
 
 VLLM = r'''
