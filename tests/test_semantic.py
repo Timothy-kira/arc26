@@ -21,3 +21,16 @@ async def test_call_json_retries_with_error_feedback():
     assert out.action == 4
     assert len(llm.calls) == 3
     assert "could not be parsed" in llm.calls[-1][-1]["content"]
+
+
+async def test_call_json_drops_thinking_after_empty_answer():
+    seen = []
+
+    async def chat(messages, *, thinking=False, json_schema=None, max_tokens=None, temperature=None):
+        seen.append(thinking)
+        return "" if thinking else '{"action": 1, "why": "x"}'
+
+    llm = MockLLM()
+    llm.chat = chat
+    out = await call_json(llm, Out, "sys", "user", thinking=True, retries=2)
+    assert out.action == 1 and seen == [True, False]

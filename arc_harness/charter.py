@@ -29,7 +29,8 @@ class Charter:
             system_addendum=out.system_addendum.strip()[:600],
             priorities=dict(out.priorities),
             avoid={a.key() for a in out.avoid},
-            max_level_actions=max(0, int(out.max_level_actions)),
+            # the model tends to pick tiny limits that switch reasoning off; only honour generous ones
+            max_level_actions=int(out.max_level_actions) if out.max_level_actions >= 400 else 0,
         )
 
     def refine(self, plan: PlanOut) -> None:

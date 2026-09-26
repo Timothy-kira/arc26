@@ -111,7 +111,9 @@ class OpenAICompatClient:
             or (self.cfg.thinking_max_tokens if thinking else self.cfg.max_tokens),
             "chat_template_kwargs": {"enable_thinking": thinking},
         }
-        if json_schema is not None and not thinking:
+        if json_schema is not None:
+            # vLLM applies structured decoding after the reasoning section (--reasoning-parser),
+            # so thinking replies are schema-constrained too.
             body["response_format"] = {
                 "type": "json_schema",
                 "json_schema": {"name": "reply", "schema": json_schema},

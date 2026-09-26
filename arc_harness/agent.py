@@ -56,7 +56,7 @@ class AgentConfig:
     stuck_steps: int = 12
     plan_max_actions: int = 24
     hypothesizers: tuple[str, ...] = ("objects", "diff", "image")
-    plan_thinking: bool = True
+    plan_thinking: bool = False
     hyp_thinking: bool = False
     distill_per_game: int = 2
     use_skills: bool = True

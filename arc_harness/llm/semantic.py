@@ -63,10 +63,11 @@ async def call_json(
     ]
     json_schema = schema.model_json_schema()
     last_err: Optional[str] = None
+    think = thinking
     for _ in range(retries + 1):
         reply = await llm.chat(
             messages,
-            thinking=thinking,
+            thinking=think,
             json_schema=json_schema,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -75,6 +76,8 @@ async def call_json(
             return schema.model_validate(extract_json(reply))
         except (ValueError, ValidationError) as exc:
             last_err = str(exc)[:800]
+            # an empty/truncated answer after long reasoning: retry without thinking
+            think = False
             messages.append({"role": "assistant", "content": reply[-4000:]})
             messages.append(
                 {
