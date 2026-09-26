@@ -33,8 +33,8 @@
   },
   "dev_hours": 2.0,
   "qwen_slug": "qwen3-8-27b-fp8-repacked",
-  "max_actions": 2000,
-  "max_steps": 150,
+  "max_actions": 100000,
+  "max_steps": 300,
   "kernel_sources": [
     "xishengfeng/arc26-mcode-build"
   ],
