@@ -59,8 +59,12 @@ Work like a scientist, cheapest first:
    won (arc_model shows it) and plan directly.
 6. After GAME_OVER use RESET (action 0) and avoid what killed you (arc_model lists it).
 
-Skills from earlier games are in `.minimax/skills/`: read the ones whose description matches what you see.
-When the game ends (won, or told to stop), write or update ONE skill there:
+Keep your notebook with `arc_note` (rules, goal, levels, plan): the server stores it and hands it back
+verbatim after every restart or context compaction, so it is your reliable memory. Update it whenever you
+confirm a rule or finish a level.
+
+Skills in `.minimax/skills/` come from OTHER games played earlier in this run: read the ones whose
+description matches what you see. When the game ends (won, or told to stop), write or update ONE skill there:
 `.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the observable cues:
 available actions, avatar or not, colours) and a short numbered procedure using these tools that would solve
 that kind of game with fewer actions. Never mention game ids. Do not use the shell or other files otherwise.
@@ -132,6 +136,76 @@ def runtime_errors(data_dir: Path, n: int = 4) -> str:
     return " | ".join(l[:300] for l in lines[-n:])
 
 
+def game_key(game: str) -> str:
+    """Versions of one game share a key (``ls20-9607627b`` -> ``ls20``)."""
+    return game.split("-")[0]
+
+
+def prepare_skills(ws: Path, shared: Path, key: str) -> None:
+    """The workspace sees the run's shared skills except those that came from this game (a game must
+    never read what it wrote itself: that would leak its own solution into its evaluation)."""
+    view = ws / ".minimax" / "skills"
+    if view.is_symlink():
+        view.unlink()
+    view.mkdir(parents=True, exist_ok=True)
+    for d in sorted(shared.glob("*/SKILL.md")):
+        origins = (d.parent / ".origin").read_text().split() if (d.parent / ".origin").exists() else []
+        link = view / d.parent.name
+        if key not in origins and not link.exists():
+            link.symlink_to(d.parent, target_is_directory=True)
+
+
+def merge_skills(ws: Path, shared: Path, key: str, t_start: float) -> None:
+    """New skills written in the workspace move into the shared library; edited shared skills record
+    this game as an origin too, so later attempts at this game will not see them."""
+    view = ws / ".minimax" / "skills"
+    for d in sorted(view.iterdir()) if view.exists() else []:
+        if d.is_symlink():
+            target = d.resolve()
+            if (target / "SKILL.md").exists() and (target / "SKILL.md").stat().st_mtime > t_start:
+                o = target / ".origin"
+                origins = set(o.read_text().split()) if o.exists() else set()
+                o.write_text(" ".join(sorted(origins | {key})))
+            continue
+        if not (d / "SKILL.md").exists():
+            continue
+        dest, n = shared / d.name, 1
+        while dest.exists():
+            n += 1
+            dest = shared / f"{d.name}-{n}"
+        shutil.move(str(d), dest)
+        (dest / ".origin").write_text(key)
+
+
+def daemon_call(sock: Path, name: str, arguments: dict[str, Any]) -> str:
+    """Call a tool on the game daemon directly (same socket protocol as the MCP server)."""
+    import socket as _socket
+
+    try:
+        with _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM) as c:
+            c.settimeout(600)
+            c.connect(str(sock))
+            f = c.makefile("rw")
+            f.write(json.dumps({"name": name, "arguments": arguments}) + "\n")
+            f.flush()
+            reply = json.loads(f.readline() or "{}")
+        return "\n".join(x.get("text", "") for x in reply.get("content", []))
+    except (OSError, ValueError) as exc:
+        return f"daemon call failed: {exc}"
+
+
+def next_prompt(ws: Path, idle: int) -> str:
+    """Continuation prompt with the notebook and status copied verbatim from the MCP ledger, so
+    nothing the agent wrote down depends on how the conversation was compacted."""
+    led = read_json(ws / "ledger.json")
+    book = led.get("notebook") or {}
+    notes = "\n".join(f"[{k}]\n{v}" for k, v in book.items() if v) or "(empty)"
+    nudge = ("Your last turn ended without playing. Do not narrate: call a tool now (arc_model, then "
+             "arc_explore or arc_plan or arc_act).\n") if idle else ""
+    return (f"{nudge}Continue playing the same game from where you are.\nStatus: {led.get('status', '?')}\n"
+            f"Your notebook (verbatim):\n{notes}\nStop only when the game is won or the tools tell you to stop.")
+
+
 def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str], time_limit: float) -> dict[str, Any]:
     out_dir = Path(args.out_dir).resolve()
     final = out_dir / f"{game}_k{k}.json"
@@ -140,9 +214,8 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
     ws = out_dir / "ws" / f"{game}_k{k}"
     ws.mkdir(parents=True, exist_ok=True)
     (ws / ".minimax").mkdir(exist_ok=True)
-    skills_link = ws / ".minimax" / "skills"
-    if not skills_link.exists():
-        skills_link.symlink_to(Path(args.skills_dir).resolve(), target_is_directory=True)
+    t_attempt = time.time()
+    prepare_skills(ws, Path(args.skills_dir).resolve(), game_key(game))
     (ws / "AGENTS.md").write_text(AGENTS_MD)
     result = ws / "result.json"
     env = {
@@ -186,7 +259,7 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         state = read_json(result)
         if state.get("state") == "WIN" or int(state.get("actions") or 0) >= args.max_actions:
             break
-        cmd = [args.node, args.mcode, "exec", FIRST_PROMPT if rounds == 0 else NEXT_PROMPT, "--cwd", str(ws),
+        cmd = [args.node, args.mcode, "exec", FIRST_PROMPT if rounds == 0 else next_prompt(ws, idle), "--cwd", str(ws),
                "--permission", "full", "--max-steps", str(args.max_steps), "--timeout", f"{int(left)}s",
                "--output-format", "json"]
         if rounds > 0:
@@ -206,8 +279,13 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
                 log.append({"round": rounds, "exit": "timeout"})
         rounds += 1
         idle = idle + 1 if int(read_json(result).get("actions") or 0) == before else 0
-        if idle >= 2 and rounds > 2:
-            break  # two rounds in a row without an action: the agent stopped acting
+        if idle and args.autopilot > 0 and deadline - time.monotonic() > 60:
+            # the model ended its turn without playing: let the MCP's explorer use the time meanwhile
+            reply = daemon_call(sock, "arc_explore", {"budget": args.autopilot})
+            sys.stderr.write(f"[autopilot] {game} round {rounds}: {reply.splitlines()[0][:160] if reply else 'no reply'}\n")
+        if idle >= args.max_idle:
+            break  # the agent keeps stopping without acting
+    merge_skills(ws, Path(args.skills_dir).resolve(), game_key(game), t_attempt)
     daemon.terminate()
     try:
         daemon.wait(10)
@@ -240,6 +318,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--max-actions", type=int, default=100000)
     p.add_argument("--max-steps", type=int, default=150)
     p.add_argument("--max-rounds", type=int, default=100)
+    p.add_argument("--max-idle", type=int, default=6, help="give a game up after this many rounds in a row without an action")
+    p.add_argument("--autopilot", type=int, default=40, help="explorer actions played on the model's behalf after an idle round (0 = off)")
     p.add_argument("--skills-dir", default=None, help="shared skills directory (default <out-dir>/skills)")
     p.add_argument("--node", default=shutil.which("node") or "node")
     p.add_argument("--mcode", default=str(ROOT.parent / "minimax-code" / "dist" / "cli.js"))

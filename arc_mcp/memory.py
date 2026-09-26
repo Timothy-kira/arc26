@@ -25,6 +25,10 @@ from .model import RuleModel, Transition, cname, kind_name
 from .session import Obs, Session
 
 
+NOTEBOOK_SECTIONS = ("rules", "goal", "levels", "plan")
+NOTEBOOK_LIMIT = 1500  # characters per section: the notebook is re-sent verbatim, so it stays short
+
+
 @dataclass
 class TodoItem:
     id: int
@@ -46,6 +50,7 @@ class GameMemory:
     by_source_total: Counter = field(default_factory=Counter)
     todo: list[TodoItem] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)             # agent hypotheses and verdicts
+    notebook: dict = field(default_factory=lambda: {k: "" for k in NOTEBOOK_SECTIONS})  # the agent's own notes
     events: list[str] = field(default_factory=list)
     blocked_colours: set = field(default_factory=set)          # walls found by the planner (this level)
     clicked: set = field(default_factory=set)                  # object positions clicked by the planner (this level)
@@ -244,6 +249,29 @@ class GameMemory:
         open_.sort(key=lambda t: (t.source != "agent", t.cost))
         return "\n".join(f"[{t.id}] ({t.source}, ~{t.cost} actions) {t.text}" for t in open_[:limit]) or "(empty)"
 
+    # ------------------------------------------------------------------ notebook
+
+    def note(self, section: str, text: str, mode: str = "replace") -> str:
+        """Edit the agent's notebook. It lives in the MCP server (never in the conversation), so
+        context compaction cannot touch it; it is returned verbatim by arc_model and prepended to
+        every continuation prompt."""
+        if section not in NOTEBOOK_SECTIONS:
+            return f"unknown section {section!r}; use one of {', '.join(NOTEBOOK_SECTIONS)}"
+        text = text.strip()
+        cur = self.notebook.get(section, "")
+        new = (cur + "\n" + text).strip() if mode == "append" and cur else text
+        cut = ""
+        if len(new) > NOTEBOOK_LIMIT:
+            new = new[-NOTEBOOK_LIMIT:]
+            cut = f" (kept the last {NOTEBOOK_LIMIT} characters: condense it)"
+        self.notebook[section] = new
+        self.save()
+        return f"notebook.{section} saved ({len(new)} chars){cut}"
+
+    def notebook_text(self) -> str:
+        parts = [f"[{k}]\n{v}" for k, v in self.notebook.items() if v]
+        return "\n".join(parts) if parts else "(empty: write confirmed rules, the goal and a per-level log with arc_note)"
+
     # ------------------------------------------------------------------ ledger
 
     def status(self) -> str:
@@ -262,7 +290,7 @@ class GameMemory:
             "by_source_level": dict(self.by_source), "by_source_total": dict(self.by_source_total),
             "deaths": s.deaths, "resets": s.resets, "events": self.events[-20:],
             "rules": self.model.describe(self.obs.available_actions),
-            "todo": [t.__dict__ for t in self.todo], "notes": self.notes[-30:],
+            "todo": [t.__dict__ for t in self.todo], "notes": self.notes[-30:], "notebook": self.notebook,
             "graph_states": len(self.explorer.graph.nodes) if self.explorer.graph else 0,
             "elapsed_s": round(time.time() - self.t0, 1),
         }

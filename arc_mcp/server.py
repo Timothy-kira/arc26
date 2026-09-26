@@ -202,7 +202,8 @@ class Game:
 
     def model(self, args: dict[str, Any]) -> str:
         m = self.mem
-        parts = [self.head(), "RULES (learned from play; counts are evidence):", m.model.describe(m.obs.available_actions)]
+        parts = [self.head(), "YOUR NOTEBOOK (kept verbatim by the server; edit with arc_note):", m.notebook_text(),
+                 "RULES (learned from play; counts are evidence):", m.model.describe(m.obs.available_actions)]
         if m.notes:
             parts += ["YOUR HYPOTHESES:"] + m.notes[-6:]
         parts += ["TODO (top 5; arc_todo to manage):", m.todo_text(5)]
@@ -232,6 +233,10 @@ class Game:
             goal = json.loads(goal)
         n = max(1, min(200, int(args.get("max_actions", 60))))
         return self.head() + "\n" + plan(self.mem, goal, n)
+
+    def note(self, args: dict[str, Any]) -> str:
+        msg = self.mem.note(str(args.get("section", "")), str(args.get("text", "")), str(args.get("mode", "replace")))
+        return self.head() + "\n" + msg
 
     def todo(self, args: dict[str, Any]) -> str:
         op = str(args.get("op", "list"))
@@ -273,6 +278,12 @@ TOOL_DEFS = [
                  "{\"click_all\": {\"color\": c}}; add \"avoid\": [colours] to never step on them. Uses the fewest "
                  "actions it can find.",
      {"goal": {"type": "object"}, "max_actions": {"type": "integer", "minimum": 1, "maximum": 200}}, ["goal"]),
+    ("arc_note", "Your notebook for this game, stored by the server and shown verbatim by arc_model and at every "
+                 "restart, so it survives context compaction. Sections: rules (confirmed mechanics), goal (what wins a "
+                 "level), levels (one line per level: what worked, actions used), plan (next steps). mode=replace "
+                 "(default) or append. Keep each section short (max 1500 characters).",
+     {"section": {"type": "string", "enum": ["rules", "goal", "levels", "plan"]}, "text": {"type": "string"},
+      "mode": {"type": "string", "enum": ["replace", "append"]}}, ["section", "text"]),
     ("arc_todo", "The game's todo list (auto items from the explorer plus yours): op=list | add (text, cost) | done "
                  "(id) | drop (id). Survives restarts.",
      {"op": {"type": "string", "enum": ["list", "add", "done", "drop"]}, "text": {"type": "string"},
@@ -284,7 +295,8 @@ TOOLS = [{"name": n, "description": d, "inputSchema": {"type": "object", "proper
 
 def call_tool(game: "Game", name: str, args: dict[str, Any]) -> list[dict[str, Any]]:
     fn = {"arc_observe": game.observe, "arc_act": game.act, "arc_explore": game.explore, "arc_model": game.model,
-          "arc_hypothesize": game.hypothesize, "arc_plan": game.plan, "arc_todo": game.todo}.get(name)
+          "arc_hypothesize": game.hypothesize, "arc_plan": game.plan, "arc_todo": game.todo,
+          "arc_note": game.note}.get(name)
     if fn is None:
         raise ValueError(f"unknown tool {name}")
     text = fn(args)
