@@ -74,8 +74,10 @@ time left): spend actions only when a cell has a clear question or a computed pl
 """
 
 GOAL_OBJECTIVE = ("Win every level of the ARC game in this workspace, using as few game actions as possible. Follow "
-                  "AGENTS.md: plan with todowrite, play through the arc_python REPL, keep the notebook with arc_note. "
-                  "The goal is complete only when the tools say the game is won.")
+                  "AGENTS.md. At the start of every level write a short todowrite plan; play only through the arc_python "
+                  "REPL and give every cell an `expect`; when a result contradicts your expectation, fix it in a cell with "
+                  "`revises`; after every completed level record the rule that won it with arc_note. The goal is complete "
+                  "only when the tools say the game is won.")
 FIRST_PROMPT = "Play the ARC game. Start by looking at the state in the REPL with arc_python (looking costs no actions). Keep playing until the game is won or the tools tell you to stop."
 
 
@@ -141,6 +143,32 @@ def runtime_errors(data_dir: Path, n: int = 4) -> str:
         except OSError:
             pass
     return " | ".join(l[:300] for l in lines[-n:])
+
+
+def sandbox(args: argparse.Namespace) -> tuple[list[str], dict[str, str]]:
+    """Command prefix and env to run the agent CLI as ``--agent-user`` (no access to game files)."""
+    if not args.agent_user:
+        return [], {}
+    import pwd
+
+    pw = pwd.getpwnam(args.agent_user)
+    return ([shutil.which("setpriv") or "setpriv", f"--reuid={pw.pw_uid}", f"--regid={pw.pw_gid}", "--clear-groups", "--"],
+            {"HOME": pw.pw_dir, "USER": args.agent_user})
+
+
+def hand_over(path: Path, args: argparse.Namespace) -> None:
+    """Give the agent user ownership of a tree (its workspace, the shared skills)."""
+    if not args.agent_user:
+        return
+    import pwd
+
+    pw = pwd.getpwnam(args.agent_user)
+    for root, dirs, files in os.walk(path):
+        for n in [root] + [os.path.join(root, d) for d in dirs] + [os.path.join(root, f) for f in files]:
+            try:
+                os.lchown(n, pw.pw_uid, pw.pw_gid)
+            except OSError:
+                pass
 
 
 def game_key(game: str) -> str:
@@ -254,12 +282,18 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
     (ws / ".mcp.json").write_text(json.dumps(
         {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)],
                                 "env": {"ARC_SOCKET": str(sock), "ARC_KERNEL": str(ksock)}, "timeout": 300000}}}, indent=1))
+    for p in (sock, ksock):
+        if p.exists():
+            os.chmod(p, 0o666)  # the agent CLI may run as another user
     data_dir = ws / ".mcode-data"
     write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning, args.api_key)
     # The model server is local: no proxy (its dispatcher has 300 s timeouts), and no fetch timeouts at all.
     penv = {k: v for k, v in os.environ.items() if k.lower() not in ("http_proxy", "https_proxy", "all_proxy")}
     penv.update(MINIMAX_DATA_DIR=str(data_dir), MCODE_DISABLE_TELEMETRY="1", DO_NOT_TRACK="1",
                 NODE_OPTIONS=(penv.get("NODE_OPTIONS", "") + f" --require {PRELOAD}").strip())
+    prefix, uenv = sandbox(args)
+    penv.update(uenv)
+    hand_over(ws, args)
     deadline = time.monotonic() + time_limit
     rounds, idle, log = 0, 0, []
     if args.driver == "acp":
@@ -277,7 +311,8 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         while rounds < args.max_rounds and deadline - time.monotonic() > 60 and not done():
             before = int(read_json(result).get("actions") or 0)
             objective = GOAL_OBJECTIVE if rounds == 0 else next_prompt(ws, idle)
-            r = run_goal(args.node, args.mcode, ws, penv, mcp, objective, deadline, done, ws / f"acp_{rounds}.log")
+            r = run_goal(args.node, args.mcode, ws, penv, mcp, objective, deadline, done, ws / f"acp_{rounds}.log",
+                         prefix=prefix)
             acted = int(read_json(result).get("actions") or 0) - before
             log.append({"round": rounds, **r, "actions": acted})
             sys.stderr.write(f"[goal] {game} session {rounds} actions+={acted} stop={r.get('stop')} "
@@ -301,7 +336,7 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         before = int(state.get("actions") or 0)
         with (ws / f"exec_{rounds}.stderr").open("w") as err:
             try:
-                r = subprocess.run(cmd, cwd=ws, env=penv, stdout=subprocess.PIPE, stderr=err, text=True, timeout=left + 120)
+                r = subprocess.run(prefix + cmd, cwd=ws, env=penv, stdout=subprocess.PIPE, stderr=err, text=True, timeout=left + 120)
                 out = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
                 log.append({"round": rounds, "exit": r.returncode, "result": out[-2000:]})
                 tail = (ws / f"exec_{rounds}.stderr").read_text()[-400:].replace("\n", " | ") if r.returncode else ""
@@ -352,6 +387,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--max-rounds", type=int, default=100)
     p.add_argument("--driver", default="acp", choices=["acp", "exec"],
                    help="acp: MiniMax Code goal mode over ACP (auto-continuation); exec: one mcode exec per round")
+    p.add_argument("--agent-user", default="", help="run the agent CLI as this unprivileged user (data/ is made root-only)")
     p.add_argument("--max-idle", type=int, default=6, help="give a game up after this many rounds in a row without an action")
     p.add_argument("--skills-dir", default=None, help="shared skills directory (default <out-dir>/skills)")
     p.add_argument("--node", default=shutil.which("node") or "node")
@@ -364,6 +400,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     args.skills_dir = args.skills_dir or str(out_dir / "skills")
     Path(args.skills_dir).mkdir(parents=True, exist_ok=True)
+    if args.agent_user:  # the agent may not read game files; the root-run game daemon still can
+        for d in {ROOT / "data", Path(args.env_dir).resolve()}:
+            if d.exists():
+                os.chmod(d, 0o700)
+        hand_over(Path(args.skills_dir), args)
     arc, card, all_games = open_scorecard(args)
     wanted = all_games if args.games == "all" else args.games.split(",")
     games = [g for g in all_games if any(g == w or g.startswith(w) for w in wanted)]

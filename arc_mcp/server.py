@@ -190,7 +190,7 @@ TOOLS = [
         "parents": {"type": "array", "items": {"type": "integer"}},
         "expect": {"type": "string", "description": "what you expect to happen (e.g. 'the avatar reaches the door and the level completes')"},
         "revises": {"type": "integer", "description": "id of the node whose surprise this cell corrects"}},
-        "required": ["code", "purpose"]}},
+        "required": ["code", "purpose", "expect"]}},
     {"name": "arc_note", "description": (
         "Your notebook for this game, kept by the server and handed back verbatim after every restart or context "
         "compaction. Sections: rules (confirmed mechanics), goal (what wins a level), levels (one line per level: what "

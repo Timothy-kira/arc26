@@ -95,9 +95,10 @@ class AcpClient:
 
 def run_goal(node: str, mcode: str, ws: Path, env: dict[str, str], mcp_servers: list[dict[str, Any]],
              objective: str, deadline: float, is_done: Callable[[], bool], log_path: Path,
-             poll: float = 5.0) -> dict[str, Any]:
-    """Run one goal-mode session until the game is done, the deadline passes or the goal ends."""
-    c = AcpClient([node, mcode, "acp"], env, str(ws), log_path)
+             poll: float = 5.0, prefix: Optional[list[str]] = None) -> dict[str, Any]:
+    """Run one goal-mode session until the game is done, the deadline passes or the goal ends.
+    ``prefix`` (e.g. setpriv ...) runs MiniMax Code as an unprivileged user."""
+    c = AcpClient([*(prefix or []), node, mcode, "acp"], env, str(ws), log_path)
     out: dict[str, Any] = {"driver": "acp"}
     try:
         c.request("initialize", {"protocolVersion": 1, "clientCapabilities": {
