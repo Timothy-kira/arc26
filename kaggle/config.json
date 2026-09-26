@@ -1,14 +1,13 @@
 {
   "username": "xishengfeng",
-  "kernel_slug": "arc26-raven-qwen38",
+  "kernel_slug": "arc26-mcode-qwen38",
   "competition": "arc-prize-2026-arc-agi-3",
   "model_sources": [
-    "foysalemonshanto/qwen3-8-27b-fp8-repacked-v1/PyTorch/hf-fp8/1",
-    "qwen-lm/qwen-3-embedding/Transformers/0.6b/1"
+    "foysalemonshanto/qwen3-8-27b-fp8-repacked-v1/PyTorch/hf-fp8/1"
   ],
   "dataset_sources": [
     "driessmit1/arc3-vllm-h100-wheelhouse-v3",
-    "xishengfeng/raven-offline-wheels"
+    "xishengfeng/mcode-offline"
   ],
   "machine_shape": "NvidiaRtxPro6000",
   "notebook_accelerator": "nvidiaRtxPro6000",
@@ -18,8 +17,7 @@
   "vllm": {
     "served_model_name": "qwen3.8-27b",
     "max_model_len": 65536,
-    "gpu_memory_utilization": 0.85,
-    "embedding_gpu_util": 0.06,
+    "gpu_memory_utilization": 0.9,
     "max_num_seqs": 64,
     "extra_args": [
       "--enable-prefix-caching",
@@ -34,8 +32,6 @@
   },
   "dev_hours": 2.0,
   "qwen_slug": "qwen3-8-27b-fp8-repacked",
-  "embedding_slug": "qwen-3-embedding",
-  "max_tool_iterations": 60,
-  "temperature": 0.6,
-  "max_actions": 2000
+  "max_actions": 2000,
+  "max_steps": 150
 }
