@@ -1,0 +1,26 @@
+# secrets
+.kaggle/
+kaggle.json
+access_token
+.env
+
+# competition data (downloaded via kaggle CLI, not redistributed)
+data/
+environment_files/
+arc_agi_3_wheels/
+recordings/
+
+# outputs
+runs/
+*.parquet
+*.jsonl
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
