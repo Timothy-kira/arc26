@@ -122,6 +122,13 @@ sh([sys.executable, "-m", "pip", "install", "--no-index", "--find-links", wh, "-
     "--target", VLLM_SITE, "--upgrade", "--ignore-installed", "--only-binary", ":all:", "--no-compile",
     "--disable-pip-version-check", "--no-warn-conflicts", "-q"])
 print(f"vllm installed in {time.time() - t0:.0f}s")
+# vLLM's streaming qwen3_coder tool parser crashes (and drops the stream) when a parameter value parses
+# to a Python set: serialise sets as lists instead.
+for tp in glob.glob(VLLM_SITE + "/vllm/tool_parsers/qwen3coder_tool_parser.py") + glob.glob(VLLM_SITE + "/vllm/**/qwen3coder_tool_parser.py", recursive=True):
+    src = open(tp).read()
+    if "default=list" not in src:
+        open(tp, "w").write(src.replace("json.dumps(converted_value, ensure_ascii=False)", "json.dumps(converted_value, ensure_ascii=False, default=list)"))
+        print("patched", tp)
 v = CFG["vllm"]
 QWEN = find_dir(CFG["qwen_slug"], lambda root, files: "config.json" in files and any(f.endswith(".safetensors") for f in files))
 cmd = [sys.executable, "-m", "vllm.entrypoints.openai.api_server", "--model", QWEN, "--served-model-name", v["served_model_name"],
