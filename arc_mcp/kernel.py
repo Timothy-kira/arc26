@@ -50,6 +50,10 @@ CELL_SECONDS = int(os.getenv("ARC_CELL_SECONDS", "120"))
 OUT_LIMIT = int(os.getenv("ARC_OUT_LIMIT", "6000"))
 
 
+PROTECTED = ("act", "reset", "show", "changes", "objects", "anim", "look", "regions", "node", "rerun", "dag",
+             "journal", "np")
+
+
 class CellBudget(Exception):
     pass
 
@@ -187,6 +191,7 @@ class Kernel:
     def run(self, code: str, purpose: str = "", parents: Optional[list[int]] = None, expect: str = "",
             revises: Optional[int] = None, check: str = "") -> tuple[str, list[str]]:
         self.cell_actions, self.cell_events, self.want_image = 0, [], False
+        builtins_before = {k: NS.get(k) for k in PROTECTED}
         level0, t0 = NS["level"], time.time()
         grid0, state0, deaths0 = NS["grid"].copy(), NS["state"], sum(1 for h in NS["history"] if h["state"] == "GAME_OVER")
         buf = io.StringIO()
@@ -214,6 +219,12 @@ class Kernel:
         finally:
             signal.alarm(0)
         out = buf.getvalue()
+        clobbered = [k for k, v in builtins_before.items() if v is not None and NS.get(k) is not v]
+        for k in clobbered:  # the game API must survive the model's own variable names
+            NS[k] = builtins_before[k]
+        if clobbered:
+            out += (f"\nNOTE: this cell overwrote {', '.join(clobbered)}; the REPL restored the built-in version. "
+                    "Use other names for your variables.")
         if len(out) > OUT_LIMIT:
             out = out[:2000] + f"\n... [{len(out) - OUT_LIMIT} chars cut] ...\n" + out[-(OUT_LIMIT - 2000):]
         nid = len(self.nodes)
