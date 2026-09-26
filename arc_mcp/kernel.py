@@ -39,6 +39,11 @@ from typing import Any, Optional
 
 import numpy as np
 
+try:
+    from arc_mcp import percept
+except ImportError:  # run as a script
+    import percept  # type: ignore
+
 HEX = "0123456789abcdef"
 CELL_ACTIONS = int(os.getenv("ARC_CELL_ACTIONS", "300"))
 CELL_SECONDS = int(os.getenv("ARC_CELL_SECONDS", "120"))
@@ -106,6 +111,17 @@ class Kernel:
                 self.nodes = []
         self.cell_actions = 0
         self.cell_events: list[str] = []
+        self.want_image = False
+        self.journal_path = (os.path.splitext(dag_path)[0] + "_journal.json") if dag_path else None
+        self.journal: list[dict[str, Any]] = []
+        if self.journal_path and os.path.exists(self.journal_path):
+            try:
+                self.journal = json.load(open(self.journal_path))
+            except (OSError, ValueError):
+                self.journal = []
+        NS.update(objects=lambda g=None: percept.objects(NS["grid"] if g is None else g),
+                  anim=lambda: percept.anim(NS["frames"], NS["prev"]), look=self._look, journal=self.journal,
+                  dag=lambda last=20: self.dag(last))
         NS.update(np=np, show=show, changes=changes, act=self.act, reset=lambda: self.act(0), history=[],
                   node=self.node, rerun=self.rerun)
         NS["nodes"] = self.nodes
@@ -142,6 +158,11 @@ class Kernel:
         return {"changed": changed, "state": NS["state"], "level": NS["level"], "level_up": NS["level"] > before,
                 "game_over": NS["state"] == "GAME_OVER", "note": note, "frames": len(NS["frames"])}
 
+    def _look(self) -> str:
+        """Attach the current frame (4x image) to this cell's reply."""
+        self.want_image = True
+        return "image of the current frame attached"
+
     # ------------------------------------------------------------------ DAG
 
     def node(self, i: int) -> dict[str, Any]:
@@ -151,18 +172,19 @@ class Kernel:
         exec(compile(self.nodes[i]["code"], f"<node {i}>", "exec"), NS)
 
     def _save(self) -> None:
-        if not self.dag_path:
-            return
-        tmp = self.dag_path + ".tmp"
-        with open(tmp, "w") as f:
-            json.dump(self.nodes, f, indent=1)
-        os.replace(tmp, self.dag_path)
+        for path, data in ((self.dag_path, self.nodes), (self.journal_path, self.journal)):
+            if not path:
+                continue
+            tmp = path + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(data, f, indent=1)
+            os.replace(tmp, path)
 
     # ------------------------------------------------------------------ cells
 
     def run(self, code: str, purpose: str = "", parents: Optional[list[int]] = None, expect: str = "",
-            revises: Optional[int] = None) -> str:
-        self.cell_actions, self.cell_events = 0, []
+            revises: Optional[int] = None, check: str = "") -> tuple[str, list[str]]:
+        self.cell_actions, self.cell_events, self.want_image = 0, [], False
         level0, t0 = NS["level"], time.time()
         grid0, state0, deaths0 = NS["grid"].copy(), NS["state"], sum(1 for h in NS["history"] if h["state"] == "GAME_OVER")
         buf = io.StringIO()
@@ -202,10 +224,27 @@ class Kernel:
             "state": f"{state0}->{NS['state']}" if NS["state"] != state0 else NS["state"],
             "cells_changed": int((grid0 != NS["grid"]).sum()), "error": err.splitlines()[-1] if err else None,
         }
-        flag = bool(err) or deaths > 0 or (bool(expect) and "level" in expect.lower() and outcome["levels"] <= 0
-                                           and self.cell_actions > 0)
-        self.nodes.append({"id": nid, "parents": parents, "purpose": purpose, "expect": expect, "outcome": outcome,
-                           "flag": flag, "revises": revises, "code": code, "actions": self.cell_actions,
+        # verdict: the cell's own check expression if given, else the obvious failure signals
+        verdict, why = None, ""
+        if check:
+            NS["outcome"] = outcome
+            try:
+                verdict = bool(eval(compile(check, "<check>", "eval"), NS))
+                why = f"check `{check}` is {verdict}"
+            except Exception as exc:
+                verdict, why = False, f"check `{check}` raised {type(exc).__name__}: {exc}"
+        if err or deaths > 0:
+            verdict, why = False, ("error: " + outcome["error"]) if err else f"{deaths} GAME_OVER"
+        elif verdict is None and expect and "level" in expect.lower() and self.cell_actions > 0:
+            verdict = outcome["levels"] > 0
+            why = "expected a level-up: " + ("it came" if verdict else "it did not come")
+        flag = verdict is False
+        if verdict is not None or expect:
+            self.journal.append({"node": nid, "level": level0 + 1, "ok": verdict, "purpose": purpose[:100],
+                                 "expect": expect[:120], "why": why[:160], "actions": self.cell_actions,
+                                 "revises": revises})
+        self.nodes.append({"id": nid, "parents": parents, "purpose": purpose, "expect": expect, "check": check,
+                           "verdict": verdict, "why": why, "outcome": outcome, "flag": flag, "revises": revises, "code": code, "actions": self.cell_actions,
                            "level_before": level0, "level_after": NS["level"], "events": self.cell_events,
                            "error": outcome["error"], "out": out[:400], "seconds": round(time.time() - t0, 1)})
         self._save()
@@ -213,13 +252,38 @@ class Kernel:
               f"{outcome['cells_changed']} cells changed" + (", error" if err else "")
         head = f"[node {nid}] {got}" + (f"; events: {'; '.join(self.cell_events[-4:])}" if self.cell_events else "")
         if expect:
-            head += f"\nexpected: {expect[:200]}" + ("  <- did not happen: revise (revises=%d)" % nid if flag else "")
-        parts = [self.status, head]
+            mark = {True: "RIGHT", False: "WRONG", None: "unchecked"}[verdict]
+            head += f"\nexpected: {expect[:200]} -> {mark}" + (f" ({why})" if why else "") + \
+                    (f"; fix it in a cell with revises={nid}" if flag else "")
+        parts = [self.status, head, self.journal_text()]
+        images: list[str] = []
+        if self.cell_actions > 0 or self.want_image:
+            images.append(percept.png4x(NS["grid"]))
+            per = ["PERCEPTION (4x image of the current frame attached):", percept.objects_text(NS["grid"])]
+            at = percept.anim_text(NS["frames"], NS["prev"]) if self.cell_actions > 0 else ""
+            if at:
+                per.append(at)
+            parts.append("\n".join(per))
         if out.strip():
             parts.append(out.rstrip())
         if err:
             parts.append("ERROR:\n" + err)
-        return "\n".join(parts)
+        return "\n".join(p for p in parts if p), images
+
+    def journal_text(self, wrong: int = 4, right: int = 3) -> str:
+        """This game's live record of what was right and wrong, newest last."""
+        revised = {j["revises"] for j in self.journal if j.get("revises") is not None}
+        bad = [j for j in self.journal if j["ok"] is False][-wrong:]
+        good = [j for j in self.journal if j["ok"] is True][-right:]
+        if not bad and not good:
+            return ""
+        lines = ["JOURNAL (this game; `journal` in the REPL has all of it):"]
+        for j in bad:
+            lines.append(f"  WRONG n{j['node']} L{j['level']}: {j['expect'] or j['purpose']} -> {j['why']}"
+                         + ("" if j["node"] in revised else "  [not revised yet]"))
+        for j in good:
+            lines.append(f"  RIGHT n{j['node']} L{j['level']}: {j['expect'] or j['purpose']}")
+        return "\n".join(lines)
 
     def dag(self, last: int = 12) -> str:
         if not self.nodes:
@@ -275,11 +339,11 @@ def main() -> None:
                 try:
                     req = json.loads(line)
                     if req.get("op") == "dag":
-                        text = k.status + "\n" + k.dag(int(req.get("last", 12)))
+                        reply = {"text": "\n".join(x for x in [k.status, k.dag(int(req.get("last", 12))), k.journal_text(8, 5)] if x)}
                     else:
-                        text = k.run(str(req.get("code", "")), str(req.get("purpose", "")), req.get("parents"),
-                                     str(req.get("expect", "") or ""), req.get("revises"))
-                    reply = {"text": text}
+                        text, images = k.run(str(req.get("code", "")), str(req.get("purpose", "")), req.get("parents"),
+                                             str(req.get("expect", "") or ""), req.get("revises"), str(req.get("check", "") or ""))
+                        reply = {"text": text, "images": images}
                 except Exception as exc:  # the kernel itself must survive
                     reply = {"text": f"kernel error: {type(exc).__name__}: {exc}"}
                 f.write(json.dumps(reply) + "\n")

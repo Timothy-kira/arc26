@@ -176,7 +176,10 @@ PYTHON_DOC = (
     "(one dict per action). Functions: act(a, x=None, y=None) plays one action and returns {changed, level_up, "
     "game_over, note, ...} (0 RESET only after GAME_OVER, 1-4 directions (their meaning differs per game), "
     "5 interact, 6 click at (x, y), 7 undo); show(g=None, y0, y1, x0, x1) -> hex text of a region; changes(a, b) -> "
-    "[(y, x, old, new)]; np is numpy. Write your own helpers (object finding, BFS, simulators) and reuse them. "
+    "[(y, x, old, new)]; objects(g=None) -> connected components [{color, size, bbox, center}]; anim() -> diff "
+    "between the animation frames of the last action; look() attaches an image; journal / dag() = this game's live "
+    "record of RIGHT and WRONG expectations and the DAG; np is numpy. After every cell that plays actions the "
+    "reply carries the perception block: a 4x image of the frame, the objects and the animation diff. Write your own helpers (simulators, BFS, solvers) and reuse them. "
     "Every action counts against the score: probe with few actions, then act with a plan. The last expression "
     "is printed. Each call becomes a node of your exploration DAG: purpose = the question it answers; parents = "
     "the node ids it builds on (default the previous node); expect = what you expect to happen, recorded next to "
@@ -189,7 +192,8 @@ TOOLS = [
         "code": {"type": "string"}, "purpose": {"type": "string", "description": "one line: the question this cell answers"},
         "parents": {"type": "array", "items": {"type": "integer"}},
         "expect": {"type": "string", "description": "what you expect to happen (e.g. 'the avatar reaches the door and the level completes')"},
-        "revises": {"type": "integer", "description": "id of the node whose surprise this cell corrects"}},
+        "revises": {"type": "integer", "description": "id of the node whose surprise this cell corrects"},
+        "check": {"type": "string", "description": "optional Python expression evaluated after the cell that decides RIGHT/WRONG, e.g. \"outcome['levels'] > 0\" or \"grid[30, 20] == 12\" (outcome has actions, levels, deaths, state, cells_changed, error)"}},
         "required": ["code", "purpose", "expect"]}},
     {"name": "arc_note", "description": (
         "Your notebook for this game, kept by the server and handed back verbatim after every restart or context "
@@ -207,12 +211,19 @@ TOOLS = [
 ]
 
 
-def call_tool(name: str, args: dict[str, Any]) -> str:
+def call_tool(name: str, args: dict[str, Any]) -> list[dict[str, Any]]:
+    """MCP content for a tool call: text, plus the 4x frame image after acting cells."""
     game, kernel = os.environ["ARC_SOCKET"], os.environ["ARC_KERNEL"]
     if name == "arc_python":
-        return request(kernel, {"code": args.get("code", ""), "purpose": args.get("purpose", ""),
-                                "parents": args.get("parents"), "expect": args.get("expect", ""),
-                                "revises": args.get("revises")})["text"]
+        r = request(kernel, {"code": args.get("code", ""), "purpose": args.get("purpose", ""),
+                             "parents": args.get("parents"), "expect": args.get("expect", ""),
+                             "revises": args.get("revises"), "check": args.get("check", "")})
+        return [{"type": "text", "text": r["text"]}] + [{"type": "image", "data": b, "mimeType": "image/png"}
+                                                        for b in r.get("images") or []]
+    return [{"type": "text", "text": _call_text(name, args, game, kernel)}]
+
+
+def _call_text(name: str, args: dict[str, Any], game: str, kernel: str) -> str:
     if name == "arc_dag":
         return request(kernel, {"op": "dag", "last": int(args.get("last", 12))})["text"]
     if name == "arc_note":
@@ -256,8 +267,8 @@ def main() -> None:
             elif method == "tools/list":
                 reply(msg_id, {"tools": TOOLS})
             elif method == "tools/call":
-                text = call_tool(params.get("name"), params.get("arguments") or {})
-                reply(msg_id, {"content": [{"type": "text", "text": text}], "isError": False})
+                content = call_tool(params.get("name"), params.get("arguments") or {})
+                reply(msg_id, {"content": content, "isError": False})
             elif method in ("resources/list", "prompts/list"):
                 reply(msg_id, {method.split("/")[0]: []})
             else:

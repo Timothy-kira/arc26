@@ -28,7 +28,8 @@ def load(p: Path):
         return None
 
 
-REPL_FUNCS = ("act(", "show(", "changes(", "node(", "rerun(", "reset(", "history", "frames", "np.")
+REPL_FUNCS = ("act(", "show(", "changes(", "node(", "rerun(", "reset(", "history", "frames", "np.", "objects(",
+              "anim(", "look(", "journal", "dag(")
 
 
 def usage(ws: Path) -> dict:
@@ -53,6 +54,8 @@ def usage(ws: Path) -> dict:
             tokens += int((m.get("usage") or {}).get("totalTokens") or 0)
     dag = load(ws / "dag.json") or []
     repl: Counter = Counter()
+    for j in load(ws / "dag_journal.json") or []:
+        repl["journal_right" if j.get("ok") is True else "journal_wrong" if j.get("ok") is False else "journal_unchecked"] += 1
     for n in dag:
         code = n.get("code", "")
         for fn in REPL_FUNCS:
@@ -60,6 +63,7 @@ def usage(ws: Path) -> dict:
                 repl[fn.rstrip("(.")] += 1
         repl["def"] += code.count("def ")
         repl["expect"] += bool(n.get("expect"))
+        repl["check"] += bool(n.get("check"))
         repl["revises"] += n.get("revises") is not None
         repl["explicit_parents"] += bool(n.get("parents")) and n.get("parents") != [n["id"] - 1]
     return {"tools": tools, "llm_turns": turns, "text_only_turns": text_only, "tokens": tokens, "repl": repl,

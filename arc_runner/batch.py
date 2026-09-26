@@ -47,12 +47,16 @@ plays one action. Score per level = (human_actions / your_actions)^2: every acti
 code that does not act are free.
 
 Method (a scientist with a programmable lab):
-1. Look first, for free: print `show()` or regions of it, count colours, find objects with numpy.
+1. Look first, for free: after every cell that plays actions you get a PERCEPTION block (a 4x image of
+   the frame, the objects grouped by colour and size, the diff between animation frames); `look()`
+   attaches an image without acting, `objects()` / `anim()` / `show()` give the raw data.
 2. Ask one question per cell and spend as few actions as that question needs (e.g. "what does
    ACTION1 do?" = one act() and a look at changes()). Give every cell a `purpose`, `parents` = the
-   cells it builds on, and `expect` = what you think will happen; the DAG records it next to what
-   actually happened and flags surprises (`!` in `arc_dag`). When a result contradicts you, fix your
-   understanding in the next cell with `revises` = that node's id.
+   cells it builds on, `expect` = what you think will happen and, when you can, `check` = a Python
+   expression that decides it (e.g. "outcome['levels'] > 0", "grid[y, x] == 12"). Every cell is judged
+   RIGHT or WRONG in real time and kept in this game's JOURNAL (shown in every reply; `journal` and
+   `dag()` in the REPL). Learn from it: never repeat a WRONG idea unchanged; fix it in a cell with
+   `revises` = that node's id, and build on what was RIGHT.
 3. Turn what you learn into code: helpers that find the avatar, list objects, simulate a move, run BFS
    to a target. Keep them in the REPL and reuse them; later levels usually share the rules and only
    change the layout, so a working solver from level 1 often solves level 2 with few actions.
@@ -91,6 +95,7 @@ def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, 
     models:
       {model}:
         tool_call: true
+        modalities: {{ input: [text, image], output: [text] }}
         reasoning: {str(reasoning).lower()}
         limit: {{ context: {context}, output: {output} }}
         compat: {{ thinkingFormat: qwen-chat-template, supportsDeveloperRole: false, maxTokensField: max_tokens }}
@@ -224,6 +229,15 @@ def next_prompt(ws: Path, idle: int) -> str:
         nodes = []
     dag = "\n".join(f"[{n['id']}]{'!' if n.get('flag') else ''} <- {n['parents']} {n['actions']}a {n['purpose'][:100]}"
                     + (f" | expected: {n['expect'][:80]}" if n.get("expect") else "") for n in nodes) or "(no cells yet)"
+    try:
+        jr = json.loads((ws / "dag_journal.json").read_text())
+    except (OSError, ValueError):
+        jr = []
+    wrong = [j for j in jr if j.get("ok") is False][-5:]
+    right = [j for j in jr if j.get("ok") is True][-4:]
+    journal = "\n".join([f"WRONG n{j['node']} L{j['level']}: {j['expect'] or j['purpose']} -> {j['why']}" for j in wrong]
+                        + [f"RIGHT n{j['node']} L{j['level']}: {j['expect'] or j['purpose']}" for j in right]) or "(empty)"
+    dag += "\nJournal (what was right and wrong so far):\n" + journal
     nudge = "Your last turn ended without playing. Do not narrate: call arc_python now.\n" if idle else ""
     return (f"{nudge}Continue playing the same game from where you are. The REPL still holds your variables and "
             f"helper functions.\nStatus: {led.get('status', '?')}\nYour notebook (verbatim):\n{notes}\n"
