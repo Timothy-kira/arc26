@@ -176,7 +176,10 @@ try:
     key = UserSecretsClient().get_secret("DOTS_API_KEY")
 except Exception as exc:
     print("no Kaggle secret DOTS_API_KEY:", type(exc).__name__)
-assert key, "add the Kaggle secret DOTS_API_KEY to this notebook (Add-ons > Secrets)"
+if not key:  # fallback: the private dataset xishengfeng/arc26-secrets
+    kf = next((os.path.join(r, "dots_api_key") for r, _, fs in os.walk("/kaggle/input") if "dots_api_key" in fs), None)
+    key = open(kf).read().strip() if kf else None
+assert key, "no API key: add the Kaggle secret DOTS_API_KEY or mount the private dataset arc26-secrets"
 os.makedirs("/tmp/secrets", exist_ok=True)
 open("/tmp/secrets/key", "w").write(key); os.chmod("/tmp/secrets/key", 0o600)
 proxy = subprocess.Popen([sys.executable, CODE + "/arc_runner/llm_proxy.py", "--upstream", A["base_url"], "--api-key-file",
@@ -292,7 +295,8 @@ def build(variant: str, out: Path) -> Path:
     meta = {
         "id": f"{cfg['username']}/{slug}", "title": slug, "code_file": "notebook.ipynb", "language": "python",
         "kernel_type": "notebook", "is_private": True, "enable_gpu": variant != "api", "enable_tpu": False,
-        "enable_internet": variant == "api", "dataset_sources": [] if variant == "api" else cfg["dataset_sources"],
+        "enable_internet": variant == "api",
+        "dataset_sources": cfg["api"].get("dataset_sources", []) if variant == "api" else cfg["dataset_sources"],
         "competition_sources": [cfg["competition"]], "kernel_sources": cfg.get("kernel_sources", []),
         "model_sources": [] if variant == "api" else cfg["model_sources"],
     }

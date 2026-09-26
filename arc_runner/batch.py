@@ -286,6 +286,8 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
     ksock = Path("/tmp") / f"arc26-{os.getpid()}-{game[:12]}-{k}.k.sock"
     ksock.unlink(missing_ok=True)
     blocked = [str(Path(args.env_dir).resolve()), str(ROOT / "data")]
+    if Path("/kaggle/input").exists():  # competition files (game sources) and secrets on Kaggle
+        blocked.append("/kaggle/input")
     kenv = {**os.environ, "ARC_DAG": str(ws / "dag.json"), "ARC_BLOCK_PATHS": os.pathsep.join(blocked),
             "PYTHONPATH": str(ROOT)}
     kernel = subprocess.Popen([args.server_python, "-m", "arc_mcp.kernel", str(ksock), str(sock)], env=kenv, cwd=str(ws),
