@@ -159,6 +159,9 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
                 r = subprocess.run(cmd, cwd=ws, env=penv, stdout=subprocess.PIPE, stderr=err, text=True, timeout=left + 120)
                 out = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
                 log.append({"round": rounds, "exit": r.returncode, "result": out[-2000:]})
+                tail = (ws / f"exec_{rounds}.stderr").read_text()[-400:].replace("\n", " | ") if r.returncode else ""
+                acted = int(read_json(result).get("actions") or 0) - before
+                sys.stderr.write(f"[exec] {game} round {rounds} exit={r.returncode} actions+={acted} {out[-500:]} {tail}\n")
             except subprocess.TimeoutExpired:
                 log.append({"round": rounds, "exit": "timeout"})
         rounds += 1

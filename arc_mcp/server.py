@@ -156,10 +156,11 @@ class Game:
     # ----------------------------------------------------------------- tools
 
     def observe(self) -> list[dict[str, Any]]:
-        return [
-            {"type": "text", "text": f"{self.status()}\n{grid_hex(self.grid)}"},
-            {"type": "image", "data": grid_png_b64(self.grid), "mimeType": "image/png"},
-        ]
+        out: list[dict[str, Any]] = [{"type": "text", "text": f"{self.status()}\n{grid_hex(self.grid)}"}]
+        # Off by default: many OpenAI-compatible servers reject images inside tool-result messages.
+        if os.getenv("ARC_IMAGE") == "1":
+            out.append({"type": "image", "data": grid_png_b64(self.grid), "mimeType": "image/png"})
+        return out
 
     def act(self, actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
         lines = []
@@ -189,8 +190,8 @@ TOOLS = [
     {
         "name": "arc_observe",
         "description": (
-            "Show the current game frame: status line, the 64x64 grid as hex digits (one row per line, row number "
-            "first, colour 0-f per cell; x = column index, y = row number) and a rendered image. Costs no game actions."
+            "Show the current game frame: status line and the 64x64 grid as hex digits (one row per line, row number "
+            "first, colour 0-f per cell; x = column index, y = row number). Costs no game actions."
         ),
         "inputSchema": {"type": "object", "properties": {}},
     },
