@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import time
 from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
@@ -44,6 +46,11 @@ class Evolver:
         self.eval = evaluator
         self.llm = llm
         self.forbidden = sorted(set(all_game_ids or []) | set(spec.train_games) | set(spec.test_games))
+        hours = float(os.getenv("ARC26_EVOLVE_HOURS", "0") or 0)
+        self.deadline = time.monotonic() + hours * 3600 if hours > 0 else None
+
+    def time_left(self) -> bool:
+        return self.deadline is None or time.monotonic() < self.deadline
 
     def _log(self, **event) -> None:
         self.state.meta["history"].append(event)
@@ -109,6 +116,8 @@ class Evolver:
             brief = why_brief(fmap, why)
             distinct: list[str] = []
             for _ in range(spec.candidates_per_why):
+                if not self.time_left():
+                    break
                 node = await self._design(parent, why, brief, distinct)
                 if node is not None:
                     cands.append(node)
@@ -116,6 +125,8 @@ class Evolver:
         anchor = select_anchor(vanilla, spec.train_games, spec.anchor_size)
         survivors: list[tuple[float, TreeNode]] = []
         for node in cands:
+            if not self.time_left():
+                break
             s = self.eval.eval(node, anchor, 1, "screen")
             node.screen = {g: v[0] for g, v in s.items()}
             culled, why_txt = screen_cull(node.screen, parent.scores, anchor, spec.screen_sigma)
@@ -127,6 +138,8 @@ class Evolver:
         survivors.sort(key=lambda x: -x[0])
         best: Optional[TreeNode] = None
         for _, node in survivors[: spec.confirm_top]:
+            if not self.time_left():
+                break
             node.scores = self.eval.eval(node, spec.train_games, spec.k_confirm, "train")
             res = paired(node.scores, parent.scores, spec.train_games)
             passed = res.cand_mean > res.ctrl_mean
@@ -158,7 +171,11 @@ class Evolver:
 
     async def run(self) -> TreeNode:
         self.cold_start()
-        while self.state.meta["round"] < self.spec.max_rounds and self.state.meta["no_improve"] < self.spec.patience:
+        while (
+            self.state.meta["round"] < self.spec.max_rounds
+            and self.state.meta["no_improve"] < self.spec.patience
+            and self.time_left()
+        ):
             await self.round()
         parent = self.state.parent
         assert parent is not None

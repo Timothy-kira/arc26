@@ -165,11 +165,23 @@ class ArcEnv:
         return GameSession(game_id=game_id, wrapper=wrapper, tags=tags, baseline_actions=baseline)
 
     def scorecard(self) -> Any:
-        return self.arc.get_scorecard(self.card_id) if self.card_id else None
+        """Live scorecard; the competition gateway hides scores (403), so this may be None."""
+        if not self.card_id or self.mode != "offline":
+            return None
+        try:
+            return self.arc.get_scorecard(self.card_id)
+        except Exception as exc:
+            logger.warning("scorecard unavailable: %s", exc)
+            return None
 
     def close(self) -> Any:
+        """Close the scorecard; on the gateway this finalizes the submission, so never skip it."""
         if self.card_id is None:
             return None
-        card = self.arc.close_scorecard(self.card_id)
-        self.card_id = None
-        return card
+        card_id, self.card_id = self.card_id, None
+        for attempt in range(3):
+            try:
+                return self.arc.close_scorecard(card_id)
+            except Exception as exc:
+                logger.warning("close_scorecard attempt %d failed: %s", attempt + 1, exc)
+        return None

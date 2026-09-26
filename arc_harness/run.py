@@ -83,10 +83,12 @@ async def run(args: argparse.Namespace) -> dict:
             )
 
     t0 = time.time()
-    await asyncio.gather(*(one(g) for g in games))
-    card = env.scorecard()
-    summary = summarize_scorecard(card)
-    env.close()
+    try:
+        await asyncio.gather(*(one(g) for g in games))
+    finally:
+        card = env.scorecard()
+        closed = env.close()
+    summary = summarize_scorecard(card if card is not None else closed)
     summary["reports"] = reports
     summary["wall_seconds"] = time.time() - t0
     summary["llm"] = llm.stats.as_dict() if llm is not None else None
