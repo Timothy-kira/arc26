@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def code_blob() -> str:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for name in ("arc_mcp", "arc_runner", "plugin", "skills"):
+        for name in ("arc_mcp", "arc_runner", "arc_eval", "plugin", "skills"):
             p = ROOT / name
             if p.exists():
                 tar.add(p, arcname=name, filter=lambda ti: None if "__pycache__" in ti.name else ti)
@@ -64,11 +64,12 @@ def find_dir(part, must):
             return root
     return None
 
-r = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"], capture_output=True, text=True)
-print("nvidia-smi:", r.stdout.strip(), r.stderr.strip())
-names = [l.lower() for l in r.stdout.splitlines() if l.strip()]
-# Hard requirement: only ever run on the competition's RTX PRO 6000.
-assert names and all(CFG["expected_gpu"] in n for n in names), f"expected {CFG['expected_gpu']!r}, got {r.stdout.strip()}"
+if NEED_GPU:
+    r = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"], capture_output=True, text=True)
+    print("nvidia-smi:", r.stdout.strip(), r.stderr.strip())
+    names = [l.lower() for l in r.stdout.splitlines() if l.strip()]
+    # Hard requirement: only ever run on the competition's RTX PRO 6000.
+    assert names and all(CFG["expected_gpu"] in n for n in names), f"expected {CFG['expected_gpu']!r}, got {r.stdout.strip()}"
 '''
 
 TOOLS = r'''
@@ -165,6 +166,50 @@ def echo_vllm_errors(path=WORK + "/vllm.log", limit=300):
 echo_vllm_errors()
 '''
 
+API_RUN = r'''
+# Long local-style runs on Kaggle (CPU + internet): the hosted model through the local proxy, the game
+# harness exactly as in the repo (goal mode over ACP, arc26 plugin, sandboxed agent user).
+A = CFG["api"]
+key = None
+try:
+    from kaggle_secrets import UserSecretsClient
+    key = UserSecretsClient().get_secret("DOTS_API_KEY")
+except Exception as exc:
+    print("no Kaggle secret DOTS_API_KEY:", type(exc).__name__)
+assert key, "add the Kaggle secret DOTS_API_KEY to this notebook (Add-ons > Secrets)"
+os.makedirs("/tmp/secrets", exist_ok=True)
+open("/tmp/secrets/key", "w").write(key); os.chmod("/tmp/secrets/key", 0o600)
+proxy = subprocess.Popen([sys.executable, CODE + "/arc_runner/llm_proxy.py", "--upstream", A["base_url"], "--api-key-file",
+                          "/tmp/secrets/key", "--port", "8012", "--log", WORK + "/llm_proxy.jsonl"])
+time.sleep(3)
+sh("id arcagent || useradd -m arcagent", shell=True)
+os.chmod(WORK, 0o755)
+if A.get("community"):
+    sh(["git", "clone", "--depth", "1", "https://github.com/theredbluepill/arc-interactive", "/tmp/community"])
+env_dir = "/tmp/community/environment_files" if A.get("community") else COMP + "/environment_files"
+# the agent user may not read game files; the game daemon (root) still can
+shutil.copytree(env_dir, "/tmp/games", dirs_exist_ok=True); os.chmod("/tmp/games", 0o700)
+cmd = [sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8012/v1", "--model", A["model"],
+       "--context", "131072", "--output-limit", "8192", "--agent-user", "arcagent", "--node", NODE, "--mcode", MCODE,
+       "--server-python", sys.executable, "--out-dir", WORK + "/api_run", "--games", A["games"], "--conc", str(A["conc"]),
+       "--hours", str(A["hours"]), "--max-game-seconds", str(A["game_seconds"]), "--env-dir", "/tmp/games"]
+print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localhost"})
+os.makedirs(CODE + "/data", exist_ok=True)  # arc_eval reads the human baselines from data/environment_files
+if not os.path.exists(CODE + "/data/environment_files"):
+    os.symlink(COMP + "/environment_files", CODE + "/data/environment_files")
+subprocess.run([sys.executable, "-m", "arc_eval.summarize", WORK + "/api_run", "--set", "community" if A.get("community") else "official"],
+               cwd=CODE, env={**os.environ, "PYTHONPATH": CODE})
+proxy.terminate()
+for d in glob.glob(WORK + "/api_run/ws/*/.mcode-data"):
+    logs = d + "/v2/sessions"
+    if os.path.isdir(logs):  # keep the transcripts (feature-use stats), drop the rest
+        shutil.copytree(logs, os.path.dirname(d) + "/mcode-sessions", dirs_exist_ok=True)
+    shutil.rmtree(d, ignore_errors=True)
+import pandas as pd
+pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
+'''
+
+
 def batch_cmd(extra: str) -> str:
     return (
         '[sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8000/v1", '
@@ -218,19 +263,23 @@ def build(variant: str, out: Path) -> Path:
             "Model: Qwen3.8-27B FP8 via vLLM on the RTX PRO 6000. Code: github.com/timothy-kira/arc26.",
             "markdown",
         ),
-        cell("CODE_TGZ = " + repr(code_blob()) + "\nCFG_JSON = " + repr(json.dumps(cfg))),
+        cell("CODE_TGZ = " + repr(code_blob()) + "\nCFG_JSON = " + repr(json.dumps(cfg))
+             + f"\nNEED_GPU = {variant != 'api'}"),
         cell(SETUP),
     ]
     if variant == "submit":
         cells.append(cell("if RERUN:\n" + "\n".join("    " + l for l in (TOOLS + VLLM).strip().splitlines())))
         cells.append(cell(submit))
+    elif variant == "api":
+        cells += [cell(TOOLS), cell(API_RUN)]
     else:
         cells += [cell(TOOLS), cell(VLLM), cell(dev)]
     nb = {
         "metadata": {
             "kernelspec": {"language": "python", "display_name": "Python 3", "name": "python3"},
             "language_info": {"name": "python"},
-            "kaggle": {"accelerator": cfg["notebook_accelerator"], "isInternetEnabled": False, "isGpuEnabled": True,
+            "kaggle": {"accelerator": "none" if variant == "api" else cfg["notebook_accelerator"],
+                       "isInternetEnabled": variant == "api", "isGpuEnabled": variant != "api",
                        "language": "python", "sourceType": "notebook"},
         },
         "nbformat": 4,
@@ -242,17 +291,20 @@ def build(variant: str, out: Path) -> Path:
     slug = cfg["kernel_slug"] + ("" if variant == "submit" else f"-{variant}")
     meta = {
         "id": f"{cfg['username']}/{slug}", "title": slug, "code_file": "notebook.ipynb", "language": "python",
-        "kernel_type": "notebook", "is_private": True, "enable_gpu": True, "enable_tpu": False, "enable_internet": False,
-        "machine_shape": cfg["machine_shape"], "dataset_sources": cfg["dataset_sources"],
-        "competition_sources": [cfg["competition"]], "kernel_sources": cfg.get("kernel_sources", []), "model_sources": cfg["model_sources"],
+        "kernel_type": "notebook", "is_private": True, "enable_gpu": variant != "api", "enable_tpu": False,
+        "enable_internet": variant == "api", "dataset_sources": [] if variant == "api" else cfg["dataset_sources"],
+        "competition_sources": [cfg["competition"]], "kernel_sources": cfg.get("kernel_sources", []),
+        "model_sources": [] if variant == "api" else cfg["model_sources"],
     }
+    if variant != "api":
+        meta["machine_shape"] = cfg["machine_shape"]
     (out / "kernel-metadata.json").write_text(json.dumps(meta, indent=2))
     return out
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--variant", default="dev", choices=["submit", "dev"])
+    ap.add_argument("--variant", default="dev", choices=["submit", "dev", "api"])
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     out = build(a.variant, Path(a.out or ROOT / "build" / a.variant))

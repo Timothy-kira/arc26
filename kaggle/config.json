@@ -40,5 +40,14 @@
   "kernel_sources": [
     "xishengfeng/arc26-mcode-build"
   ],
-  "output_limit": 8192
+  "output_limit": 8192,
+  "api": {
+    "base_url": "https://note3-prev-api.askdiandian.com/v1",
+    "model": "dots3-note-prev",
+    "games": "ls20,vc33,tu93",
+    "conc": 3,
+    "hours": 1.0,
+    "game_seconds": 1200,
+    "community": false
+  }
 }
