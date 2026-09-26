@@ -43,11 +43,14 @@ You are playing an unknown turn-based puzzle game on a 64x64 grid of 16 colours 
 `arc` MCP tools. Nobody tells you the rules or the goal: discover them by acting and watching what
 changes, then win every level.
 
-- `arc_observe`: the current frame as hex rows (row number first; x = column, y = row) plus an image. Free.
+- `arc_observe`: the current frame as hex rows (row number first; x = column, y = row; "NN-MM" = identical rows). Free, but
+  `arc_act` already shows the new cells of small changes, so observe only when you need the whole frame.
 - `arc_act`: send up to 20 actions: 0=RESET (restart the level; needed after GAME_OVER), 1=up, 2=down,
   3=left, 4=right, 5=interact, 6=click at (x, y), 7=undo. Only the listed available actions do anything.
 
 Scoring: each level scores (human_actions / your_actions)^2, so every wasted action hurts.
+There is no time limit you need to track and no other action budget than `actions_used/N` in the
+status line: the runner stops you when time is up. Never stop on your own while the game is unfinished.
 `levels_completed` rising means you won a level. GAME_OVER means the attempt failed: RESET.
 
 Work like a scientist: hypothesise the goal and the mechanics, run the cheapest action that tests a

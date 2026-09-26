@@ -43,7 +43,30 @@ MAX_BATCH = 20
 
 
 def grid_hex(grid: np.ndarray) -> str:
-    return "\n".join(f"{r:02d} " + "".join(HEX[int(v)] for v in row) for r, row in enumerate(grid))
+    """One line per row ("NN hex"); runs of identical rows collapse to "NN-MM hex"."""
+    rows = ["".join(HEX[int(v)] for v in row) for row in grid]
+    out, r = [], 0
+    while r < len(rows):
+        e = r
+        while e + 1 < len(rows) and rows[e + 1] == rows[r]:
+            e += 1
+        out.append((f"{r:02d}-{e:02d} " if e > r else f"{r:02d} ") + rows[r])
+        r = e + 1
+    return "\n".join(out)
+
+
+def patch_hex(prev: np.ndarray, cur: np.ndarray, max_cells: int = 600) -> str:
+    """The changed bounding box of ``cur`` (rows with a column offset), or "" if none / too big."""
+    changed = prev != cur
+    if not changed.any():
+        return ""
+    rows = np.where(changed.any(axis=1))[0]
+    cols = np.where(changed.any(axis=0))[0]
+    r0, r1, c0, c1 = int(rows[0]), int(rows[-1]), int(cols[0]), int(cols[-1])
+    if (r1 - r0 + 1) * (c1 - c0 + 1) > max_cells:
+        return ""
+    body = "\n".join(f"{r:02d} " + "".join(HEX[int(v)] for v in cur[r, c0:c1 + 1]) for r in range(r0, r1 + 1))
+    return f"new cells in rows {r0}-{r1}, starting at column {c0}:\n{body}"
 
 
 def grid_png_b64(grid: np.ndarray, scale: int = 4) -> str:
@@ -164,6 +187,7 @@ class Game:
 
     def act(self, actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
         lines = []
+        start_grid = self.grid.copy()
         for i, a in enumerate(actions[:MAX_BATCH]):
             if self.finished:
                 break
@@ -180,6 +204,9 @@ class Game:
             if self.levels > prev_levels or self.state == self.GameState.GAME_OVER:
                 break
         text = "\n".join(lines) + f"\n{self.status()}"
+        patch = patch_hex(start_grid, self.grid)
+        if patch:
+            text += "\n" + patch
         if self.finished:
             text += "\nThe game is won." if self.state == self.GameState.WIN else "\nThe action budget is used up."
             text += " Stop playing now."
@@ -191,7 +218,8 @@ TOOLS = [
         "name": "arc_observe",
         "description": (
             "Show the current game frame: status line and the 64x64 grid as hex digits (one row per line, row number "
-            "first, colour 0-f per cell; x = column index, y = row number). Costs no game actions."
+            "first, colour 0-f per cell; x = column index, y = row number; \"NN-MM\" marks identical rows NN..MM). "
+            "Costs no game actions. arc_act already shows small changes, so observe only when you need the full frame."
         ),
         "inputSchema": {"type": "object", "properties": {}},
     },
@@ -201,7 +229,8 @@ TOOLS = [
             "Send actions to the game, in order. Each is {\"action\": 0-7, \"x\": col, \"y\": row}: 0=RESET (restart the "
             "level; needed after GAME_OVER), 1=up, 2=down, 3=left, 4=right, 5=interact, 6=click at (x, y), 7=undo. "
             "Only available actions have an effect. Every action counts against the score (fewer is better). Up to 20 "
-            "per call; stops early when a level is completed or the game is over. Returns what changed after each."
+            "per call; stops early when a level is completed or the game is over. Returns what changed after each and, "
+            "when the changed area is small, its new cells."
         ),
         "inputSchema": {
             "type": "object",
@@ -228,6 +257,10 @@ TOOLS = [
 
 
 def main() -> None:
+    # The engine logs to stdout; keep fd 1 for JSON-RPC only and send everything else to stderr.
+    out = os.fdopen(os.dup(1), "w")
+    os.dup2(2, 1)
+    sys.stdout = sys.stderr
     game: Optional[Game] = None
 
     def reply(msg_id: Any, result: Any = None, error: Optional[dict] = None) -> None:
@@ -236,8 +269,8 @@ def main() -> None:
             msg["error"] = error
         else:
             msg["result"] = result
-        sys.stdout.write(json.dumps(msg) + "\n")
-        sys.stdout.flush()
+        out.write(json.dumps(msg) + "\n")
+        out.flush()
 
     for line in sys.stdin:
         line = line.strip()
