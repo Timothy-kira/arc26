@@ -117,6 +117,17 @@ def read_json(p: Path) -> dict[str, Any]:
         return {}
 
 
+def runtime_errors(data_dir: Path, n: int = 4) -> str:
+    """The last ERROR/WARN lines of MiniMax Code's runtime log (why a model call failed)."""
+    lines: list[str] = []
+    for log in sorted((data_dir / "v2" / "observability" / "logs").glob("runtime-*.log")):
+        try:
+            lines += [l for l in log.read_text(errors="replace").splitlines() if "ERROR" in l or "WARN" in l]
+        except OSError:
+            pass
+    return " | ".join(l[:300] for l in lines[-n:])
+
+
 def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str], time_limit: float) -> dict[str, Any]:
     out_dir = Path(args.out_dir)
     final = out_dir / f"{game}_k{k}.json"
@@ -167,6 +178,8 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
                 out = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
                 log.append({"round": rounds, "exit": r.returncode, "result": out[-2000:]})
                 tail = (ws / f"exec_{rounds}.stderr").read_text()[-400:].replace("\n", " | ") if r.returncode else ""
+                if r.returncode:
+                    tail += " || " + runtime_errors(data_dir)
                 acted = int(read_json(result).get("actions") or 0) - before
                 sys.stderr.write(f"[exec] {game} round {rounds} exit={r.returncode} actions+={acted} {out[-500:]} {tail}\n")
             except subprocess.TimeoutExpired:

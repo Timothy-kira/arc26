@@ -139,6 +139,23 @@ while time.time() - t0 < 1500:
         time.sleep(5)
 print(f"vLLM ready after {time.time() - t0:.0f}s")
 print("".join(l for l in open(WORK + "/vllm.log", errors="replace") if "KV cache" in l or "Maximum concurrency" in l))
+
+def echo_vllm_errors(path=WORK + "/vllm.log", limit=300):
+    """Copy vLLM's ERROR / exception lines into the notebook log, which streams while the run is live."""
+    import threading
+    def run():
+        n = 0
+        with open(path, errors="replace") as f:
+            f.seek(0, 2)
+            while n < limit:
+                line = f.readline()
+                if not line:
+                    time.sleep(2); continue
+                if " ERROR " in line or "Traceback" in line or "Exception" in line:
+                    n += 1; print("[vllm]", line.rstrip()[-400:], flush=True)
+    threading.Thread(target=run, daemon=True).start()
+
+echo_vllm_errors()
 '''
 
 def batch_cmd(extra: str) -> str:
@@ -169,6 +186,8 @@ print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localh
 print(open(WORK + "/dev_run/summary.json").read() if os.path.exists(WORK + "/dev_run/summary.json") else "no summary")
 VLLM_PROC.terminate()
 for d in glob.glob(WORK + "/dev_run/ws/*/.mcode-data"):
+    if os.path.isdir(d + "/v2/observability/logs"):  # MiniMax Code's runtime logs are small; keep them
+        shutil.copytree(d + "/v2/observability/logs", os.path.dirname(d) + "/mcode-logs", dirs_exist_ok=True)
     shutil.rmtree(d, ignore_errors=True)  # keep outputs small: sessions are large, results/notes/skills stay
 import pandas as pd
 pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
