@@ -96,72 +96,58 @@ def change_summary(prev: np.ndarray, cur: np.ndarray) -> str:
 
 
 class Game:
+    """One game, played through ``GameMemory`` (ledger, rules, todo), exposed as MCP tools."""
+
     def __init__(self) -> None:
         from arc_agi import Arcade, OperationMode
-        from arcengine import GameAction, GameState
 
-        self.GameAction, self.GameState = GameAction, GameState
+        from arc_mcp.memory import GameMemory
+
         quiet = logging.getLogger("arc.engine")
         gateway = os.getenv("ARC_GATEWAY")
         if gateway:
-            self.arcade = Arcade(
-                arc_api_key=os.getenv("ARC_API_KEY", "test-key-123"),
-                arc_base_url=gateway.rstrip("/"),
-                operation_mode=OperationMode.ONLINE,
-                logger=quiet,
-            )
+            self.arcade = Arcade(arc_api_key=os.getenv("ARC_API_KEY", "test-key-123"), arc_base_url=gateway.rstrip("/"),
+                                 operation_mode=OperationMode.ONLINE, logger=quiet)
             self.card_id = os.environ["ARC_CARD_ID"]
         else:
-            self.arcade = Arcade(
-                operation_mode=OperationMode.OFFLINE,
-                environments_dir=os.getenv("ARC_ENV_DIR", "environment_files"),
-                logger=quiet,
-            )
+            self.arcade = Arcade(operation_mode=OperationMode.OFFLINE, environments_dir=os.getenv("ARC_ENV_DIR", "environment_files"),
+                                 logger=quiet)
             self.card_id = self.arcade.open_scorecard(tags=["arc26"])
         want = os.environ["ARC_GAME"]
-        ids = [e.game_id for e in self.arcade.get_environments()]
-        self.game_id = next((g for g in ids if g == want or g.startswith(want)), want)
-        self.wrapper = self.arcade.make(self.game_id, scorecard_id=self.card_id)
-        self.max_actions = int(os.getenv("ARC_MAX_ACTIONS", "2000"))
-        self.session = Session(self.wrapper)
+        envs = {e.game_id: e for e in self.arcade.get_environments()}
+        self.game_id = next((g for g in envs if g == want or g.startswith(want)), want)
+        baseline = None
+        if not gateway:  # offline only: the human per-level baseline from metadata
+            try:
+                baseline = list(getattr(envs[self.game_id], "baseline_actions", None) or []) or None
+            except KeyError:
+                pass
+        self.max_actions = int(os.getenv("ARC_MAX_ACTIONS", "100000"))
+        wrapper = self.arcade.make(self.game_id, scorecard_id=self.card_id)
+        ledger = os.getenv("ARC_LEDGER") or (os.path.join(os.path.dirname(os.getenv("ARC_RESULT", "")), "ledger.json")
+                                             if os.getenv("ARC_RESULT") else None)
+        self.mem = GameMemory(Session(wrapper), path=ledger, baseline=baseline)
         self.t0 = time.time()
-        self._sync(self.session.start())
-
-    def _sync(self, obs: Obs) -> None:
-        self.grid, self.frames_last = obs.grid, len(obs.frames)
-        self.state, self.levels, self.available = obs.state, obs.levels_completed, obs.available_actions
-        self.win_levels, self.actions = self.session.win_levels, self.session.actions
-
-    def step(self, action: int, x: Optional[int] = None, y: Optional[int] = None) -> bool:
-        """Play one action; False if it was a RESET the competition rules ignore (level start)."""
-        if int(action) == 0 and not self.session.can_reset():
-            return False
-        self._sync(self.session.step(action, x, y))
-        return True
 
     @property
     def finished(self) -> bool:
-        return self.state == self.GameState.WIN or self.actions >= self.max_actions
+        return self.mem.obs.state.name == "WIN" or self.mem.session.actions >= self.max_actions
 
-    def status(self) -> str:
-        acts = ", ".join("RESET" if a == 0 else f"ACTION{a}" for a in self.available)
-        return (
-            f"state={self.state.name} levels_completed={self.levels}/{self.win_levels} "
-            f"actions_used={self.actions}/{self.max_actions} available=[{acts}]"
-        )
+    def head(self) -> str:
+        text = self.mem.status()
+        if self.finished:
+            text += "\nThe game is won. Stop playing now." if self.mem.obs.state.name == "WIN" else \
+                "\nThe action budget is used up. Stop playing now."
+        return text
 
     def record(self) -> None:
         path = os.getenv("ARC_RESULT")
         if not path:
             return
-        out: dict[str, Any] = {
-            "game_id": self.game_id,
-            "levels_completed": self.levels,
-            "win_levels": self.win_levels,
-            "actions": self.actions,
-            "state": self.state.name,
-            "elapsed_s": round(time.time() - self.t0, 1),
-        }
+        s = self.mem.session
+        out: dict[str, Any] = {"game_id": self.game_id, "levels_completed": self.mem.obs.levels_completed,
+                               "win_levels": s.win_levels, "actions": s.actions, "level_actions": s.level_actions,
+                               "state": self.mem.obs.state.name, "elapsed_s": round(time.time() - self.t0, 1)}
         if not os.getenv("ARC_GATEWAY"):  # the gateway hides scores
             try:
                 card = self.arcade.get_scorecard(self.card_id).model_dump()
@@ -176,95 +162,134 @@ class Game:
 
     # ----------------------------------------------------------------- tools
 
-    def observe(self) -> list[dict[str, Any]]:
-        out: list[dict[str, Any]] = [{"type": "text", "text": f"{self.status()}\n{grid_hex(self.grid)}"}]
-        # Off by default: many OpenAI-compatible servers reject images inside tool-result messages.
-        if os.getenv("ARC_IMAGE") == "1":
-            out.append({"type": "image", "data": grid_png_b64(self.grid), "mimeType": "image/png"})
-        return out
+    def observe(self, args: dict[str, Any]) -> str:
+        from arc_mcp.perception import describe_scene
 
-    def act(self, actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        g = self.mem.obs.grid
+        parts = [self.head(), describe_scene(g, max_objects=int(args.get("max_objects", 30)), mask=self.mem.mask)]
+        if self.mem.mask is not None:
+            rows = np.where(self.mem.mask.any(axis=1))[0]
+            parts.append(f"HUD / counter area (ignored by the explorer): rows {rows[0]}-{rows[-1]}")
+        if args.get("grid"):
+            parts.append("grid (row: hex colours; NN-MM = identical rows):\n" + grid_hex(g))
+        return "\n".join(parts)
+
+    def act(self, args: dict[str, Any]) -> str:
+        from arc_mcp.perception import diff
+
         lines = []
-        start_grid = self.grid.copy()
-        for i, a in enumerate(actions[:MAX_BATCH]):
+        start = self.mem.obs.grid.copy()
+        for i, a in enumerate(list(args.get("actions") or [])[:MAX_BATCH]):
             if self.finished:
                 break
-            prev_grid, prev_levels = self.grid.copy(), self.levels
             aid = int(a.get("action", 0))
-            label = "RESET" if aid == 0 else (f"ACTION6({a.get('x')},{a.get('y')})" if aid == 6 else f"ACTION{aid}")
-            if not self.step(aid, a.get("x"), a.get("y")):
-                lines.append(f"{i + 1}. RESET: ignored (the level has just started; RESET only helps after GAME_OVER)")
-                continue
-            note = change_summary(prev_grid, self.grid)
-            if self.frames_last > 1:
-                note += f" ({self.frames_last} animation frames)"
-            if self.levels > prev_levels:
-                note = "LEVEL COMPLETED; " + note
-            lines.append(f"{i + 1}. {label}: {note}; state={self.state.name}")
-            if self.levels > prev_levels or self.state == self.GameState.GAME_OVER:
+            key = (6, int(a.get("x", 0)), int(a.get("y", 0))) if aid == 6 else (aid,)
+            label = "RESET" if aid == 0 else (f"CLICK({key[1]},{key[2]})" if aid == 6 else f"ACTION{aid}")
+            prev = self.mem.obs.grid.copy()
+            obs, note = self.mem.step(key, "agent")
+            what = note or diff(prev, obs.grid, self.mem.mask).describe(limit=4)
+            lines.append(f"{i + 1}. {label}: {what}")
+            if "LEVEL" in note or obs.state.name == "GAME_OVER":
                 break
-        text = "\n".join(lines) + f"\n{self.status()}"
-        patch = patch_hex(start_grid, self.grid)
-        if patch:
-            text += "\n" + patch
-        if self.finished:
-            text += "\nThe game is won." if self.state == self.GameState.WIN else "\nThe action budget is used up."
-            text += " Stop playing now."
-        return [{"type": "text", "text": text}]
+        patch = patch_hex(start, self.mem.obs.grid)
+        return "\n".join([self.head()] + lines + ([patch] if patch else []))
+
+    def explore(self, args: dict[str, Any]) -> str:
+        budget = max(1, min(200, int(args.get("budget", 30))))
+        budget = min(budget, self.max_actions - self.mem.session.actions)
+        out = self.mem.explore(budget) if budget > 0 else "no action budget left"
+        return self.head() + "\n" + out
+
+    def model(self, args: dict[str, Any]) -> str:
+        m = self.mem
+        parts = [self.head(), "RULES (learned from play; counts are evidence):", m.model.describe(m.obs.available_actions)]
+        if m.notes:
+            parts += ["YOUR HYPOTHESES:"] + m.notes[-6:]
+        parts += ["TODO (top 5; arc_todo to manage):", m.todo_text(5)]
+        if m.events:
+            parts += ["RECENT EVENTS:"] + m.events[-4:]
+        return "\n".join(parts)
+
+    def hypothesize(self, args: dict[str, Any]) -> str:
+        claim = str(args.get("claim", "")).strip()
+        if not claim:
+            return "give a claim, e.g. {\"claim\": \"yellow#11 blocks the avatar\", \"kind\": \"rule\"}"
+        kind_ = str(args.get("kind", "rule"))
+        rules = self.mem.model.describe(self.mem.obs.available_actions).splitlines()
+        words = [w.strip(".,:;()").lower() for w in claim.split() if len(w) > 3]
+        evidence = [r for r in rules if any(w in r.lower() for w in words)]
+        self.mem.notes.append(f"[{kind_}] {claim}  (level {self.mem.obs.levels_completed + 1})")
+        if kind_ == "goal" and args.get("plan"):
+            self.mem.todo_add(f"test goal: {claim} -> arc_plan {json.dumps(args['plan'])}")
+        self.mem.save()
+        return "\n".join([self.head(), f"noted [{kind_}]: {claim}", "related evidence:"] + (evidence[:6] or ["(none yet: test it)"]))
+
+    def plan(self, args: dict[str, Any]) -> str:
+        from arc_mcp.planner import plan
+
+        goal = args.get("goal") or {}
+        if isinstance(goal, str):
+            goal = json.loads(goal)
+        n = max(1, min(200, int(args.get("max_actions", 60))))
+        return self.head() + "\n" + plan(self.mem, goal, n)
+
+    def todo(self, args: dict[str, Any]) -> str:
+        op = str(args.get("op", "list"))
+        if op == "add":
+            t = self.mem.todo_add(str(args.get("text", "")), int(args.get("cost", 1)))
+            msg = f"added [{t.id}]"
+        elif op in ("done", "drop"):
+            msg = "ok" if self.mem.todo_done(int(args.get("id", -1)), drop=op == "drop") else "no such id"
+        else:
+            msg = ""
+        return "\n".join(x for x in [self.head(), msg, self.mem.todo_text(12)] if x)
 
 
-TOOLS = [
-    {
-        "name": "arc_observe",
-        "description": (
-            "Show the current game frame: status line and the 64x64 grid as hex digits (one row per line, row number "
-            "first, colour 0-f per cell; x = column index, y = row number; \"NN-MM\" marks identical rows NN..MM). "
-            "Costs no game actions. arc_act already shows small changes, so observe only when you need the full frame."
-        ),
-        "inputSchema": {"type": "object", "properties": {}},
-    },
-    {
-        "name": "arc_act",
-        "description": (
-            "Send actions to the game, in order. Each is {\"action\": 0-7, \"x\": col, \"y\": row}: 0=RESET (restart the "
-            "level; needed after GAME_OVER), 1=up, 2=down, 3=left, 4=right, 5=interact, 6=click at (x, y), 7=undo. "
-            "Only available actions have an effect. Every action counts against the score (fewer is better). Up to 20 "
-            "per call; stops early when a level is completed or the game is over. Returns what changed after each and, "
-            "when the changed area is small, its new cells."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "actions": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": MAX_BATCH,
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "action": {"type": "integer", "minimum": 0, "maximum": 7},
-                            "x": {"type": "integer", "minimum": 0, "maximum": 63},
-                            "y": {"type": "integer", "minimum": 0, "maximum": 63},
-                        },
-                        "required": ["action"],
-                    },
-                }
-            },
-            "required": ["actions"],
-        },
-    },
+TOOL_DEFS = [
+    ("arc_observe", "Objects on screen (colour, size, position, click centre), the HUD area and the status line. "
+                    "grid=true adds the full 64x64 hex grid (costly: use rarely). Free: costs no game actions.",
+     {"grid": {"type": "boolean"}, "max_objects": {"type": "integer", "minimum": 5, "maximum": 80}}, []),
+    ("arc_act", "Send up to 20 actions in order. Each is {\"action\": 0-7, \"x\": col, \"y\": row}: 0=RESET (only "
+                "after GAME_OVER), 1-4 directions (their effect differs per game), 5=interact, 6=click at (x, y), "
+                "7=undo. Every action counts against the score. Stops early on level-up or GAME_OVER. Returns what "
+                "changed after each action.",
+     {"actions": {"type": "array", "minItems": 1, "maxItems": MAX_BATCH, "items": {"type": "object", "properties": {
+         "action": {"type": "integer", "minimum": 0, "maximum": 7}, "x": {"type": "integer", "minimum": 0, "maximum": 63},
+         "y": {"type": "integer", "minimum": 0, "maximum": 63}}, "required": ["action"]}}}, ["actions"]),
+    ("arc_explore", "Let the built-in explorer play up to `budget` actions (default 30): it tries untried actions and "
+                    "never-clicked object kinds, then walks to unexplored states, learning rules as it goes. Stops at a "
+                    "level-up. Returns the new rules it found. Cheap in thinking, but its actions count too.",
+     {"budget": {"type": "integer", "minimum": 1, "maximum": 200}}, []),
+    ("arc_model", "What is known so far: learned rules with evidence (avatar and how each action moves it, what blocks "
+                  "it, what clicks do, what caused GAME_OVER, what won earlier levels), your hypotheses, the todo list "
+                  "and recent events. Free.", {}, []),
+    ("arc_hypothesize", "Record a hypothesis (kind rule | goal | label), e.g. 'green#14 is the exit' or 'clicking "
+                        "turns blue#9 cells red'. Returns the related evidence. Optional `plan` = a goal for arc_plan "
+                        "to test it later (added to the todo).",
+     {"claim": {"type": "string"}, "kind": {"type": "string", "enum": ["rule", "goal", "label"]},
+      "plan": {"type": "object"}}, ["claim"]),
+    ("arc_plan", "Reach a goal with the learned rules, executing and re-planning when a prediction fails. Goals: "
+                 "{\"reach\": {\"color\": c}} (walk the avatar onto that colour), {\"reach\": {\"x\": X, \"y\": Y}}, "
+                 "{\"click_all\": {\"color\": c}}; add \"avoid\": [colours] to never step on them. Uses the fewest "
+                 "actions it can find.",
+     {"goal": {"type": "object"}, "max_actions": {"type": "integer", "minimum": 1, "maximum": 200}}, ["goal"]),
+    ("arc_todo", "The game's todo list (auto items from the explorer plus yours): op=list | add (text, cost) | done "
+                 "(id) | drop (id). Survives restarts.",
+     {"op": {"type": "string", "enum": ["list", "add", "done", "drop"]}, "text": {"type": "string"},
+      "id": {"type": "integer"}, "cost": {"type": "integer"}}, []),
 ]
+TOOLS = [{"name": n, "description": d, "inputSchema": {"type": "object", "properties": p, **({"required": r} if r else {})}}
+         for n, d, p, r in TOOL_DEFS]
 
 
 def call_tool(game: "Game", name: str, args: dict[str, Any]) -> list[dict[str, Any]]:
-    if name == "arc_observe":
-        content = game.observe()
-    elif name == "arc_act":
-        content = game.act(list(args.get("actions") or []))
-    else:
+    fn = {"arc_observe": game.observe, "arc_act": game.act, "arc_explore": game.explore, "arc_model": game.model,
+          "arc_hypothesize": game.hypothesize, "arc_plan": game.plan, "arc_todo": game.todo}.get(name)
+    if fn is None:
         raise ValueError(f"unknown tool {name}")
+    text = fn(args)
     game.record()
-    return content
+    return [{"type": "text", "text": text}]
 
 
 def daemon(path: str) -> None:

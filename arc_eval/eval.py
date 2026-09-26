@@ -38,10 +38,12 @@ def rhae(level_actions: list[int], baseline: tuple[int, ...]) -> float:
     return min(num / den, 100.0 * scoring / den) if den else 0.0
 
 
-def play(info: GameInfo, agent: str, max_actions: int, seed: int) -> dict[str, Any]:
+def play(info: GameInfo, agent: str, max_actions: int, seed: int, max_seconds: float = 300.0) -> dict[str, Any]:
     logging.disable(logging.CRITICAL)
     from arc_agi import Arcade, OperationMode
     from arcengine import GameAction, GameState
+
+    import numpy as np
 
     from arc_mcp.explorer import play_explore
     from arc_mcp.session import Session
@@ -51,8 +53,55 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int) -> dict[str, A
     s = Session(arc.make(info.game_id, scorecard_id=card))
     obs = s.start()
     t0 = time.time()
+    real_step = s.step
+
+    def capped(*args, **kw):
+        if time.time() - t0 > max_seconds:
+            s.max_actions_hit = True
+            raise TimeoutError
+        return real_step(*args, **kw)
+
+    s.step = capped
+    try:
+        _run(agent, s, info, max_actions, seed)
+    except TimeoutError:
+        pass
+    return _result(info, s, t0, arc, card)
+
+
+def _run(agent, s, info, max_actions, seed):
+    import numpy as np
+    from arcengine import GameState
+
+    from arc_mcp.explorer import play_explore
+
     if agent == "explorer":
         play_explore(s, max_actions=max_actions)
+    elif agent == "memory":  # the MCP's own curiosity policy (arc_explore) with the rule model
+        from arc_mcp.memory import GameMemory
+        m = GameMemory(s, baseline=list(info.baseline) if info.baseline else None)
+        while s.actions < max_actions and s.last.state != GameState.WIN:
+            m.explore(min(50, max_actions - s.actions), stop_on_event=False)
+    elif agent == "novelty":  # explore, then walk the avatar to every colour it has not entered yet
+        from arc_mcp.memory import GameMemory
+        from arc_mcp.planner import plan
+        m = GameMemory(s, baseline=list(info.baseline) if info.baseline else None)
+        tried: dict[int, set] = {}
+        while s.actions < max_actions and s.last.state != GameState.WIN:
+            lvl = s.last.levels_completed
+            m.explore(min(30, max_actions - s.actions))
+            if s.last.levels_completed != lvl or not m.model.avatar():
+                continue
+            g = s.last.grid
+            bg = int(np.bincount(g.ravel()).argmax())
+            av = m.model.avatar()[0][0]
+            cand = [c for c in np.unique(g).tolist() if c not in (bg, av) and m.model.entered.get(c, 0) == 0
+                    and c not in tried.setdefault(lvl, set())]
+            if not cand:
+                continue
+            c = min(cand, key=lambda c: int((g == c).sum()))  # rarest colour first
+            tried[lvl].add(c)
+            plan(m, {"reach": {"color": int(c)}}, max_actions=min(80, max_actions - s.actions))
     elif agent == "random":
         rng = random.Random(seed)
         while s.actions < max_actions and s.last.state != GameState.WIN:
@@ -63,11 +112,15 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int) -> dict[str, A
             s.step(a, rng.randrange(64), rng.randrange(64))
     else:
         raise ValueError(agent)
+
+
+def _result(info, s, t0, arc, card):
     out: dict[str, Any] = {
         "game": info.game_id, "tags": list(info.tags), "levels": len(s.level_actions),
         "win_levels": s.win_levels, "actions": s.actions, "level_actions": s.level_actions,
         "deaths": s.deaths, "resets": s.resets, "state": s.last.state.name,
         "ms_per_action": round(1000 * (time.time() - t0) / max(1, s.actions), 2),
+        "timed_out": bool(getattr(s, "max_actions_hit", False)),
     }
     if info.baseline:
         out["score"] = round(rhae(s.level_actions, info.baseline), 3)
@@ -83,21 +136,26 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int) -> dict[str, A
 def main(argv: Optional[list[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--set", default="official", choices=["official", "community"])
-    p.add_argument("--agent", default="explorer", choices=["explorer", "random"])
+    p.add_argument("--agent", default="explorer", choices=["explorer", "memory", "novelty", "random"])
     p.add_argument("--max-actions", type=int, default=2000)
     p.add_argument("--limit", type=int, default=0, help="play a random subset of this many games")
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--workers", type=int, default=8)
+    p.add_argument("--workers", type=int, default=4)
+    p.add_argument("--max-seconds", type=float, default=300.0, help="wall-time cap per game")
     p.add_argument("--out", default="")
     a = p.parse_args(argv)
     gs = games(a.set)
     if a.limit:
         gs = sorted(random.Random(a.seed).sample(gs, min(a.limit, len(gs))), key=lambda g: g.game_id)
+    res = []
     with ProcessPoolExecutor(a.workers) as ex:
-        res = list(ex.map(play, gs, [a.agent] * len(gs), [a.max_actions] * len(gs), [a.seed] * len(gs)))
-    for r in res:
-        print(f"{r['game'][:12]:12} lv {r['levels']}/{r['win_levels']} acts {r['actions']:5} "
-              f"per-level {r['level_actions']} deaths {r['deaths']} {r.get('score', '')} {r['ms_per_action']}ms")
+        futs = [ex.submit(play, g, a.agent, a.max_actions, a.seed, a.max_seconds) for g in gs]
+        for f in futs:
+            r = f.result()
+            res.append(r)
+            print(f"{r['game'][:12]:12} lv {r['levels']}/{r['win_levels']} acts {r['actions']:5} "
+                  f"per-level {r['level_actions']} deaths {r['deaths']} {r.get('score', '')} {r['ms_per_action']}ms"
+                  + (" TIMEOUT" if r["timed_out"] else ""), flush=True)
     summary = {
         "set": a.set, "agent": a.agent, "max_actions": a.max_actions, "games": len(res),
         "levels": sum(r["levels"] for r in res), "levels_total": sum(r["win_levels"] for r in res),

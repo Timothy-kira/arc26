@@ -40,33 +40,36 @@ PRELOAD = ROOT / "arc_runner" / "no_fetch_timeouts.cjs"
 
 AGENTS_MD = """# Playing an ARC-AGI-3 game
 
-You are playing an unknown turn-based puzzle game on a 64x64 grid of 16 colours (0-f), through the
-`arc` MCP tools. Nobody tells you the rules or the goal: discover them by acting and watching what
-changes, then win every level.
+You play an unknown turn-based puzzle game (64x64 grid, 16 colours) through the `arc` MCP tools.
+Nobody tells you the rules or the goal. Score per level = (human_actions / your_actions)^2, so every
+action counts; thinking and free tools (arc_observe, arc_model, arc_todo, arc_hypothesize) cost nothing.
 
-- `arc_observe`: the current frame as hex rows (row number first; x = column, y = row; "NN-MM" = identical rows). Free, but
-  `arc_act` already shows the new cells of small changes, so observe only when you need the whole frame.
-- `arc_act`: send up to 20 actions: 0=RESET (restart the level; needed after GAME_OVER), 1=up, 2=down,
-  3=left, 4=right, 5=interact, 6=click at (x, y), 7=undo. Only the listed available actions do anything.
+The MCP server remembers everything for you (state, step counts, learned rules, todo) across restarts:
+every tool reply starts with a status line like `L2/7 NOT_FINISHED | this level 14 actions (...) | total 90`.
 
-Scoring: each level scores (human_actions / your_actions)^2, so every wasted action hurts.
-There is no time limit you need to track and no other action budget than `actions_used/N` in the
-status line: the runner stops you when time is up. Never stop on your own while the game is unfinished.
-`levels_completed` rising means you won a level. GAME_OVER means the attempt failed: RESET.
+Work like a scientist, cheapest first:
+1. `arc_model` (free): what is already known, and the todo list.
+2. `arc_explore` with a small budget (10-30) when basic mechanics are unknown: it finds the avatar, what each
+   action does, what blocks, what clicks do. Do not explore blindly for long.
+3. `arc_observe` (free): the objects on screen. Form a hypothesis about the GOAL (what must be reached,
+   collected, matched or cleared) and record it with `arc_hypothesize`.
+4. Test the hypothesis with the fewest actions: `arc_plan` ({"reach": {"color": c}}, {"click_all": {"color": c}})
+   or a few precise `arc_act` actions.
+5. When a level is completed, the next level usually has the same rules with a harder layout: reuse what
+   won (arc_model shows it) and plan directly.
+6. After GAME_OVER use RESET (action 0) and avoid what killed you (arc_model lists it).
 
-Work like a scientist: hypothesise the goal and the mechanics, run the cheapest action that tests a
-hypothesis, and never repeat an action that was useless in the same situation. Keep a short notes file
-(`notes.md`) of confirmed rules so you do not lose them when the conversation is compacted.
-
-Skills from earlier games are in `.minimax/skills/` - read the ones whose description matches what you
-see before you start. When the game ends (won, or told to stop), write or update ONE skill there:
-`.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the observable
-cues: available actions, layout, colours) and a short numbered procedure that would solve that kind of
-game faster. Never mention game ids. Do not use the shell or other files for anything else.
+Skills from earlier games are in `.minimax/skills/`: read the ones whose description matches what you see.
+When the game ends (won, or told to stop), write or update ONE skill there:
+`.minimax/skills/<short-kebab-name>/SKILL.md` with frontmatter `name` and `description` (the observable cues:
+available actions, avatar or not, colours) and a short numbered procedure using these tools that would solve
+that kind of game with fewer actions. Never mention game ids. Do not use the shell or other files otherwise.
+There is no time limit you need to track and no budget besides the status line: never stop on your own while
+the game is unfinished.
 """
 
-FIRST_PROMPT = "Play the ARC game. Start with arc_observe. Keep playing until the game is won or the tools tell you to stop."
-NEXT_PROMPT = "Continue playing the same game from where you are (check notes.md and arc_observe). Stop only when the game is won or the tools tell you to stop."
+FIRST_PROMPT = "Play the ARC game. Start with arc_model and arc_observe. Keep playing until the game is won or the tools tell you to stop."
+NEXT_PROMPT = "Continue playing the same game from where you are (arc_model shows what is known). Stop only when the game is won or the tools tell you to stop."
 
 
 def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False,
@@ -130,7 +133,7 @@ def runtime_errors(data_dir: Path, n: int = 4) -> str:
 
 
 def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str], time_limit: float) -> dict[str, Any]:
-    out_dir = Path(args.out_dir)
+    out_dir = Path(args.out_dir).resolve()
     final = out_dir / f"{game}_k{k}.json"
     if final.exists() and read_json(final):
         return read_json(final)
@@ -244,7 +247,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = p.parse_args(argv)
     args.api_key = Path(args.api_key_file).read_text().strip() if args.api_key_file else "EMPTY"
 
-    out_dir = Path(args.out_dir)
+    out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     args.skills_dir = args.skills_dir or str(out_dir / "skills")
     Path(args.skills_dir).mkdir(parents=True, exist_ok=True)
