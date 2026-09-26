@@ -69,12 +69,13 @@ FIRST_PROMPT = "Play the ARC game. Start with arc_observe. Keep playing until th
 NEXT_PROMPT = "Continue playing the same game from where you are (check notes.md and arc_observe). Stop only when the game is won or the tools tell you to stop."
 
 
-def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False) -> None:
+def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False,
+                       api_key: str = "EMPTY") -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
     cfg = f"""custom_provider:
   vllm:
     api: openai-completions
-    options: {{ apiKey: EMPTY, baseURL: "{base_url}", timeout: 900000 }}
+    options: {{ apiKey: "{api_key}", baseURL: "{base_url}", timeout: 900000 }}
     models:
       {model}:
         tool_call: true
@@ -168,7 +169,7 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)], "env": {**env, "ARC_SOCKET": str(sock)},
                                 "timeout": 120000}}}, indent=1))
     data_dir = ws / ".mcode-data"
-    write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning)
+    write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning, args.api_key)
     # The model server is local: no proxy (its dispatcher has 300 s timeouts), and no fetch timeouts at all.
     penv = {k: v for k, v in os.environ.items() if k.lower() not in ("http_proxy", "https_proxy", "all_proxy")}
     penv.update(MINIMAX_DATA_DIR=str(data_dir), MCODE_DISABLE_TELEMETRY="1", DO_NOT_TRACK="1",
@@ -225,6 +226,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--env-dir", default=str(ROOT / "data" / "environment_files"))
     p.add_argument("--gateway", default=None)
     p.add_argument("--base-url", default="http://127.0.0.1:8000/v1")
+    p.add_argument("--api-key-file", default="", help="file holding the API key of a hosted endpoint")
     p.add_argument("--model", default="qwen3.8-27b")
     p.add_argument("--context", type=int, default=262144)
     p.add_argument("--output-limit", type=int, default=8192)
@@ -240,6 +242,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--mcode", default=str(ROOT.parent / "minimax-code" / "dist" / "cli.js"))
     p.add_argument("--server-python", default=sys.executable)
     args = p.parse_args(argv)
+    args.api_key = Path(args.api_key_file).read_text().strip() if args.api_key_file else "EMPTY"
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

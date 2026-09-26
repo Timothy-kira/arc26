@@ -30,6 +30,9 @@ from typing import Any, Optional
 
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from arc_mcp.session import Obs, Session  # noqa: E402
+
 logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
 
 HEX = "0123456789abcdef"
@@ -120,30 +123,21 @@ class Game:
         self.game_id = next((g for g in ids if g == want or g.startswith(want)), want)
         self.wrapper = self.arcade.make(self.game_id, scorecard_id=self.card_id)
         self.max_actions = int(os.getenv("ARC_MAX_ACTIONS", "2000"))
-        self.actions = 0
-        self.grid = np.zeros((64, 64), dtype=np.int8)
-        self.state = GameState.NOT_PLAYED
-        self.levels = self.win_levels = 0
-        self.available: list[int] = []
-        self.frames_last = 0
+        self.session = Session(self.wrapper)
         self.t0 = time.time()
-        self.step(0)
+        self._sync(self.session.start())
 
-    def step(self, action: int, x: Optional[int] = None, y: Optional[int] = None) -> None:
-        ga = self.GameAction.from_id(int(action))
-        data = {"x": int(x or 0), "y": int(y or 0)} if ga.is_complex() else None
-        raw = self.wrapper.step(ga, data=data)
-        if raw is None:
-            raise RuntimeError(f"engine returned nothing for {ga.name}")
-        self.actions += 1
-        frames = [np.asarray(f, dtype=np.int8) for f in (raw.frame or [])]
-        if frames:
-            self.grid = frames[-1]
-        self.frames_last = len(frames)
-        self.state = raw.state
-        self.levels = int(raw.levels_completed)
-        self.win_levels = max(self.win_levels, int(raw.win_levels))  # GAME_OVER frames report 0
-        self.available = [int(a) for a in (raw.available_actions or [])]
+    def _sync(self, obs: Obs) -> None:
+        self.grid, self.frames_last = obs.grid, len(obs.frames)
+        self.state, self.levels, self.available = obs.state, obs.levels_completed, obs.available_actions
+        self.win_levels, self.actions = self.session.win_levels, self.session.actions
+
+    def step(self, action: int, x: Optional[int] = None, y: Optional[int] = None) -> bool:
+        """Play one action; False if it was a RESET the competition rules ignore (level start)."""
+        if int(action) == 0 and not self.session.can_reset():
+            return False
+        self._sync(self.session.step(action, x, y))
+        return True
 
     @property
     def finished(self) -> bool:
@@ -197,8 +191,10 @@ class Game:
                 break
             prev_grid, prev_levels = self.grid.copy(), self.levels
             aid = int(a.get("action", 0))
-            self.step(aid, a.get("x"), a.get("y"))
             label = "RESET" if aid == 0 else (f"ACTION6({a.get('x')},{a.get('y')})" if aid == 6 else f"ACTION{aid}")
+            if not self.step(aid, a.get("x"), a.get("y")):
+                lines.append(f"{i + 1}. RESET: ignored (the level has just started; RESET only helps after GAME_OVER)")
+                continue
             note = change_summary(prev_grid, self.grid)
             if self.frames_last > 1:
                 note += f" ({self.frames_last} animation frames)"

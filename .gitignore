@@ -1,4 +1,5 @@
 # secrets
+.secrets/
 .kaggle/
 kaggle.json
 access_token
