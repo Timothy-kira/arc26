@@ -36,6 +36,7 @@ from typing import Any, Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVER = ROOT / "arc_mcp" / "server.py"
+PRELOAD = ROOT / "arc_runner" / "no_fetch_timeouts.cjs"
 
 AGENTS_MD = """# Playing an ARC-AGI-3 game
 
@@ -141,9 +142,12 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)], "env": env, "timeout": 120000}}}, indent=1))
     data_dir = ws / ".mcode-data"
     write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning)
-    penv = {**os.environ, "MINIMAX_DATA_DIR": str(data_dir), "MCODE_DISABLE_TELEMETRY": "1", "DO_NOT_TRACK": "1"}
+    # The model server is local: no proxy (its dispatcher has 300 s timeouts), and no fetch timeouts at all.
+    penv = {k: v for k, v in os.environ.items() if k.lower() not in ("http_proxy", "https_proxy", "all_proxy")}
+    penv.update(MINIMAX_DATA_DIR=str(data_dir), MCODE_DISABLE_TELEMETRY="1", DO_NOT_TRACK="1",
+                NODE_OPTIONS=(penv.get("NODE_OPTIONS", "") + f" --require {PRELOAD}").strip())
     deadline = time.monotonic() + time_limit
-    rounds, log = 0, []
+    rounds, idle, log = 0, 0, []
     while rounds < args.max_rounds:
         left = deadline - time.monotonic()
         if left < 60:
@@ -168,8 +172,9 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
             except subprocess.TimeoutExpired:
                 log.append({"round": rounds, "exit": "timeout"})
         rounds += 1
-        if int(read_json(result).get("actions") or 0) == before and rounds > 1:
-            break  # the agent stopped acting
+        idle = idle + 1 if int(read_json(result).get("actions") or 0) == before else 0
+        if idle >= 2 and rounds > 2:
+            break  # two rounds in a row without an action: the agent stopped acting
     res = {"game": game, "k": k, "rounds": rounds, **read_json(result), "exec": log}
     res["infra_error"] = None if result.exists() else "no game progress recorded"
     final.write_text(json.dumps(res, indent=1))

@@ -138,7 +138,8 @@ class Game:
             self.grid = frames[-1]
         self.frames_last = len(frames)
         self.state = raw.state
-        self.levels, self.win_levels = int(raw.levels_completed), int(raw.win_levels)
+        self.levels = int(raw.levels_completed)
+        self.win_levels = max(self.win_levels, int(raw.win_levels))  # GAME_OVER frames report 0
         self.available = [int(a) for a in (raw.available_actions or [])]
 
     @property
