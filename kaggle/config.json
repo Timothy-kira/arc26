@@ -7,7 +7,7 @@
   ],
   "dataset_sources": [
     "driessmit1/arc3-vllm-h100-wheelhouse-v3",
-    "xishengfeng/mcode-offline"
+    "xishengfeng/mcode-offline-v2"
   ],
   "machine_shape": "NvidiaRtxPro6000",
   "notebook_accelerator": "nvidiaRtxPro6000",

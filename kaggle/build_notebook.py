@@ -78,7 +78,7 @@ MC = "/tmp/mcode"
 src = find_dir("mcode-offline", lambda root, files: os.path.basename(root) == "mcode-offline" or "README.md" in files)
 print("mcode dataset:", src)
 shutil.copytree(src, MC, symlinks=True, dirs_exist_ok=True)
-for t in glob.glob(MC + "/*.tar"):
+for t in glob.glob(MC + "/*.tar") + glob.glob(MC + "/*.tar.gz"):
     tarfile.open(t).extractall(MC)
 NODE = next(p for p in glob.glob(MC + "/**/bin/node", recursive=True))
 os.chmod(NODE, 0o755)
