@@ -51,7 +51,7 @@ OUT_LIMIT = int(os.getenv("ARC_OUT_LIMIT", "6000"))
 
 
 PROTECTED = ("act", "reset", "show", "changes", "objects", "anim", "look", "regions", "node", "rerun", "dag",
-             "journal", "np")
+             "journal", "np", "action_stats")
 
 
 class CellBudget(Exception):
@@ -127,7 +127,7 @@ class Kernel:
                                                                           NS["grid"] if b is None else b),
                   objects=lambda g=None: percept.objects(NS["grid"] if g is None else g),
                   anim=lambda: percept.anim(NS["frames"], NS["prev"]), look=self._look, journal=self.journal,
-                  dag=lambda last=20: self.dag(last))
+                  dag=lambda last=20: self.dag(last), action_stats=self.action_stats)
         NS.update(np=np, show=show, changes=changes, act=self.act, reset=lambda: self.act(0), history=[],
                   node=self.node, rerun=self.rerun)
         NS["nodes"] = self.nodes
@@ -158,11 +158,31 @@ class Kernel:
         note = r.get("note", "")
         if note:
             self.cell_events.append(note)
+        mv = percept.moves(NS["prev"], NS["grid"], limit=3) if changed and NS["level"] == before else []
         rec = {"n": NS["actions_used"], "action": int(a), "x": x, "y": y, "level": NS["level"], "state": NS["state"],
-               "changed": changed, "note": note}
+               "changed": changed, "note": note, "moves": [(m["color"], m["size"], m["d"]) for m in mv]}
         NS["history"].append(rec)
         return {"changed": changed, "state": NS["state"], "level": NS["level"], "level_up": NS["level"] > before,
                 "game_over": NS["state"] == "GAME_OVER", "note": note, "frames": len(NS["frames"])}
+
+    def action_stats(self, level: Optional[int] = None) -> str:
+        """Facts from the history: for each action id, how often it was played and what it moved."""
+        from collections import Counter as C
+        rows: dict = {}
+        for h in NS["history"]:
+            if level is not None and h["level"] != level:
+                continue
+            r = rows.setdefault(h["action"], {"n": 0, "noop": 0, "moves": C()})
+            r["n"] += 1
+            r["noop"] += h["changed"] == 0
+            for c, size, d in h.get("moves") or []:
+                r["moves"][(c, tuple(size), tuple(d))] += 1
+        out = []
+        for a, r in sorted(rows.items()):
+            mv = ", ".join(f"{percept.NAMES[c]}#{c} {w}x{hh} d=({d[0]:+d},{d[1]:+d}) x{n}"
+                           for (c, (w, hh), d), n in r["moves"].most_common(3))
+            out.append(f"ACTION{a}: played {r['n']}, no change {r['noop']}" + (f"; moved {mv}" if mv else ""))
+        return "\n".join(out) or "no actions yet"
 
     def _look(self) -> str:
         """Attach the current frame (4x image) to this cell's reply."""
@@ -275,6 +295,9 @@ class Kernel:
             per = ["PERCEPTION (4x image of the current frame attached):", percept.objects_text(NS["grid"])]
             if self.cell_actions > 0:
                 per.append("last action " + percept.regions_text(NS["prev"], NS["grid"]))
+                mt = percept.moves_text(NS["prev"], NS["grid"])
+                if mt:
+                    per.append("last action " + mt)
                 if self.cell_actions > 1:
                     per.append("whole cell " + percept.regions_text(grid0, NS["grid"]))
             at = percept.anim_text(NS["frames"], NS["prev"]) if self.cell_actions > 0 else ""

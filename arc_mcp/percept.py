@@ -159,3 +159,36 @@ def regions_text(a: np.ndarray, b: np.ndarray, limit: int = 6) -> str:
     if len(regs) > limit:
         lines.append(f"  ... {len(regs) - limit} smaller regions")
     return "\n".join(lines)
+
+
+def moves(a: np.ndarray, b: np.ndarray, limit: int = 6) -> list[dict]:
+    """Objects that moved between two frames: matched by colour and size, nearest position wins.
+    [{color, size: (w, h), from: (x, y), to: (x, y), d: (dx, dy)}]"""
+    def kinds(g):
+        out: dict = {}
+        for o in objects(g):
+            y0, x0, y1, x1 = o["bbox"]
+            out.setdefault((o["color"], x1 - x0 + 1, y1 - y0 + 1), []).append((x0, y0))
+        return out
+    ka, kb = kinds(a), kinds(b)
+    res = []
+    for k, pa in ka.items():
+        pb = kb.get(k, [])
+        gone = [p for p in pa if p not in pb]
+        new = [p for p in pb if p not in pa]
+        for p in gone:
+            if not new:
+                break
+            q = min(new, key=lambda q: abs(q[0] - p[0]) + abs(q[1] - p[1]))
+            new.remove(q)
+            res.append({"color": k[0], "size": (k[1], k[2]), "from": p, "to": q, "d": (q[0] - p[0], q[1] - p[1])})
+    return sorted(res, key=lambda m: -(m["size"][0] * m["size"][1]))[:limit]
+
+
+def moves_text(a: np.ndarray, b: np.ndarray) -> str:
+    ms = moves(a, b)
+    if not ms:
+        return ""
+    return "moved objects: " + "; ".join(
+        f"{NAMES[m['color']]}#{m['color']} {m['size'][0]}x{m['size'][1]} ({m['from'][0]},{m['from'][1]})->"
+        f"({m['to'][0]},{m['to'][1]}) d=({m['d'][0]:+d},{m['d'][1]:+d})" for m in ms)
