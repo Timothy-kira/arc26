@@ -39,3 +39,19 @@ class MockLLM:
 
     async def aclose(self) -> None:
         return None
+
+
+_DEFAULTS: dict[str, Any] = {
+    "HypothesesOut": {"hypotheses": [{"statement": "the avatar moves with arrows", "kind": "control", "confidence": 0.5, "test": "press ACTION1"}], "notes": ""},
+    "PlanOut": {"goal": "explore", "actions": [], "mode": "explore"},
+    "CharterOut": {"system_addendum": "", "priorities": {}, "avoid": [], "max_level_actions": 0},
+    "LevelSummaryOut": {"task_intent": "reach the goal", "approach": "explore every action systematically", "key_insight": "none"},
+    "GateOut": {"plan": "", "selected": []},
+    "SkillOpsOut": {"reasoning": "", "ops": []},
+}
+
+
+def schema_default_handler(messages: list[dict[str, Any]], schema: Optional[dict[str, Any]]) -> str:
+    """Return a minimal valid reply for whichever role schema is requested."""
+    title = (schema or {}).get("title", "")
+    return json.dumps(_DEFAULTS.get(title, {}))
