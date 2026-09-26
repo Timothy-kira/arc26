@@ -285,10 +285,24 @@ class Kernel:
             lines.append(f"  RIGHT n{j['node']} L{j['level']}: {j['expect'] or j['purpose']}")
         return "\n".join(lines)
 
+    def events(self) -> list[dict[str, Any]]:
+        """Non-REPL tool calls (plans, notes, skill reads) logged by the arc26 plugin's PostToolUse hook."""
+        if not self.dag_path:
+            return []
+        path = os.path.join(os.path.dirname(self.dag_path), "dag_events.jsonl")
+        try:
+            return [json.loads(l) for l in open(path) if l.strip()]
+        except (OSError, ValueError):
+            return []
+
     def dag(self, last: int = 12) -> str:
         if not self.nodes:
             return "(no cells yet)"
         lines = []
+        ev = self.events()[-6:]
+        if ev:
+            lines.append("other tool calls (plans, notes, skills): " + "; ".join(
+                f"{e['tool']} {e['input'][:70]}" for e in ev))
         for n in self.nodes[-last:]:
             lv = f"L{n['level_before'] + 1}" + (f"->L{n['level_after'] + 1}" if n["level_after"] != n["level_before"] else "")
             tag = "!" if n.get("flag") else ("*" if n["events"] else "")

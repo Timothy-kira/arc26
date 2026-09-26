@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def code_blob() -> str:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for name in ("arc_mcp", "arc_runner", "skills"):
+        for name in ("arc_mcp", "arc_runner", "plugin", "skills"):
             p = ROOT / name
             if p.exists():
                 tar.add(p, arcname=name, filter=lambda ti: None if "__pycache__" in ti.name else ti)

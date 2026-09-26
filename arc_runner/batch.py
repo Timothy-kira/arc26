@@ -37,6 +37,7 @@ from typing import Any, Optional
 ROOT = Path(__file__).resolve().parents[1]
 SERVER = ROOT / "arc_mcp" / "server.py"
 PRELOAD = ROOT / "arc_runner" / "no_fetch_timeouts.cjs"
+PLUGIN = ROOT / "plugin" / "arc26"
 
 AGENTS_MD = """# Playing an ARC-AGI-3 game as an interactive programming problem
 
@@ -301,13 +302,23 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
             os.chmod(p, 0o666)  # the agent CLI may run as another user
     data_dir = ws / ".mcode-data"
     write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning, args.api_key)
+    # The arc26 MiniMax Code plugin: hooks restore state after start/compaction, guard tools, log the
+    # trajectory into the DAG and keep the session from stopping while the game is unfinished.
+    plugin_dst = data_dir / "plugins" / "arc26"
+    if not plugin_dst.exists():
+        shutil.copytree(PLUGIN, plugin_dst)
     # The model server is local: no proxy (its dispatcher has 300 s timeouts), and no fetch timeouts at all.
     penv = {k: v for k, v in os.environ.items() if k.lower() not in ("http_proxy", "https_proxy", "all_proxy")}
     penv.update(MINIMAX_DATA_DIR=str(data_dir), MCODE_DISABLE_TELEMETRY="1", DO_NOT_TRACK="1",
+                ARC_DEADLINE=env["ARC_DEADLINE"],
                 NODE_OPTIONS=(penv.get("NODE_OPTIONS", "") + f" --require {PRELOAD}").strip())
     prefix, uenv = sandbox(args)
     penv.update(uenv)
     hand_over(ws, args)
+    en = subprocess.run(prefix + [args.node, args.mcode, "plugin", "enable", "arc26"], cwd=ws, env=penv,
+                        capture_output=True, text=True, timeout=120)
+    if en.returncode:
+        sys.stderr.write(f"[plugin] {game}: enable failed: {(en.stderr or en.stdout)[-300:]}\n")
     deadline = time.monotonic() + time_limit
     rounds, idle, log = 0, 0, []
     if args.driver == "acp":
@@ -324,7 +335,8 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         # breaker); the REPL, notebook and DAG persist, so the next session picks up from them.
         while rounds < args.max_rounds and deadline - time.monotonic() > 60 and not done():
             before = int(read_json(result).get("actions") or 0)
-            objective = GOAL_OBJECTIVE if rounds == 0 else next_prompt(ws, idle)
+            # state, notebook, journal and DAG reach the model through the plugin's SessionStart hook
+            objective = GOAL_OBJECTIVE
             r = run_goal(args.node, args.mcode, ws, penv, mcp, objective, deadline, done, ws / f"acp_{rounds}.log",
                          prefix=prefix)
             acted = int(read_json(result).get("actions") or 0) - before
