@@ -86,9 +86,9 @@ def stage(part, dest):
     for a in glob.glob(dest + "/**/*.tar*", recursive=True):
         tarfile.open(a).extractall(os.path.dirname(a))
     return dest
-stage("node22-linux-x64", "/tmp/node22")
-stage("mcode-pkg", "/tmp/mcode")
-NODE = next(p for p in glob.glob("/tmp/node22/**/bin/node", recursive=True))
+# Built inside Kaggle from github.com/Timothy-kira/minimax-code by the arc26-mcode-build utility kernel.
+stage("arc26-mcode-build", "/tmp/mcode")
+NODE = next(p for p in glob.glob("/tmp/mcode/**/bin/node", recursive=True))
 MCODE = next(p for p in glob.glob("/tmp/mcode/**/@minimax-ai/code/cli.js", recursive=True))
 for f in [NODE] + glob.glob("/tmp/mcode/**/rg", recursive=True) + glob.glob("/tmp/mcode/**/*.node", recursive=True):
     os.chmod(f, 0o755)
@@ -204,7 +204,7 @@ def build(variant: str, out: Path) -> Path:
         "id": f"{cfg['username']}/{slug}", "title": slug, "code_file": "notebook.ipynb", "language": "python",
         "kernel_type": "notebook", "is_private": True, "enable_gpu": True, "enable_tpu": False, "enable_internet": False,
         "machine_shape": cfg["machine_shape"], "dataset_sources": cfg["dataset_sources"],
-        "competition_sources": [cfg["competition"]], "kernel_sources": [], "model_sources": cfg["model_sources"],
+        "competition_sources": [cfg["competition"]], "kernel_sources": cfg.get("kernel_sources", []), "model_sources": cfg["model_sources"],
     }
     (out / "kernel-metadata.json").write_text(json.dumps(meta, indent=2))
     return out
