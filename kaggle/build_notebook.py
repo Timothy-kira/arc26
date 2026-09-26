@@ -130,7 +130,7 @@ print(f"vLLM ready after {time.time() - t0:.0f}s")
 def batch_cmd(extra: str) -> str:
     return (
         '[sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8000/v1", '
-        '"--model", CFG["vllm"]["served_model_name"], "--context", str(CFG["vllm"]["max_model_len"]), '
+        '"--model", CFG["vllm"]["served_model_name"], "--context", str(CFG["vllm"]["max_model_len"]), "--output-limit", str(CFG.get("output_limit", 16384)), '
         '"--conc", str(CFG["concurrency"]), "--max-actions", str(CFG["max_actions"]), '
         '"--max-steps", str(CFG["max_steps"]), "--node", NODE, "--mcode", MCODE, '
         '"--server-python", sys.executable, "--skills-dir", WORK + "/skills", ' + extra + "]"

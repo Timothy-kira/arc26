@@ -65,7 +65,7 @@ FIRST_PROMPT = "Play the ARC game. Start with arc_observe. Keep playing until th
 NEXT_PROMPT = "Continue playing the same game from where you are (check notes.md and arc_observe). Stop only when the game is won or the tools tell you to stop."
 
 
-def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int) -> None:
+def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False) -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
     cfg = f"""custom_provider:
   vllm:
@@ -74,7 +74,7 @@ def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, 
     models:
       {model}:
         tool_call: true
-        reasoning: true
+        reasoning: {str(reasoning).lower()}
         limit: {{ context: {context}, output: {output} }}
         compat: {{ thinkingFormat: qwen-chat-template, supportsDeveloperRole: false, maxTokensField: max_tokens }}
 defaultModel: custom_provider:vllm/{model}
@@ -137,7 +137,7 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
     (ws / ".mcp.json").write_text(json.dumps(
         {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)], "env": env, "timeout": 120000}}}, indent=1))
     data_dir = ws / ".mcode-data"
-    write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit)
+    write_mcode_config(data_dir, args.base_url, args.model, args.context, args.output_limit, args.reasoning)
     penv = {**os.environ, "MINIMAX_DATA_DIR": str(data_dir), "MCODE_DISABLE_TELEMETRY": "1", "DO_NOT_TRACK": "1"}
     deadline = time.monotonic() + time_limit
     rounds, log = 0, []
@@ -184,7 +184,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument("--base-url", default="http://127.0.0.1:8000/v1")
     p.add_argument("--model", default="qwen3.8-27b")
     p.add_argument("--context", type=int, default=65536)
-    p.add_argument("--output-limit", type=int, default=8192)
+    p.add_argument("--output-limit", type=int, default=16384)
+    p.add_argument("--reasoning", action="store_true",
+                   help="let the model think before each step (off: long reasoning exhausted the output budget)")
     p.add_argument("--hours", type=float, default=8.0)
     p.add_argument("--max-game-seconds", type=float, default=3600.0)
     p.add_argument("--max-actions", type=int, default=2000)

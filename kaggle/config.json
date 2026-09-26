@@ -26,7 +26,9 @@
       "--tool-call-parser",
       "qwen3_coder",
       "--reasoning-parser",
-      "qwen3"
+      "qwen3",
+      "--default-chat-template-kwargs",
+      "{\"enable_thinking\": false}"
     ]
   },
   "dev_hours": 2.0,
@@ -35,5 +37,6 @@
   "max_steps": 150,
   "kernel_sources": [
     "xishengfeng/arc26-mcode-build"
-  ]
+  ],
+  "output_limit": 16384
 }
