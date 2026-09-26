@@ -49,6 +49,7 @@ class GameMemory:
     events: list[str] = field(default_factory=list)
     blocked_colours: set = field(default_factory=set)          # walls found by the planner (this level)
     clicked: set = field(default_factory=set)                  # object positions clicked by the planner (this level)
+    reached: set = field(default_factory=set)                  # colours explore already walked to (this level)
     t0: float = field(default_factory=time.time)
 
     def __post_init__(self) -> None:
@@ -97,7 +98,7 @@ class GameMemory:
                 self.events.append(note)
                 self.by_source = Counter()
                 self.model.level_start = obs.grid.copy()
-                self.blocked_colours, self.clicked = set(), set()
+                self.blocked_colours, self.clicked, self.reached = set(), set(), set()
                 self.carry_todo()
             elif game_over:
                 note = "GAME_OVER " + self.model.deaths[-1] + " -> RESET to retry the level"
@@ -111,10 +112,25 @@ class GameMemory:
 
     def explore(self, budget: int, stop_on_event: bool = True) -> str:
         """Curiosity policy for up to ``budget`` actions: untried actions and never-clicked object
-        kinds first, then the state graph's nearest unexplored (state, action)."""
+        kinds first; once an avatar is known, walk it to the rarest colour it has not entered yet
+        (novelty); otherwise the state graph's nearest unexplored (state, action)."""
+        from .planner import plan
+
         before = self.model.describe(self.obs.available_actions)
         start_actions, notes = self.session.actions, []
         while self.session.actions - start_actions < budget and self.obs.state != GameState.WIN:
+            left = budget - (self.session.actions - start_actions)
+            target = self._novel_colour()
+            if target is not None:
+                lvl = self.obs.levels_completed
+                self.reached.add(target)
+                out = plan(self, {"reach": {"color": target}}, max_actions=min(left, 80))
+                for line in out.splitlines():
+                    if line.startswith(("LEVEL", "GAME_OVER")):
+                        notes.append(line)
+                if stop_on_event and self.obs.levels_completed != lvl:
+                    break
+                continue
             key = self._curious_action()
             obs, note = self.step(key, "explore")
             if note:
@@ -129,6 +145,24 @@ class GameMemory:
             out.append("new or changed rules:")
             out += ["  " + l for l in new[:12]]
         return "\n".join(out)
+
+    def _novel_colour(self) -> Optional[int]:
+        """Rarest on-screen colour the avatar has never entered (and not yet targeted this level)."""
+        import numpy as np
+
+        if self.obs.state != GameState.NOT_FINISHED or not self.model.avatar():
+            return None
+        if any(self.model.actions.get(a) is None for a in self.obs.available_actions if a not in (0, 6)):
+            return None
+        g = self.obs.grid
+        if self.mask is not None:
+            g = np.where(self.mask, -1, g)
+        vals, counts = np.unique(g, return_counts=True)
+        bg = int(vals[np.argmax(counts)])
+        own = self.model.avatar_colours()
+        cand = [(int(n), int(c)) for c, n in zip(vals, counts)
+                if c >= 0 and c != bg and c not in own and self.model.entered.get(int(c), 0) == 0 and int(c) not in self.reached]
+        return min(cand)[1] if cand else None
 
     def _curious_action(self) -> ActionKey:
         obs = self.obs
