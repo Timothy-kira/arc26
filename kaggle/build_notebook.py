@@ -72,19 +72,26 @@ assert names and all(CFG["expected_gpu"] in n for n in names), f"expected {CFG['
 '''
 
 TOOLS = r'''
-# The game engine for the MCP server (kernel python), and MiniMax Code + Node from the dataset.
+# The game engine for the MCP server (kernel python); Node 22 and MiniMax Code from their datasets
+# (Kaggle's own node is v20, which MiniMax Code does not run on).
 sh([sys.executable, "-m", "pip", "install", "-q", "--no-index", "--find-links", COMP + "/arc_agi_3_wheels", "arc-agi"])
-MC = "/tmp/mcode"
-src = find_dir("mcode-offline", lambda root, files: os.path.basename(root) == "mcode-offline" or "README.md" in files)
-print("mcode dataset:", src)
-shutil.copytree(src, MC, symlinks=True, dirs_exist_ok=True)
-for t in glob.glob(MC + "/*.tar") + glob.glob(MC + "/*.tar.gz"):
-    tarfile.open(t).extractall(MC)
-NODE = next(p for p in glob.glob(MC + "/**/bin/node", recursive=True))
-os.chmod(NODE, 0o755)
-MCODE = next(p for p in glob.glob(MC + "/**/@minimax-ai/code/cli.js", recursive=True))
-for rg in glob.glob(MC + "/**/rg", recursive=True) + glob.glob(MC + "/**/*.node", recursive=True):
-    os.chmod(rg, 0o755)
+import zipfile
+def stage(part, dest):
+    # Copy a mounted dataset to a writable dir, unpacking any archives it holds.
+    src = next((r for r, _, _ in os.walk("/kaggle/input") if part in os.path.basename(r)), None)
+    assert src, f"dataset {part!r} is not mounted"
+    shutil.copytree(src, dest, symlinks=True, dirs_exist_ok=True)
+    for a in glob.glob(dest + "/**/*.zip", recursive=True):
+        zipfile.ZipFile(a).extractall(os.path.dirname(a))
+    for a in glob.glob(dest + "/**/*.tar*", recursive=True):
+        tarfile.open(a).extractall(os.path.dirname(a))
+    return dest
+stage("node22-linux-x64", "/tmp/node22")
+stage("mcode-pkg", "/tmp/mcode")
+NODE = next(p for p in glob.glob("/tmp/node22/**/bin/node", recursive=True))
+MCODE = next(p for p in glob.glob("/tmp/mcode/**/@minimax-ai/code/cli.js", recursive=True))
+for f in [NODE] + glob.glob("/tmp/mcode/**/rg", recursive=True) + glob.glob("/tmp/mcode/**/*.node", recursive=True):
+    os.chmod(f, 0o755)
 ok = sh([NODE, MCODE, "--version"])
 assert ok.returncode == 0, "MiniMax Code does not start; stopping before the GPU is used"
 '''
