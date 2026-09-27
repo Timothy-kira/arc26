@@ -6,19 +6,22 @@ unix socket to play an action, so code in the REPL can see exactly what a player
 state, level counters) and nothing else. That keeps local evaluation honest and matches the
 competition, where the game runs behind the gateway.
 
-Namespace (refreshed after every action):
+Namespace (refreshed after every action; the frames are copies, the kernel keeps its own):
   grid        np.ndarray (64, 64) int: the current frame; grid[y, x], colours 0-15
-  prev        the frame before the last action;  frames: all frames of the last action
+  prev_grid   the frame before the last action;  frames: all frames of the last action
   state       'NOT_FINISHED' | 'GAME_OVER' | 'WIN';  level: levels completed so far
   win_levels  number of levels;  available: action ids that do something now
   actions_used / level_actions_used: scorecard counts (every action counts, RESET too)
-  history     list of dicts, one per action: n, action, x, y, level, state, changed, note
-  act(a, x=None, y=None) -> dict   play one action (0 RESET, 1-4 directions, 5 interact,
-                                   6 click at (x, y), 7 undo); returns changed/level_up/...
-  reset()     RESET (only useful after GAME_OVER)
-  show(g=None, y0=0, y1=64, x0=0, x1=64) -> str   hex rows with row/column labels
-  changes(a=None, b=None) -> list of (y, x, old, new) between two frames (default prev->grid)
-  nodes, node(i), rerun(i)          the exploration DAG: earlier cells and their code
+  history     list of dicts, one per action (moves, changed regions, clicked object, death report)
+  act(a, x=None, y=None, force=False) -> dict   play one action (0 RESET, 1-4 directions,
+              5 interact, 6 click at (x, y), 7 undo); refuses a move that already killed from
+              exactly this frame and never went well (force=True plays it anyway)
+  reset(), show(), changes(), objects(), regions(), anim(), look()
+  cells()     the frame as a lattice map;  action_stats(): effects per action / clicked object
+  deaths()    every GAME_OVER with what the dying action moved and the budget meter state
+  journal, dag(), nodes, node(i), rerun(i)   RIGHT/WRONG record and the exploration DAG
+
+See docs/MCP_TOOLS.md for the full reference.
 
 Serve: ``python -m arc_mcp.kernel <kernel.sock> <game-daemon.sock>`` (env ARC_DAG: dag.json path).
 """

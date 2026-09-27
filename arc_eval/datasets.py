@@ -4,9 +4,9 @@
   ``official_dev`` (20, used for development) and ``official_val`` (5, validation only: never
   inspected or tuned on). The 5 are drawn once with a fixed seed, stratified by tag family
   (1 keyboard, 2 click, 2 keyboard_click), not by how well anything plays them.
-- ``community``: arc-interactive (github.com/theredbluepill/arc-interactive, MIT), 252 games
-  in the same format; the development set. Its ``baseline_actions`` are not per-level human
-  counts, so only levels and actions are reported there.
+- ``community``: arc-interactive (github.com/theredbluepill/arc-interactive, MIT), 249 games
+  in the same format (its copies of official games are left out); the development set. Its
+  ``baseline_actions`` are not per-level human counts, so only levels and actions are reported there.
 """
 
 from __future__ import annotations
@@ -59,8 +59,11 @@ def games(name: str) -> list[GameInfo]:
     if name == "dev":  # everything we may tune on
         return games("official_dev") + games("community")
     env_dir = SETS[name]
+    official = {m.parent.parent.name for m in SETS["official"].glob("*/*/metadata.json")} if name == "community" else set()
     out = []
     for meta in sorted(env_dir.glob("*/*/metadata.json")):
+        if meta.parent.parent.name in official:
+            continue  # arc-interactive ships copies of some official games (ft09, ls20, vc33)
         m = json.loads(meta.read_text())
         base = tuple(m.get("baseline_actions") or ()) if HAS_HUMAN_BASELINE[name] else None
         out.append(GameInfo(m["game_id"], env_dir, tuple(m.get("tags") or ()), base or None))

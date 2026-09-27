@@ -1,0 +1,5475 @@
+{
+ "official": {
+  "source": "kaggle competitions download -c arc-prize-2026-arc-agi-3 (make data)",
+  "games": [
+   {
+    "game_id": "ar25-0c556536",
+    "short": "ar25",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     32,
+     50,
+     75,
+     37,
+     89,
+     159,
+     233,
+     73
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "bp35-0a0ad940",
+    "short": "bp35",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     21,
+     48,
+     44,
+     38,
+     33,
+     87,
+     86,
+     131,
+     163
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "cd82-fb555c5d",
+    "short": "cd82",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     55,
+     8,
+     41,
+     21,
+     23,
+     23
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "cn04-2fe56bfb",
+    "short": "cn04",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     29,
+     54,
+     85,
+     300,
+     208,
+     113
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "dc22-fdcac232",
+    "short": "dc22",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     59,
+     102,
+     67,
+     98,
+     324,
+     578
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "ft09-0d8bbf25",
+    "short": "ft09",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [],
+    "human_baseline": [
+     43,
+     12,
+     23,
+     28,
+     65,
+     37
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "g50t-5849a774",
+    "short": "g50t",
+    "split": "official_val",
+    "iteration": false,
+    "tags": [
+     "keyboard"
+    ],
+    "human_baseline": [
+     78,
+     175,
+     179,
+     230,
+     96,
+     54,
+     67
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "ka59-38d34dbb",
+    "short": "ka59",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     28,
+     109,
+     51,
+     51,
+     33,
+     132,
+     326
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "lf52-271a04aa",
+    "short": "lf52",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     32,
+     81,
+     60,
+     71,
+     205,
+     148,
+     244,
+     109,
+     164,
+     225
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "lp85-305b61c3",
+    "short": "lp85",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     17,
+     38,
+     31,
+     16,
+     41,
+     60,
+     26,
+     159
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "ls20-9607627b",
+    "short": "ls20",
+    "split": "official_dev",
+    "iteration": true,
+    "tags": [
+     "keyboard"
+    ],
+    "human_baseline": [
+     22,
+     123,
+     73,
+     84,
+     96,
+     192,
+     186
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "m0r0-492f87ba",
+    "short": "m0r0",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     30,
+     111,
+     203,
+     26,
+     500,
+     237
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "r11l-495a7899",
+    "short": "r11l",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     22,
+     33,
+     51,
+     26,
+     52,
+     49
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "re86-8af5384d",
+    "short": "re86",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     26,
+     42,
+     86,
+     108,
+     189,
+     139,
+     424,
+     241
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "s5i5-18d95033",
+    "short": "s5i5",
+    "split": "official_val",
+    "iteration": false,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     20,
+     89,
+     106,
+     54,
+     162,
+     38,
+     86,
+     83
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "sb26-7fbdac44",
+    "short": "sb26",
+    "split": "official_val",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     18,
+     28,
+     18,
+     19,
+     31,
+     23,
+     58,
+     18
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "sc25-635fd71a",
+    "short": "sc25",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     36,
+     6,
+     32,
+     83,
+     143,
+     50
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "sk48-d8078629",
+    "short": "sk48",
+    "split": "official_val",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     61,
+     177,
+     101,
+     103,
+     230,
+     181,
+     125,
+     92
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "sp80-589a99af",
+    "short": "sp80",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     39,
+     58,
+     25,
+     148,
+     96,
+     152
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "su15-1944f8ab",
+    "short": "su15",
+    "split": "official_val",
+    "iteration": false,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     22,
+     42,
+     26,
+     115,
+     36,
+     31,
+     8,
+     40,
+     41
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "tn36-ef4dde99",
+    "short": "tn36",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     32,
+     72,
+     26,
+     40,
+     30,
+     55,
+     62
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "tr87-cd924810",
+    "short": "tr87",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard"
+    ],
+    "human_baseline": [
+     54,
+     58,
+     40,
+     45,
+     71,
+     146
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "tu93-0768757b",
+    "short": "tu93",
+    "split": "official_dev",
+    "iteration": true,
+    "tags": [
+     "keyboard_click"
+    ],
+    "human_baseline": [
+     19,
+     16,
+     34,
+     42,
+     123,
+     80,
+     14,
+     23,
+     111
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "vc33-5430563c",
+    "short": "vc33",
+    "split": "official_dev",
+    "iteration": true,
+    "tags": [
+     "click"
+    ],
+    "human_baseline": [
+     7,
+     18,
+     44,
+     61,
+     131,
+     34,
+     152
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   },
+   {
+    "game_id": "wa30-ee6fef47",
+    "short": "wa30",
+    "split": "official_dev",
+    "iteration": false,
+    "tags": [
+     "keyboard"
+    ],
+    "human_baseline": [
+     71,
+     119,
+     183,
+     98,
+     368,
+     68,
+     79,
+     442,
+     415
+    ],
+    "path": "environment_files",
+    "sha256": {}
+   }
+  ]
+ },
+ "community": {
+  "source": "https://github.com/theredbluepill/arc-interactive",
+  "commit": "b6cbf21a36f029882b72c702bbbfd45455ce330d",
+  "excluded": "copies of official games (ft09, ls20, vc33)",
+  "games": [
+   {
+    "game_id": "ab01-v1",
+    "short": "ab01",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Win: stable + (total grains mod P) == R — modular target, not sp01 fixed sum or sp04 sinks.",
+    "tags": [
+     "simulation",
+     "click",
+     "sandpile-mod-win"
+    ],
+    "path": "community/environment_files/ab01/v1",
+    "sha256": {
+     "ab01.py": "79f6974574a7926c9f75e46da136127f811ba332fd28cabe2980a10463c4826f",
+     "metadata.json": "d4811c1dd2906b510da778ff528168f5a6788865cacd778f1930e2e0949ab30e"
+    }
+   },
+   {
+    "game_id": "as01-63be02fb",
+    "short": "as01",
+    "family": "推箱 / 环境操作",
+    "category": "Logistics",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Assembly fetch: ACTION5 pickup/drop tagged parts; deliver to matching workstations in order from level.data.",
+    "tags": [
+     "static",
+     "logistics",
+     "puzzle"
+    ],
+    "path": "community/environment_files/as01/63be02fb",
+    "sha256": {
+     "as01.py": "62af75a3b1d9bc4f05ba79835b9af7c5ff4c1e5ce6d2b2b73362f432947415c0",
+     "metadata.json": "a0af996bcbdb0a69740f501444fc2803f6b73d6ec3241c19b2a7db022fb7020d"
+    }
+   },
+   {
+    "game_id": "at01-v1",
+    "short": "at01",
+    "family": "模拟 / 场",
+    "category": "Simulation / Steering",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Ant trail: ACTION5 drops pheromone; ant follows strongest adjacent scent toward the exit hole.",
+    "tags": [
+     "static",
+     "simulation"
+    ],
+    "path": "community/environment_files/at01/v1",
+    "sha256": {
+     "at01.py": "d277e073f0e185d581dc824e42d4fa2c67ffad9a45b488d80c21169d2506cbe1",
+     "metadata.json": "8ffc65701442348b717a08cf2a374508571f976c9f5a58169499996d43b7f45a"
+    }
+   },
+   {
+    "game_id": "au01-v1",
+    "short": "au01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Resource / Path",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Bonus steps: tight move budget; cyan bonus pads add steps when entered.",
+    "tags": [
+     "static",
+     "planning"
+    ],
+    "path": "community/environment_files/au01/v1",
+    "sha256": {
+     "au01.py": "1bf72c2001e55a99038365d2f53d920bdd31ac0e03fea1d6867d21c1434952dd",
+     "metadata.json": "9b93fec35b78cb05d203cf553eecf460cd5fa86cb1dc9ef3d98c71da5aa3c5ea"
+    }
+   },
+   {
+    "game_id": "av01-63be02fb",
+    "short": "av01",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Avalanche: rocks fall after each move; crushed loses.",
+    "tags": [
+     "static",
+     "movement",
+     "physics"
+    ],
+    "path": "community/environment_files/av01/63be02fb",
+    "sha256": {
+     "av01.py": "be53538f2e8edf9120565dbc90b3858c42a43aab4b489d3790796fcf86d76f07",
+     "metadata.json": "3f1f606b0b0466efd6ee6e0d550d234e2db9909cd599d3068527a70066a7f766"
+    }
+   },
+   {
+    "game_id": "bd01-63be02fb",
+    "short": "bd01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Coverage / Path",
+    "input": "keyboard",
+    "grid": "5-8",
+    "levels": "5",
+    "description": "Revisit rule: forbidden — any cell entered twice loses (stricter than visit-all va01). Red marks cells you left; HUD flashes red on revisit fail.",
+    "tags": [
+     "static",
+     "puzzle",
+     "path"
+    ],
+    "path": "community/environment_files/bd01/63be02fb",
+    "sha256": {
+     "bd01.py": "99b0365276b1a5199c823c1b0a291ca886680f3d4489af02471306b8cb422ce5",
+     "metadata.json": "90e326c2eb5fc3a33c1e697d06e339f96e2a467f639a3f25f6152a890da08b42"
+    }
+   },
+   {
+    "game_id": "bi01-63be02fb",
+    "short": "bi01",
+    "family": "移动与协调",
+    "category": "Movement / Chess",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Bishop courier: ACTION1–4 slide diagonally (NW/NE/SW/SE) until a wall blocks.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "chess"
+    ],
+    "path": "community/environment_files/bi01/63be02fb",
+    "sha256": {
+     "bi01.py": "d59b907b8e5576f6675f069299eebaaffe6a698f1de50b4a273e6f664761c871",
+     "metadata.json": "1b235735f0fe8c1af3a515c3db67490b69196931037ae9fffadb5fa70b2919e6"
+    }
+   },
+   {
+    "game_id": "bl01-63be02fb",
+    "short": "bl01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Phase",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Phase-through (one tile): ACTION5 arms next cardinal move to walk through one wall cell — not rc01 warp to start.",
+    "tags": [
+     "static",
+     "movement",
+     "phase"
+    ],
+    "path": "community/environment_files/bl01/63be02fb",
+    "sha256": {
+     "bl01.py": "588ef57b3f792a97cac00ddf9fa0735ccb88ed2e3f9965a335cc46c74d337d54",
+     "metadata.json": "b07c3ba4e1f8ce4a2a197c8755da46546ca7a5fbfe2799fe81adaa84c45adc72"
+    }
+   },
+   {
+    "game_id": "bn01-63be02fb",
+    "short": "bn01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Exploration",
+    "input": "keyboard_click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Beacon sweep: hidden targets; ACTION5 drops a beacon (Chebyshev radius); ghosts show only under light; ACTION6 flags a cell (wrong cell = lose).",
+    "tags": [
+     "static",
+     "exploration",
+     "64-grid"
+    ],
+    "path": "community/environment_files/bn01/63be02fb",
+    "sha256": {
+     "bn01.py": "982092b792767d7eef63280ee40849ba44ccc9c7b231bec9c9a0d2aa0ba1434c",
+     "metadata.json": "279de2938124a3208a3db6f79ceba38f3248f49c3795f49edb3f80eac1fd41ac"
+    }
+   },
+   {
+    "game_id": "bn02-63be02fb",
+    "short": "bn02",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Exploration",
+    "input": "keyboard_click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Manhattan beacon: like bn01 but reveal uses L1 (Manhattan) radius; wrong ACTION6 (not on a hidden ghost) costs a step instead of instant game over.",
+    "tags": [
+     "static",
+     "exploration",
+     "hidden"
+    ],
+    "path": "community/environment_files/bn02/63be02fb",
+    "sha256": {
+     "bn02.py": "fb505b18dec4cc23d6926c941d1d5ddaf75c62824ee28e332dc6507c4d8c0c6c",
+     "metadata.json": "9ef5c1ad7b6aaf52844a70c41d0bf0fe3cf748d4d127f4e02d61f82c5b7ddf0c"
+    }
+   },
+   {
+    "game_id": "bn03-63be02fb",
+    "short": "bn03",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Exploration",
+    "input": "keyboard_click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Shrinking beacon (bn02 variant): each ACTION5 beacon reduces max light radius by 1.",
+    "tags": [
+     "static",
+     "exploration",
+     "hidden"
+    ],
+    "path": "community/environment_files/bn03/63be02fb",
+    "sha256": {
+     "bn03.py": "8bc053cbe5f0663c8212f274927f380c449f9fce9471987bdadbb63b54652b05",
+     "metadata.json": "ddf49b05c249b35a0b3fe2579a3df6fb05a27a9bd5ee9dc84ba5cb1c809efa03"
+    }
+   },
+   {
+    "game_id": "bn04-v1",
+    "short": "bn04",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Stealth / Reveal",
+    "input": "keyboard_click",
+    "grid": "16×16",
+    "levels": "7",
+    "description": "Line/column flash: ACTION5 axis reveal (bn01 family).",
+    "tags": [
+     "hidden",
+     "click"
+    ],
+    "path": "community/environment_files/bn04/v1",
+    "sha256": {
+     "bn04.py": "82bf504d41a6e6265aa830a15297dc99525e4b71a5b7a93c2b939920f572c740",
+     "metadata.json": "db55c96504734c2d4bce5129a117539475003b70a26a19daf7925e8d4d6eb9c1"
+    }
+   },
+   {
+    "game_id": "bp01-63be02fb",
+    "short": "bp01",
+    "family": "图 / 电路",
+    "category": "Graph / Power",
+    "input": "keyboard",
+    "grid": "14×14",
+    "levels": "5",
+    "description": "Tower power: stand on each light-blue tower and use ACTION5 to power it (sprite turns green); power all towers, then reach the yellow goal.",
+    "tags": [
+     "static",
+     "puzzle",
+     "activation"
+    ],
+    "path": "community/environment_files/bp01/63be02fb",
+    "sha256": {
+     "bp01.py": "595e56553285802f1aeb6fa85d55c1fe88226ff77dad4a250e26f20e7c0c5b5a",
+     "metadata.json": "2bfd9bebec3521e3682a48b25704a01f1d6fbe6d3ef8143808b7332a9bd134c9"
+    }
+   },
+   {
+    "game_id": "bt01-63be02fb",
+    "short": "bt01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Resource / Movement",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Single charge bar (not tm01): one charge integer drops every move; cyan pads refill; 0 charge loses after the step unless you reach the goal that same step (go…",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "resource"
+    ],
+    "path": "community/environment_files/bt01/63be02fb",
+    "sha256": {
+     "bt01.py": "a00df4b32ee3edcebafb825c6f577463508a12d7f7528c5a4b797fc4398647f9",
+     "metadata.json": "ea4b6fd5c612ce23147b268b0e7c9be9879beeb8237f799b81c30268e1b27632"
+    }
+   },
+   {
+    "game_id": "cf01-v1",
+    "short": "cf01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Hazard / Time",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Revisit rule: cooldown — re-enter a cell before F world steps since leave loses (cooldown gate, not tr01 TTL decay).",
+    "tags": [
+     "static",
+     "path"
+    ],
+    "path": "community/environment_files/cf01/v1",
+    "sha256": {
+     "cf01.py": "4ad5481f52bc27edfb4e50ed04b26fd48e74d1f26f50d355586434631ae1278d",
+     "metadata.json": "e175b381ffa901c3594652bf8f387b3e2ed6092ea975d9f7fbdc93c6f6935e73"
+    }
+   },
+   {
+    "game_id": "ci01-v1",
+    "short": "ci01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8–12",
+    "levels": "5",
+    "description": "Crate ice: player moves normally; pushed crates slide until wall, crate, or mud.",
+    "tags": [
+     "static",
+     "planning",
+     "push"
+    ],
+    "path": "community/environment_files/ci01/v1",
+    "sha256": {
+     "ci01.py": "e002ddc9e1c471f00257d5f01eb36a874bbe1cf241fcdfc336ce79f2a45f013e",
+     "metadata.json": "290fcc1bfc70ac623be91989c6e8045a6d2a8365dd619b2284c2bbead44f18ea"
+    }
+   },
+   {
+    "game_id": "ck02-63be02fb",
+    "short": "ck02",
+    "family": "图 / 电路",
+    "category": "Graph / Logic",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Circuit junction: ACTION6 toggles wire; ACTION5 tests path; on junction cells, no right turn relative to incoming wire direction.",
+    "tags": [
+     "static",
+     "graph",
+     "logic"
+    ],
+    "path": "community/environment_files/ck02/63be02fb",
+    "sha256": {
+     "ck02.py": "96f357e9b9f8dc36f0fe628e1db24b8a0153d87638869704638b9783fa3508e7",
+     "metadata.json": "669bebae231111d69e7417fd3241800f7eb29aa1718ad545ed882bc5efaaedbf"
+    }
+   },
+   {
+    "game_id": "ck03-63be02fb",
+    "short": "ck03",
+    "family": "图 / 电路",
+    "category": "Graph / Logic",
+    "input": "click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Checkpoint wire (ck02 variant): cyan checkpoint must lie on successful test path.",
+    "tags": [
+     "static",
+     "graph",
+     "logic"
+    ],
+    "path": "community/environment_files/ck03/63be02fb",
+    "sha256": {
+     "ck03.py": "e90e1d5726e26bcc86c1e4243c472f3be69a628cb93275e5afc623c9ddaf83ca",
+     "metadata.json": "49497390f0e07d79501b917d474fdc5373f16c4ac61fe12a40e6f71bfe557405"
+    }
+   },
+   {
+    "game_id": "ck04-v1",
+    "short": "ck04",
+    "family": "图 / 电路",
+    "category": "Circuit / Logic",
+    "input": "click",
+    "grid": "14×14",
+    "levels": "7",
+    "description": "Directed wire: each tile’s arrow rotates with ACTION6; reach out.",
+    "tags": [
+     "circuit",
+     "click"
+    ],
+    "path": "community/environment_files/ck04/v1",
+    "sha256": {
+     "ck04.py": "88edffda426cb2cc098e4896b4f5f1a9c6620973cb368c83e1521957c9ee343d",
+     "metadata.json": "fbf530d3645bd7ae58fff5bfd791fa8836236df250ea341128d7adbc4a186e48"
+    }
+   },
+   {
+    "game_id": "co01-63be02fb",
+    "short": "co01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Color gate: recolor pads set active hue; only matching doors open.",
+    "tags": [
+     "static",
+     "puzzle",
+     "10-grid"
+    ],
+    "path": "community/environment_files/co01/63be02fb",
+    "sha256": {
+     "co01.py": "d4ad93381cf971eea949a78fd6e7ecb70634158300d4ed40f5d88f6059a14b20",
+     "metadata.json": "b548b29485f3f98b77a12ca5da761625dde63f6dee1254ad89a28f37bb1aaa65"
+    }
+   },
+   {
+    "game_id": "cq01-63be02fb",
+    "short": "cq01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Territory / Coverage",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Many ordered rings: hit every orange ring marker (set), then goal — multi-stop route (not tw01’s single orange-before-green).",
+    "tags": [
+     "static",
+     "movement",
+     "coverage"
+    ],
+    "path": "community/environment_files/cq01/63be02fb",
+    "sha256": {
+     "cq01.py": "813d11d6dd07563ae902e9c8303c11372bdecf72170cb9747d111f68f113b4a6",
+     "metadata.json": "16e6e2790592108bd43f2851c162d179a49ae46856833f474bc9bbc0bc0137b8"
+    }
+   },
+   {
+    "game_id": "cr01-63be02fb",
+    "short": "cr01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard_click",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Creek crossing: limited ACTION6 planks on river; planks break when you leave; reach the goal.",
+    "tags": [
+     "static",
+     "bridge",
+     "click"
+    ],
+    "path": "community/environment_files/cr01/63be02fb",
+    "sha256": {
+     "cr01.py": "517e526e42efa6ccc5ef157d13d7266096f76a3c3dd30c363b1b3e35232c950f",
+     "metadata.json": "4de58b95e755ffc607d31eb115b7f5f1b7004fa5869b29943aa4292ce2eba300"
+    }
+   },
+   {
+    "game_id": "cs01-v1",
+    "short": "cs01",
+    "family": "图 / 电路",
+    "category": "Graph / Click",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Vertex cover: toggle cyan vertices so every edge touches a selected vertex within budget.",
+    "tags": [
+     "static",
+     "click",
+     "graph"
+    ],
+    "path": "community/environment_files/cs01/v1",
+    "sha256": {
+     "cs01.py": "95bfff55063e06644b84658d0d0f9c9f6571a19bd8c5f9f6bf676f3e4027d6eb",
+     "metadata.json": "c5f98bdf1f480379cd96ad863b3c4012bfe69e326bc47cf23e5fe45faadb644c"
+    }
+   },
+   {
+    "game_id": "ct01-v1",
+    "short": "ct01",
+    "family": "图 / 电路",
+    "category": "Graph / Click",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Independent cover: no adjacent selections; every gray mark must be selected or orth-adjacent to one.",
+    "tags": [
+     "static",
+     "click",
+     "graph"
+    ],
+    "path": "community/environment_files/ct01/v1",
+    "sha256": {
+     "ct01.py": "f7578eb04f0ff94a2557768e2f2d33d8919094d74e1bf0b53417100a8994bd23",
+     "metadata.json": "74359fd19871bda4341b460128bedf86cb2dff9822e8e015a6d8993ede487198"
+    }
+   },
+   {
+    "game_id": "cu01-v1",
+    "short": "cu01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Tiling / Click",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Cover yellow: ACTION5 domino vs L-tool; ACTION6 places.",
+    "tags": [
+     "tiling",
+     "click"
+    ],
+    "path": "community/environment_files/cu01/v1",
+    "sha256": {
+     "cu01.py": "0ed511ee724a223a00e9cea5ee89306116c71df274ee4e920d423a846e2ff019",
+     "metadata.json": "b6906e4b1795f98ca97e53cfcbb7952151bf13d3455ad7f4ce175544b961b3ec"
+    }
+   },
+   {
+    "game_id": "cv01-v1",
+    "short": "cv01",
+    "family": "图 / 电路",
+    "category": "Graph / Click",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "List coloring: ACTION6 cycles allowed colors; neighbors differ.",
+    "tags": [
+     "graph",
+     "click"
+    ],
+    "path": "community/environment_files/cv01/v1",
+    "sha256": {
+     "cv01.py": "19f1341f52cff6f9cad3686b7e26d2fdc119e96274ba0b6dc764ca847d5137af",
+     "metadata.json": "1130c77b55903b0408001f1a5294d2adb21defa0f4f8a734c8b2d559a22655fa"
+    }
+   },
+   {
+    "game_id": "cw01-v1",
+    "short": "cw01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Click",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "2-SAT literals: ACTION6 toggles a variable; satisfy all clauses.",
+    "tags": [
+     "logic",
+     "sat"
+    ],
+    "path": "community/environment_files/cw01/v1",
+    "sha256": {
+     "cw01.py": "e3b7d657dc460009852b13cc979d817ad74c6ea82a8236d9f57355942b6f76e8",
+     "metadata.json": "f90ad1be92103719769e70dd7e0a6979a7f0b1dc05c0f5b3ba76dbdd0b8800d5"
+    }
+   },
+   {
+    "game_id": "cx01-v1",
+    "short": "cx01",
+    "family": "图 / 电路",
+    "category": "Graph / Click",
+    "input": "click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Disconnect cut: toggle gates until S and T split.",
+    "tags": [
+     "graph",
+     "click"
+    ],
+    "path": "community/environment_files/cx01/v1",
+    "sha256": {
+     "cx01.py": "8294e9c22dcfbe58b6b0608da003ba672294ac63226de6265aa15afd7e478f55",
+     "metadata.json": "a3142bd0bb64494ecdd60530484edca24b3779f27b84960acb1d42de6b309f1e"
+    }
+   },
+   {
+    "game_id": "cy01-63be02fb",
+    "short": "cy01",
+    "family": "移动与协调",
+    "category": "Movement / Field",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Cyclic conveyor: on conveyor row, after each step slide west while free.",
+    "tags": [
+     "static",
+     "movement",
+     "conveyor"
+    ],
+    "path": "community/environment_files/cy01/63be02fb",
+    "sha256": {
+     "cy01.py": "deb3f2f4f962e6e29a188bf88987ed2df0f70a3d033294594f57532ca63abb1c",
+     "metadata.json": "32ef7f0bf7f9202e2dc751193808251be4fe5663f54d28325d146384f7ca0d1a"
+    }
+   },
+   {
+    "game_id": "cz01-v1",
+    "short": "cz01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Click",
+    "input": "keyboard_click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Row XOR pick: ACTION1–4 select row 0–3; ACTION6 flips all bits in that row; match target.",
+    "tags": [
+     "static",
+     "logic"
+    ],
+    "path": "community/environment_files/cz01/v1",
+    "sha256": {
+     "cz01.py": "90cf031d43481a1755d57240b982e6eb6b7cbe66dd7b289a0d780392b0076a10",
+     "metadata.json": "3f46339c8ec2b6e812684d16ee4a0399cfbefea721954a47ef74a380c78708ec"
+    }
+   },
+   {
+    "game_id": "dd01-63be02fb",
+    "short": "dd01",
+    "family": "推箱 / 环境操作",
+    "category": "Logistics",
+    "input": "keyboard",
+    "grid": "48×48",
+    "levels": "5",
+    "description": "Routed delivery: colored parcels → matching customers (same tile color); each order has an SLA deadline (late = lose) plus a global step budget. ACTION5 picks…",
+    "tags": [
+     "static",
+     "logistics",
+     "48-grid"
+    ],
+    "path": "community/environment_files/dd01/63be02fb",
+    "sha256": {
+     "dd01.py": "8840dc94b214d87f6d775c8d44fba4cc4896993ffdfb1512ce8a73eebcf11b49",
+     "metadata.json": "80a274fbf5f3e5f0e2a33956f4f2b1867b93432bfb88bd17f7352adfd89937a7"
+    }
+   },
+   {
+    "game_id": "df01-v1",
+    "short": "df01",
+    "family": "模拟 / 场",
+    "category": "Field / Simulation",
+    "input": "keyboard_click",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Heat diffusion: hot/cold sources; temperature diffuses each step; goal needs band hit; ACTION6 vents 3×3.",
+    "tags": [
+     "static",
+     "simulation"
+    ],
+    "path": "community/environment_files/df01/v1",
+    "sha256": {
+     "df01.py": "f998a5e60cdc542658b48297da357a8950917d42e0a5fd4ff93232b04f240b9f",
+     "metadata.json": "850e3b8c55b3c2a47c647c143cd43092a9d4c7b315be74bff6378322ac4df977"
+    }
+   },
+   {
+    "game_id": "df04-v1",
+    "short": "df04",
+    "family": "模拟 / 场",
+    "category": "Field / Simulation",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Diffuse only: ACTION5 heat step; ACTION6 3×3 vent; probe in band.",
+    "tags": [
+     "simulation",
+     "field"
+    ],
+    "path": "community/environment_files/df04/v1",
+    "sha256": {
+     "df04.py": "ce1b8ba2efea114d51054daaf599df03743b4138e8287fd698530741d49a8989",
+     "metadata.json": "697375b29ed17d8e08e32254d7be7bea0a27c8a328a75a2aa999fc93500cfbff"
+    }
+   },
+   {
+    "game_id": "dg01-63be02fb",
+    "short": "dg01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Dig mud only: ACTION5 clears one orth-adjacent brown mud cell (budget); does not break dr01/mx01 stone walls.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "dig"
+    ],
+    "path": "community/environment_files/dg01/63be02fb",
+    "sha256": {
+     "dg01.py": "23a862634931a24ca0b72460be3e802cbbf23273951d4cc4fac689fb9333870e",
+     "metadata.json": "f3c79f00ac58258885bfcf6b45c583a27b74ccc10b2dfe72561c0ba7ec63f8fa"
+    }
+   },
+   {
+    "game_id": "dl01-63be02fb",
+    "short": "dl01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Planning",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Delay line: moves queue (max 3); each step runs the oldest pending move then enqueues the current direction; ACTION5 clears the queue.",
+    "tags": [
+     "static",
+     "puzzle",
+     "planning"
+    ],
+    "path": "community/environment_files/dl01/63be02fb",
+    "sha256": {
+     "dl01.py": "b303ff03d9f47b6fb806683e45278bd572dd1537705969d5fd7320e1976a6a81",
+     "metadata.json": "cdb27f28a913052736dfafac03c3370fd5afdd7d5250991a6218daba0c1761f3"
+    }
+   },
+   {
+    "game_id": "dm01-63be02fb",
+    "short": "dm01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Tiling",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Domino cover: ACTION6 toggles dominoes on valid pairs; cover all marked cells once.",
+    "tags": [
+     "static",
+     "click",
+     "puzzle"
+    ],
+    "path": "community/environment_files/dm01/63be02fb",
+    "sha256": {
+     "dm01.py": "58e5ad446b67aa1d6d70fc47e11a75e71dd65c3042e872d72002467c1bfb70b5",
+     "metadata.json": "05ee6fa162eeec607f8eb20060668c14a33699247f14f8c324e030464bb9aac4"
+    }
+   },
+   {
+    "game_id": "dm04-v1",
+    "short": "dm04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Tiling",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "L-tromino cover: three ACTION6 picks forming an L in a 2×2 cover marked cells.",
+    "tags": [
+     "static",
+     "click",
+     "tiling"
+    ],
+    "path": "community/environment_files/dm04/v1",
+    "sha256": {
+     "dm04.py": "3376f9c81159771a82f1e96f03d2c771b8024f5285b43c42a9e577d30d6870d0",
+     "metadata.json": "2d866be7241e59774631652fd453175f55aba0a884d5f2795d21a30109054d6d"
+    }
+   },
+   {
+    "game_id": "dn01-v1",
+    "short": "dn01",
+    "family": "拓扑 / 几何",
+    "category": "Topology / Torus",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Donut wind: torus wrap east increments winding; need winding ≥ 2 on the goal to clear.",
+    "tags": [
+     "static",
+     "topology"
+    ],
+    "path": "community/environment_files/dn01/v1",
+    "sha256": {
+     "dn01.py": "ca4598efb0a2acf814b93c5e5134bb5ab3bd63fa5b4510179adf5b08e985303d",
+     "metadata.json": "77dfe6080247fc8ee566a7400053289d67a65411a8c2ef5388d78712ecbb1531"
+    }
+   },
+   {
+    "game_id": "dp01-v1",
+    "short": "dp01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Planes",
+    "input": "keyboard",
+    "grid": "10×14",
+    "levels": "5",
+    "description": "Spatial A/B planes (not dv01 timeline): ACTION5 swaps plane_a vs plane_b wall layers on the same board; HUD yellow top cue = overlay planes.",
+    "tags": [
+     "static",
+     "planning"
+    ],
+    "path": "community/environment_files/dp01/v1",
+    "sha256": {
+     "dp01.py": "968b0d73f5e1a185a0a352efb9625e5165247da33140ba20d57a4ef42ed02a2e",
+     "metadata.json": "c65a9a7fd9d2ba9115c76a03752179f61b08eeb62881b424875b5be35011d0d7"
+    }
+   },
+   {
+    "game_id": "dr01-63be02fb",
+    "short": "dr01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Rush",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Drill (wall + rush): ACTION5 destroys one orth-adjacent grid wall; strict step budget — not mx01 melt budget style or dg01 mud dig.",
+    "tags": [
+     "static",
+     "puzzle",
+     "10-grid"
+    ],
+    "path": "community/environment_files/dr01/63be02fb",
+    "sha256": {
+     "dr01.py": "a17c8178cc551646abf3e8145e418791a781161e8323676fc5c79e8f3be71e97",
+     "metadata.json": "c8dd0563e412113123cf431c8499fb947a822bee3b7f11c55a35d02a165fd368"
+    }
+   },
+   {
+    "game_id": "dt01-63be02fb",
+    "short": "dt01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Detour: cyan waypoint arms only when you enter it from the required side (waypoint_enter_from: n/ e/ s/ w); then the yellow goal counts.",
+    "tags": [
+     "static",
+     "puzzle",
+     "routing"
+    ],
+    "path": "community/environment_files/dt01/63be02fb",
+    "sha256": {
+     "dt01.py": "d0a1a59af67739e257686713ef94038ed9b1b96fe39efb39a6982f895e2c1ffa",
+     "metadata.json": "421d45f9875d0be6a0331ae834211e92d4ffd628000b514d35add1aa21986da5"
+    }
+   },
+   {
+    "game_id": "dv01-63be02fb",
+    "short": "dv01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Timeline",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Timeline walls (not dp01 planes): ACTION5 swaps which wall set is solid (t0 / t1); HUD red top cue = branch timeline.",
+    "tags": [
+     "static",
+     "movement",
+     "timeline"
+    ],
+    "path": "community/environment_files/dv01/63be02fb",
+    "sha256": {
+     "dv01.py": "88cb015283b186bfebe094095093dad77414675e8c80e3a84660dca9c1ce5667",
+     "metadata.json": "db08f49812c992cb200c97593899b147e76132fc1771854c59196073f4eed77f"
+    }
+   },
+   {
+    "game_id": "eb01-63be02fb",
+    "short": "eb01",
+    "family": "移动与协调",
+    "category": "Movement / Field",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Escalator row: on the marked row, after each move you auto-slide east while free.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "conveyor"
+    ],
+    "path": "community/environment_files/eb01/63be02fb",
+    "sha256": {
+     "eb01.py": "dbe59f50564ee8b3f2ff0dbcd9c1a8ff3d47f8d2d2592a568e7d3530e8ff7258",
+     "metadata.json": "9e0740c86cb22e6e30e9f1a286eb6a8e87064a602d8768443c89e4c28a41aa0a"
+    }
+   },
+   {
+    "game_id": "ec01-v1",
+    "short": "ec01",
+    "family": "移动与协调",
+    "category": "Coordination / Mirror",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Echo ghost: a mirror copy moves with reflected horizontal delta; wall collision for the echo blocks the whole move.",
+    "tags": [
+     "static",
+     "planning"
+    ],
+    "path": "community/environment_files/ec01/v1",
+    "sha256": {
+     "ec01.py": "9335c20c73a453b068787ec1a59d1123b606bed7a7ff0c22fa20abb899de2f75",
+     "metadata.json": "08bbb04049e8fcd4f8cbfc522fad46cae1263bed503279b4f5dcd78348a00d7e"
+    }
+   },
+   {
+    "game_id": "eg01-v1",
+    "short": "eg01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern / Click",
+    "input": "click",
+    "grid": "6×6",
+    "levels": "7",
+    "description": "Hamming target: ACTION6 cycles cell color; win when distance to target ≤ D.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/eg01/v1",
+    "sha256": {
+     "eg01.py": "02da07ca75aa681b307e6b0e6f3f196adb88b8049a0613c54ef8e3d0b56bb166",
+     "metadata.json": "e7825f124d64c47612b378877b090f9115adfbc58e6acfd70ddf1e40c0bbe38b"
+    }
+   },
+   {
+    "game_id": "em01-63be02fb",
+    "short": "em01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Planning",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Echo move: every second step repeats your previous cardinal delta.",
+    "tags": [
+     "static",
+     "puzzle",
+     "10-grid"
+    ],
+    "path": "community/environment_files/em01/63be02fb",
+    "sha256": {
+     "em01.py": "57c4e23a57486b42fc23436783b9ce3a81744aabc0c9097c583225c69a6e06fd",
+     "metadata.json": "7c3e73621f504a215b178081b301e7477d0a168e2d475502db009ec6dfae146d"
+    }
+   },
+   {
+    "game_id": "ep01-v1",
+    "short": "ep01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Budget",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Pain budget: entering a cell costs its visit count; exceed the global budget to lose.",
+    "tags": [
+     "static",
+     "path"
+    ],
+    "path": "community/environment_files/ep01/v1",
+    "sha256": {
+     "ep01.py": "cdb31a71d7207d0177e7840d8f713c24e36da283b474afb1f77f6e7c1b4a28e3",
+     "metadata.json": "d324bb865aa38f2586495b84d2a99ded60008cf7b6681d5255e2f4178007cbc7"
+    }
+   },
+   {
+    "game_id": "es01-63be02fb",
+    "short": "es01",
+    "family": "移动与协调",
+    "category": "Escort",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Co-op escort: friendly NPC steps one toward you every player move; both must reach colored goals; bump = lose — not hs01 hunter cadence.",
+    "tags": [
+     "static",
+     "movement",
+     "multi-agent"
+    ],
+    "path": "community/environment_files/es01/63be02fb",
+    "sha256": {
+     "es01.py": "16a839cea7cdf67446f088265ce3de38c2db57f1d86fae4c65ea5fac9b6383eb",
+     "metadata.json": "812dc9f6f1b8a75b028dfd21dc3aad62fb2befb0751a574acaf1005571531a95"
+    }
+   },
+   {
+    "game_id": "ex01-63be02fb",
+    "short": "ex01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Exit hold: stand on green exit pad and repeat ACTION5 hold_frames times to clear.",
+    "tags": [
+     "static",
+     "puzzle",
+     "timing"
+    ],
+    "path": "community/environment_files/ex01/63be02fb",
+    "sha256": {
+     "ex01.py": "a64765da7d970bd89d0cec2f91b1a64ae1f24192bd2691d8317cb18a9482b152",
+     "metadata.json": "d0e206e5c7bb7ab57e97d5e6a072ecf247c5111ddc286b142b7bb13d9fa6941b"
+    }
+   },
+   {
+    "game_id": "ex02-63be02fb",
+    "short": "ex02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Sliding exit hold: ACTION5 on pad increments hold; moving only decays hold by 1 (not full reset).",
+    "tags": [
+     "static",
+     "puzzle",
+     "hold"
+    ],
+    "path": "community/environment_files/ex02/63be02fb",
+    "sha256": {
+     "ex02.py": "4bec0190a2bd0a5ad5e85feefbad11f7eadfb2547f1b183620109027f30ffe8b",
+     "metadata.json": "e56b94696f979a66794e7c24706a0b5adc762a4d89ba5f8d3053a01d2f1c2b93"
+    }
+   },
+   {
+    "game_id": "ex03-63be02fb",
+    "short": "ex03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Moving exit hold: like ex02, but the green pad slides on a timer (pad_period, pad_delta).",
+    "tags": [
+     "static",
+     "puzzle",
+     "hold"
+    ],
+    "path": "community/environment_files/ex03/63be02fb",
+    "sha256": {
+     "ex03.py": "636356168b137c38fb3456c89323835ec9863f885de0c5d81d35554911543252",
+     "metadata.json": "78f520b530a6acef2e87e9fce0373494a985d8bd58cb8e52a8e611da96c5240f"
+    }
+   },
+   {
+    "game_id": "ez01-63be02fb",
+    "short": "ez01",
+    "family": "教程 / 移动基础",
+    "category": "Tutorial / Movement Basics",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Go UP to reach the target.",
+    "tags": [
+     "static",
+     "tutorial",
+     "directional"
+    ],
+    "path": "community/environment_files/ez01/63be02fb",
+    "sha256": {
+     "ez01.py": "fa740acce92e5b4c0c7088bd5da71783f109842b2ac161ff20bc95213b5ac366",
+     "metadata.json": "84d348d7ac08a9201f375ad018a33f127dee648c9be245e153936b98820101cd"
+    }
+   },
+   {
+    "game_id": "ez02-63be02fb",
+    "short": "ez02",
+    "family": "教程 / 移动基础",
+    "category": "Tutorial / Movement Basics",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Go LEFT to reach the target.",
+    "tags": [
+     "static",
+     "tutorial",
+     "directional"
+    ],
+    "path": "community/environment_files/ez02/63be02fb",
+    "sha256": {
+     "ez02.py": "31c69c9411fe3d07b4c0c39ad6b9af23bcb778fdcde58b90a13d98dcc2a14413",
+     "metadata.json": "897c8af7dba649136639bef8053462103a54322b8aa59a0865b2d73ca4a243c1"
+    }
+   },
+   {
+    "game_id": "ez03-63be02fb",
+    "short": "ez03",
+    "family": "教程 / 移动基础",
+    "category": "Tutorial / Movement Basics",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Go RIGHT to reach the target.",
+    "tags": [
+     "static",
+     "tutorial",
+     "directional"
+    ],
+    "path": "community/environment_files/ez03/63be02fb",
+    "sha256": {
+     "ez03.py": "0efb9c115380c95691506b134d0cc0e7b40b4e567c5034fb898390a3d391a2a4",
+     "metadata.json": "2df4e0ce2f905dc880a0ec07fa584c7ddd9e6cb46c229d3b0b7cc6d40a0ac6e8"
+    }
+   },
+   {
+    "game_id": "ez04-63be02fb",
+    "short": "ez04",
+    "family": "教程 / 移动基础",
+    "category": "Tutorial / Movement Basics",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Go DOWN to reach the target.",
+    "tags": [
+     "static",
+     "tutorial",
+     "directional"
+    ],
+    "path": "community/environment_files/ez04/63be02fb",
+    "sha256": {
+     "ez04.py": "323233a053194d51214bc9cb7826e21badff8655c098b305dce1c864b5f6994d",
+     "metadata.json": "12def59902bd71b7bf40627de0a809ad6da7da6b6750c1f8d08494d1cd17385a"
+    }
+   },
+   {
+    "game_id": "fb01-v1",
+    "short": "fb01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Hazard / Push",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Fuse bombs: push bombs with countdown; blast removes adjacent weak walls and loses if you are adjacent.",
+    "tags": [
+     "static",
+     "hazard"
+    ],
+    "path": "community/environment_files/fb01/v1",
+    "sha256": {
+     "fb01.py": "c01dda6febf6fd0c8c5160693e1087b0ee77b68247905390168015de569e7def",
+     "metadata.json": "2d71d63080623b72b2d1e9c3d4577f7ad30b27c33ac8e79a81551343145c1775"
+    }
+   },
+   {
+    "game_id": "fc01-v1",
+    "short": "fc01",
+    "family": "移动与协调",
+    "category": "Coordination / Chain",
+    "input": "keyboard",
+    "grid": "14×10",
+    "levels": "5",
+    "description": "Follow chain: three tails copy prior segment positions; you and tails must reach the exit neighborhood together.",
+    "tags": [
+     "static",
+     "coordination"
+    ],
+    "path": "community/environment_files/fc01/v1",
+    "sha256": {
+     "fc01.py": "3fa49ae7a9ae9b1b3129c6149fc89173c0e90e7d9a29cbb41c24528b0d8403dc",
+     "metadata.json": "d386ec1b24d171bd2c701b0375bbd827c11c3e02d1d273f83a93bc22c8fdbe53"
+    }
+   },
+   {
+    "game_id": "fe02-v1",
+    "short": "fe02",
+    "family": "模拟 / 场",
+    "category": "Simulation / Abstract",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Vote + ratify: ACTION1–4 tally; ACTION5 picks the leading rule (tie → higher index) and applies one (a,b,c) tick; need ratifications / level; keep a,b,c in 1..…",
+    "tags": [
+     "simulation",
+     "abstract"
+    ],
+    "path": "community/environment_files/fe02/v1",
+    "sha256": {
+     "fe02.py": "950391a36f2742ef3eb47caa7afdca2931f4007c92e273b6fc9afb281c3585ea",
+     "metadata.json": "884217c8173be711e6fba4029e3ace5c4d8ad79e66fc8857f5dc2b395ad48032"
+    }
+   },
+   {
+    "game_id": "ff01-63be02fb",
+    "short": "ff01",
+    "family": "拓扑 / 几何",
+    "category": "Precision / Topology",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Flood fill: click inside closed regions to paint them yellow. Five levels mix rectangles, donut/ring, and C-bays with ramping shape count. Sq01-style click rip…",
+    "tags": [
+     "topology",
+     "flood-fill",
+     "precision"
+    ],
+    "path": "community/environment_files/ff01/63be02fb",
+    "sha256": {
+     "ff01.py": "fa507bb051384513f7b1293620bedd2f33006d4c183907af6a704d719a974830",
+     "metadata.json": "6692861885deafdb038e723b5a5a27484598db6325a47a6b9f92445dbd3fe08e"
+    }
+   },
+   {
+    "game_id": "ff02-63be02fb",
+    "short": "ff02",
+    "family": "拓扑 / 几何",
+    "category": "Precision / Topology",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Flood unpaint: interiors start filled; ACTION6 erases a clicked enclosure; gray hints must end empty. ACTION1–4 no-op.",
+    "tags": [
+     "static",
+     "topology",
+     "click"
+    ],
+    "path": "community/environment_files/ff02/63be02fb",
+    "sha256": {
+     "ff02.py": "3064f37eb36c1526b79ba6525eca6afb259b7c8a0a3e5c2084d93ec80a803eff",
+     "metadata.json": "d60a5b31be9e18aaa1cdd51030ef59e3bbe6c55af288641cc6d2a56e23d0e4ab"
+    }
+   },
+   {
+    "game_id": "ff03-63be02fb",
+    "short": "ff03",
+    "family": "拓扑 / 几何",
+    "category": "Precision / Topology",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Limited erases (ff02 variant): capped enclosure erasers per level in data.",
+    "tags": [
+     "static",
+     "topology",
+     "click"
+    ],
+    "path": "community/environment_files/ff03/63be02fb",
+    "sha256": {
+     "ff03.py": "611434433916d8946d9dbb5df2f632dc34af1d7c5297ad2717332a70ee66e803",
+     "metadata.json": "a868c913b5ccc956b0ba41517e7be7826ec0cb86be64db1f7a27cb4ce6daac5f"
+    }
+   },
+   {
+    "game_id": "ff04-v1",
+    "short": "ff04",
+    "family": "拓扑 / 几何",
+    "category": "Precision / Topology",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Gradient budget flood: grow paint from seed; total Manhattan cost to seed ≤ budget; match gray hints.",
+    "tags": [
+     "static",
+     "click",
+     "topology"
+    ],
+    "path": "community/environment_files/ff04/v1",
+    "sha256": {
+     "ff04.py": "628708e725b29fb41e9d3096fde3bcdc926e3f518bbe1b416bfbdf9cb1a0c9d3",
+     "metadata.json": "c3842080645146b3dc853dc768577c05162644f9e8792e26a532d539d2f214ab"
+    }
+   },
+   {
+    "game_id": "fg01-63be02fb",
+    "short": "fg01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Exploration",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Fog (visibility): Chebyshev radius r hides far tiles in render only — no kb01 key-distance leash rule.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "fog"
+    ],
+    "path": "community/environment_files/fg01/63be02fb",
+    "sha256": {
+     "fg01.py": "6dd576fe8e882ec69847651ffa1417210b577c22054f9c5770f8b00c3d9629c6",
+     "metadata.json": "c0860e6c01cb8db44c28ea7ae90895c417a866558b780807f4082589bc1f1927"
+    }
+   },
+   {
+    "game_id": "fi01-63be02fb",
+    "short": "fi01",
+    "family": "模拟 / 场",
+    "category": "Simulation / Hazard",
+    "input": "keyboard",
+    "grid": "14×14",
+    "levels": "5",
+    "description": "Firebreak: fire spreads each step; ACTION5 places a blue break tile blocking spread.",
+    "tags": [
+     "static",
+     "simulation",
+     "14-grid"
+    ],
+    "path": "community/environment_files/fi01/63be02fb",
+    "sha256": {
+     "fi01.py": "02c759cf19bbda946f2176f191c9c3e3530268676bc2e7e34171848ceddf5cec",
+     "metadata.json": "b139c788c0b595c7d4cb4dea3fa78288ced79d829107457012cc7cd70b3e14ba"
+    }
+   },
+   {
+    "game_id": "fl01-63be02fb",
+    "short": "fl01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Numberlink",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Numberlink: connect numbered endpoints with paths of exact per-pair length; no overlap (pairs, length in data). ACTION6 extends/cuts at the clicked grid cell.",
+    "tags": [
+     "static",
+     "path",
+     "puzzle"
+    ],
+    "path": "community/environment_files/fl01/63be02fb",
+    "sha256": {
+     "fl01.py": "1c8571a1d31b1af6046b9ea3678ec0ed855b3669f53d1812b31a686b7e2a8852",
+     "metadata.json": "08b279492ca18e08650eb92cc6b67de0ec3d3b8766d558682f1f6e35e14d3461"
+    }
+   },
+   {
+    "game_id": "fl04-v1",
+    "short": "fl04",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Click",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Capped path: connect A→B with click path length ≤ max_len.",
+    "tags": [
+     "path",
+     "click",
+     "budget"
+    ],
+    "path": "community/environment_files/fl04/v1",
+    "sha256": {
+     "fl04.py": "5608d72f0383bcc176fb34c02b410e32b9f2011e1caaaeaa2452e25b55603bd9",
+     "metadata.json": "8ffbbabf5b94ba7c3ebf7c55c970fcd2902c6fd6c0b9612498544b1bd618f5b5"
+    }
+   },
+   {
+    "game_id": "fs01-63be02fb",
+    "short": "fs01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Floor switches. Step on every yellow pressure plate (any order) to open the gray door, then reach the green goal.",
+    "tags": [
+     "static",
+     "puzzle",
+     "switches"
+    ],
+    "path": "community/environment_files/fs01/63be02fb",
+    "sha256": {
+     "fs01.py": "8c6f52a85d5ce605904e9290780dcf0c13170c11376c333cfb869767af75c141",
+     "metadata.json": "0555f3f4451752d426809c7ed920a45186346a9d66313099229b3861143e2949"
+    }
+   },
+   {
+    "game_id": "fs02-63be02fb",
+    "short": "fs02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Floor switches OR: orange plates — stepping on any one opens the door (redundant branches, not a count).",
+    "tags": [
+     "static",
+     "puzzle",
+     "switches"
+    ],
+    "path": "community/environment_files/fs02/63be02fb",
+    "sha256": {
+     "fs02.py": "44fab35e501488966b69768e0a66ca409b0c2712c3736129fff4a1a141d064e0",
+     "metadata.json": "e592957fd8d0952c3a72269960fddd7127a8df9fe4f5ad26509b15ca47bf2814"
+    }
+   },
+   {
+    "game_id": "fs03-63be02fb",
+    "short": "fs03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Floor switches k-of-n: step on k distinct yellow plates (any order); k = required_plates in level data (corner HUD shows k ticks). Extras optional.",
+    "tags": [
+     "static",
+     "puzzle",
+     "switches"
+    ],
+    "path": "community/environment_files/fs03/63be02fb",
+    "sha256": {
+     "fs03.py": "2426cb935794671c7f0b40328d7985c1c25f742d7672e6e3f76cf867fac40d3a",
+     "metadata.json": "ab87e355aa0d7a6df1695eaf2a8fd292778b96178f5712af04a338b79ce7f380"
+    }
+   },
+   {
+    "game_id": "fw01-63be02fb",
+    "short": "fw01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Simulation",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Wildfire: fire spreads on a timer; ACTION6 splashes water (3×3); standing on fire (walk or spread) loses; reach the green exit.",
+    "tags": [
+     "static",
+     "survival",
+     "simulation"
+    ],
+    "path": "community/environment_files/fw01/63be02fb",
+    "sha256": {
+     "fw01.py": "10bae0543a973d249c2558c67d04b93cff404f22437efad8c6dcef0d715fe10d",
+     "metadata.json": "227815f18060d3bbb26bfab3ee2dcbcd07d3fbf0131d5db64edcde18d7a8c5da"
+    }
+   },
+   {
+    "game_id": "gc01-v1",
+    "short": "gc01",
+    "family": "模拟 / 场",
+    "category": "Growth / Routing",
+    "input": "keyboard",
+    "grid": "14×14",
+    "levels": "5",
+    "description": "Coral creep: coral spreads to empty neighbors every M steps (blocking, non-lethal); reach the goal.",
+    "tags": [
+     "static",
+     "growth"
+    ],
+    "path": "community/environment_files/gc01/v1",
+    "sha256": {
+     "gc01.py": "7d6aac0cb9d5eba9d9ac77feb62fdaf5bf1815c815f5fae4cddb7daacd5685b4",
+     "metadata.json": "c195959bdc99e8f48c5e5032d1a5e39544acc6195e6a11a9ac11090a75b6cda7"
+    }
+   },
+   {
+    "game_id": "gl01-63be02fb",
+    "short": "gl01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Hazard / Path",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Revisit rule: 2 free, 3rd loses — same cell third visit loses (vs vp01 one-and-done).",
+    "tags": [
+     "static",
+     "hazard",
+     "10-grid"
+    ],
+    "path": "community/environment_files/gl01/63be02fb",
+    "sha256": {
+     "gl01.py": "dc611b96ce8f65d9bd7d2bc6eceaf93b4bd69848002cf28bc3237c4f97044d8d",
+     "metadata.json": "adf9c0cd14a60dd65305208c02500fd96f0a5f89957ad67619c49e358bc74a23"
+    }
+   },
+   {
+    "game_id": "gp01-63be02fb",
+    "short": "gp01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Per-cell paint to match hints: ACTION6 flips only the clicked cell yellow/off to match gray template — no neighbor kernel (lo01 / lo05).",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/gp01/63be02fb",
+    "sha256": {
+     "gp01.py": "bb7a045246c8cdae3702f88dec1712986e4d4d093b7ea96a49735ff6cce41c40",
+     "metadata.json": "a6cc247b9f2be703b190c7f5aeb22ef50c4a53de02bac5c533110287f1add3c2"
+    }
+   },
+   {
+    "game_id": "gp02-63be02fb",
+    "short": "gp02",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Grid paint erase: floor starts fully painted; ACTION6 erases yellow; leave paint only on gray hint cells.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/gp02/63be02fb",
+    "sha256": {
+     "gp02.py": "7fcebe724fa9eea4078020c8b8cee88fc1ec2c3a9ce5b4f2d45ca04b19c6235f",
+     "metadata.json": "40aab1790c369eeef26b9ef6aa0cea90361a7ca9c3624df8d7cc72739c0e519e"
+    }
+   },
+   {
+    "game_id": "gp03-63be02fb",
+    "short": "gp03",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Three-state grid paint: cycle cell colors with ACTION6; match per-cell goal palette in data.",
+    "tags": [
+     "static",
+     "pattern",
+     "paint"
+    ],
+    "path": "community/environment_files/gp03/63be02fb",
+    "sha256": {
+     "gp03.py": "31d62514e4401d4c4119bde157bdda583130b351e34358d799ed3eaaabf3b700",
+     "metadata.json": "6e91569912616cc1ee34cb197fb5654303e1bcea4f48baa089c2ab7ae5ebc4f4"
+    }
+   },
+   {
+    "game_id": "gp04-v1",
+    "short": "gp04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Blob cap: paint like gp01 but also keep ≤ K orthogonal yellow components.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/gp04/v1",
+    "sha256": {
+     "gp04.py": "a54debac05c37237dd00d7f281021fea2f2a009090d4be616ff91372ae2361cb",
+     "metadata.json": "ca72cb806f541eb0fa4e34f6955d7c854bc3468d73842f102dfda5162e24e5d2"
+    }
+   },
+   {
+    "game_id": "gr01-63be02fb",
+    "short": "gr01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "6",
+    "description": "Gravity: after each move, one auto-step down (if clear). Lose if the goal is unreachable (BFS with same rules), confirmed on two consecutive steps. Dense gray…",
+    "tags": [
+     "static",
+     "puzzle",
+     "physics"
+    ],
+    "path": "community/environment_files/gr01/63be02fb",
+    "sha256": {
+     "gr01.py": "b1eee56d7d93a63a8d8bac256b2afd4958843895a24d2b73da8ff0a7e9342b98",
+     "metadata.json": "81b6c11257c42912591abe4e0460749f6e3f197f12df55e67f8ca40a7d648cd7"
+    }
+   },
+   {
+    "game_id": "hd01-63be02fb",
+    "short": "hd01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Heat front: a heat band advances south every N steps; ACTION5 on a magenta station charges temporary immunity; reach the goal.",
+    "tags": [
+     "static",
+     "survival",
+     "timing"
+    ],
+    "path": "community/environment_files/hd01/63be02fb",
+    "sha256": {
+     "hd01.py": "d8ee3f784f6faf2efe1337d58a2a3770fd3560cf6d18f02582aad4d2fcffc93c",
+     "metadata.json": "35bd407cacd71e13ccc9fcca40d0828971f27debabfd0183f5ead8002a8c22ea"
+    }
+   },
+   {
+    "game_id": "hm01-63be02fb",
+    "short": "hm01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Coverage / Path",
+    "input": "keyboard",
+    "grid": "3-6",
+    "levels": "5",
+    "description": "Revisit rule: forbidden — Hamiltonian: every open cell exactly once (same strictness as bd01 but win = full grid, not goal-only).",
+    "tags": [
+     "static",
+     "puzzle",
+     "coverage"
+    ],
+    "path": "community/environment_files/hm01/63be02fb",
+    "sha256": {
+     "hm01.py": "32751c88578666c4f2647e9961794176b934b65b2b7d9e93d7aa8d18d69fd3be",
+     "metadata.json": "2612cc0e0408e7dea5c97a352e8443e2a3fd58e2afa54b569222cd87a7710fcc"
+    }
+   },
+   {
+    "game_id": "hn01-v1",
+    "short": "hn01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Classic",
+    "input": "keyboard",
+    "grid": "10×12",
+    "levels": "5",
+    "description": "Tower of Hanoi: ACTION1–3 pick peg; ACTION5 pick/drop top disk; stack all on the right peg.",
+    "tags": [
+     "static",
+     "logic"
+    ],
+    "path": "community/environment_files/hn01/v1",
+    "sha256": {
+     "hn01.py": "5056ef6c44f7c171bf3f4f039db36597f0626699542718cb6a03bc79e95a3be8",
+     "metadata.json": "fcea8930bfe7dcbff48d07156d68526b4f86e7cac4e062c79f2d6003bd6ab0a3"
+    }
+   },
+   {
+    "game_id": "hn04-v1",
+    "short": "hn04",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Classic",
+    "input": "keyboard",
+    "grid": "10×12",
+    "levels": "7",
+    "description": "4 peg Hanoi: ACTION1–4 select peg; ACTION5 pick/drop.",
+    "tags": [
+     "logic",
+     "classic"
+    ],
+    "path": "community/environment_files/hn04/v1",
+    "sha256": {
+     "hn04.py": "13d006aece92ab5812089ec70ba1876b9460faed5922710c068e34d771624e73",
+     "metadata.json": "26026a29434a13e577e506d53c3c7d5c0181676063126a15ca70de31fee7652d"
+    }
+   },
+   {
+    "game_id": "hs01-63be02fb",
+    "short": "hs01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Stealth / Chase",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Hostile chase: hunter moves one toward you every two player moves (slower than es01 NPC); reach goal without capture.",
+    "tags": [
+     "static",
+     "movement",
+     "chase"
+    ],
+    "path": "community/environment_files/hs01/63be02fb",
+    "sha256": {
+     "hs01.py": "be6427ab76c10d2f8945a48d8896bb31e8473a84d1dfa911b3879d54bab43e99",
+     "metadata.json": "5b299d9d40abd0911a518dd4efa2e6a423dbf2a6413aec4426d0135d0520a11d"
+    }
+   },
+   {
+    "game_id": "hz01-63be02fb",
+    "short": "hz01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Hazard / Growth",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Hazard growth: red hazards spread orthogonally every M steps.",
+    "tags": [
+     "static",
+     "movement",
+     "hazard"
+    ],
+    "path": "community/environment_files/hz01/63be02fb",
+    "sha256": {
+     "hz01.py": "e5b48ce8a07ca6aa739c41c4b8c9587b944936b8af4bef04d29548be2f63046d",
+     "metadata.json": "5f4c33633788eb9988379fc35ca9db52921423ef720650be5a506bc0545440d3"
+    }
+   },
+   {
+    "game_id": "ic01-63be02fb",
+    "short": "ic01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Ice slide: one movement action = slide in a straight line until the next cell would be OOB, a wall, or a red hazard (you stop before entering those). Yellow go…",
+    "tags": [
+     "static",
+     "puzzle",
+     "ice"
+    ],
+    "path": "community/environment_files/ic01/63be02fb",
+    "sha256": {
+     "ic01.py": "b817ac319aef981eb4a2c264303a1c10ce1701ea54ac4963d47d7b4941f90b1a",
+     "metadata.json": "a75856a28fcf9e7824b5195826d4121e7f41edb7746ed8c069e0dfd7b9aa5009"
+    }
+   },
+   {
+    "game_id": "ic02-63be02fb",
+    "short": "ic02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Torus ice slide: wraps at grid edges until a wall/hazard stops you.",
+    "tags": [
+     "static",
+     "puzzle",
+     "ice"
+    ],
+    "path": "community/environment_files/ic02/63be02fb",
+    "sha256": {
+     "ic02.py": "0d0ef5ed476904dc8defc406e98b19d69a474876487fffde785af2b840490ec2",
+     "metadata.json": "64cf77aaa46d946b1d7ae250b2c87f7a878e7ccec806cdeb300720e52fdf184a"
+    }
+   },
+   {
+    "game_id": "ic03-63be02fb",
+    "short": "ic03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Capped slide: each move travels at most slide_cap cells (level.data).",
+    "tags": [
+     "static",
+     "puzzle",
+     "ice"
+    ],
+    "path": "community/environment_files/ic03/63be02fb",
+    "sha256": {
+     "ic03.py": "ba5b68a1cdb06ff90e89aec7d41ad5e4af12a6f5b3939d24f4b31b6a0459aec4",
+     "metadata.json": "0f84157cb9459072cba8792d814c798377601a5e5f046be00bad0d0c8a12100b"
+    }
+   },
+   {
+    "game_id": "ih01-v1",
+    "short": "ih01",
+    "family": "模拟 / 场",
+    "category": "Field / Simulation",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Heaters: ACTION5 global chill; ACTION6 toggles heater pads.",
+    "tags": [
+     "simulation",
+     "click"
+    ],
+    "path": "community/environment_files/ih01/v1",
+    "sha256": {
+     "ih01.py": "8be0360fd93b80e2560b313e366082a486c1eadea75cfac4e879f0ef31b828f3",
+     "metadata.json": "3c65e8583525322f2d50b02adc968e8f25bd7192960330e0275ff378f36a4437"
+    }
+   },
+   {
+    "game_id": "in01-63be02fb",
+    "short": "in01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Hazard",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Ink trail: leaving a cell drops blocking ink.",
+    "tags": [
+     "static",
+     "movement",
+     "trail"
+    ],
+    "path": "community/environment_files/in01/63be02fb",
+    "sha256": {
+     "in01.py": "a8098ce13a9ed173d9dc2213bc07d723b79c30310b27a6bc8131464728dce835",
+     "metadata.json": "231b9133fc7d5ef79b37bf0a31b0c29054de8a1438acedb9f4050fb61b6a4aff"
+    }
+   },
+   {
+    "game_id": "ju01-63be02fb",
+    "short": "ju01",
+    "family": "移动与协调",
+    "category": "Movement / Planning",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Jump tile: landing on a jump floor moves two cells in the same direction when the skip cell is clear.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid"
+    ],
+    "path": "community/environment_files/ju01/63be02fb",
+    "sha256": {
+     "ju01.py": "1c4b573dc82cfe9ddb122bebac9c6efba27e9f10283641a92b470b646ffa2a9e",
+     "metadata.json": "92d3b6cdf7e17d18ab489dbdb08565ea4c1dd15687b6b5f0a29bb507e149d69a"
+    }
+   },
+   {
+    "game_id": "jw01-63be02fb",
+    "short": "jw01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Jigsaw swap: ACTION6 on magenta trigger swaps two authored rectangles; push boxes to the goal.",
+    "tags": [
+     "static",
+     "click",
+     "10-grid",
+     "swap"
+    ],
+    "path": "community/environment_files/jw01/63be02fb",
+    "sha256": {
+     "jw01.py": "5e91e938e0d2ad7dc4766723ce7e132002aa5b24254f886622e95fcb7765b71f",
+     "metadata.json": "e19b40b625f23443fb67a07a3fd5e297929493dd75a6c19b34fdbee9296f38b6"
+    }
+   },
+   {
+    "game_id": "kb01-63be02fb",
+    "short": "kb01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Key",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Key leash: yellow key must stay within Manhattan R of you or lose — positional rule, not fg01 sight fog.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "constraint"
+    ],
+    "path": "community/environment_files/kb01/63be02fb",
+    "sha256": {
+     "kb01.py": "e394ad92bde13ac58929fd2dcb55943ba3fb928eb0c1ebadf47b4a2b3976e228",
+     "metadata.json": "36efb06ac6344a7b9d095622e327a568f5fb2d8e1046ff1b0e2cb2e86a130046"
+    }
+   },
+   {
+    "game_id": "kn01-63be02fb",
+    "short": "kn01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Movement",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Knight’s courier: ACTION1–4 use L-shaped knight hops from the active bank; ACTION5 toggles between two banks (eight directions total).",
+    "tags": [
+     "static",
+     "movement",
+     "puzzle"
+    ],
+    "path": "community/environment_files/kn01/63be02fb",
+    "sha256": {
+     "kn01.py": "1ded87766d1fc4f47154323cc8171e34895f4247da9d1a45ac7942b8aa9919e6",
+     "metadata.json": "e6d321026fbc78cffa66c2a75bb6df59dd6ab1b8e67024fcc23d4db8f2a194c4"
+    }
+   },
+   {
+    "game_id": "kv01-v1",
+    "short": "kv01",
+    "family": "图 / 电路",
+    "category": "Circuit / Logic",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Voltage ladder: cycle three series resistors (1/2/4 Ω); ACTION5 checks probe voltages vs targets.",
+    "tags": [
+     "static",
+     "logic",
+     "circuit"
+    ],
+    "path": "community/environment_files/kv01/v1",
+    "sha256": {
+     "kv01.py": "bd4fdbf4053e3c93ede9e6ea097792fdf8163c12d6195e62e5d30f4ae641ef43",
+     "metadata.json": "ce571b95215735f0ffd61ae1378de3ca19072364a5c553c59838a63d0a44d317"
+    }
+   },
+   {
+    "game_id": "kv04-v1",
+    "short": "kv04",
+    "family": "图 / 电路",
+    "category": "Circuit / Logic",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Two ladders: ACTION1–3 / ACTION4 cycle branches; ACTION5 verify.",
+    "tags": [
+     "circuit",
+     "logic"
+    ],
+    "path": "community/environment_files/kv04/v1",
+    "sha256": {
+     "kv04.py": "feaa3de588d6b51a9ce7797882f8433e7a7d05f012e9067563ece06571957b59",
+     "metadata.json": "ecdcc888b10478226aed24f931e72272c2984143f4ce5e42cb563a585b5089a4"
+    }
+   },
+   {
+    "game_id": "lf01-63be02fb",
+    "short": "lf01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Blinking row hazard: one fixed row toggles lethal/safe every P steps — on/off stripe, not rh01 advancing band.",
+    "tags": [
+     "static",
+     "movement",
+     "timing"
+    ],
+    "path": "community/environment_files/lf01/63be02fb",
+    "sha256": {
+     "lf01.py": "38bc9efd80d38ba75f2b065712aa04cc9fb60a46d4f29bef59cb27e8152250c6",
+     "metadata.json": "cf419b8188eb4a42aa8a1d73b4c46ad179166a28b3e8f9507282e831365b9518"
+    }
+   },
+   {
+    "game_id": "lk01-v1",
+    "short": "lk01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Lock",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Lock tumblers: while the door exists ACTION1–3 cycle digits; when matched the door vanishes; then 1-4 move to goal.",
+    "tags": [
+     "static",
+     "logic"
+    ],
+    "path": "community/environment_files/lk01/v1",
+    "sha256": {
+     "lk01.py": "924dc8f4d40e665fbe4048df5e80d38afeaed3ae21bdd804d4639a71eaab7e38",
+     "metadata.json": "647a3d8cf943b772c37dce89bae93451a07eb5ce60b47cf515d026d8d62cf484"
+    }
+   },
+   {
+    "game_id": "ll01-63be02fb",
+    "short": "ll01",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "6",
+    "description": "Generations lock: Conway Life; ACTION6 toggles cells (budget); ACTION5 advances one generation; after exactly N steps the live set must equal the target. Level…",
+    "tags": [
+     "static",
+     "simulation",
+     "puzzle"
+    ],
+    "path": "community/environment_files/ll01/63be02fb",
+    "sha256": {
+     "ll01.py": "88059e172759de0312475e3f9e97f7593ee12009425bebb39a0e7e2e2b6bd2db",
+     "metadata.json": "83491f14977fb4ae476f84bce51023dfdda8d43681e353e4003e151b134df320"
+    }
+   },
+   {
+    "game_id": "ll04-v1",
+    "short": "ll04",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Torus Life: Conway on a torus; ACTION6 toggles; ACTION5 steps.",
+    "tags": [
+     "simulation",
+     "click"
+    ],
+    "path": "community/environment_files/ll04/v1",
+    "sha256": {
+     "ll04.py": "db4bdb5c60e8af972dab1d45fb4bbbdc84f761d02199fc5c079ae867486f0d9f",
+     "metadata.json": "6280fca2bfbcdecd3c81d710e29c45037c753b147c32540be1b74f20524fdae4"
+    }
+   },
+   {
+    "game_id": "lo01-63be02fb",
+    "short": "lo01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "3×3–5×5",
+    "levels": "5",
+    "description": "Orthogonal Lights Out: ACTION6 toggles self + 4 orth neighbors; clear all on — not gp01 hint paint or lo05 knight kernel.",
+    "tags": [
+     "static",
+     "click",
+     "puzzle"
+    ],
+    "path": "community/environment_files/lo01/63be02fb",
+    "sha256": {
+     "lo01.py": "fce028e6c77ede11913a555750c82c7e0972ccba1a6387ef6fc7d4758c738814",
+     "metadata.json": "07c4dfd86d2074c715c107034be4e0f477b604efa632db719972b2703e21cf02"
+    }
+   },
+   {
+    "game_id": "lo02-63be02fb",
+    "short": "lo02",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "4×4–6×6",
+    "levels": "5",
+    "description": "Torus Lights Out: ACTION6 toggles a cell and orthogonal neighbors with edge wrap; walls block toggles on their cells.",
+    "tags": [
+     "static",
+     "click",
+     "topology"
+    ],
+    "path": "community/environment_files/lo02/63be02fb",
+    "sha256": {
+     "lo02.py": "32e86f69f1884e43a6317c148cb4802b835c975fa637ebbb95b9d5d6a35b60fb",
+     "metadata.json": "700757118b60bae9efc3fe1bc1bb7591d5229b01f491684f090619ec3c1b230d"
+    }
+   },
+   {
+    "game_id": "lo03-63be02fb",
+    "short": "lo03",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "4×4–6×6",
+    "levels": "5",
+    "description": "Diagonal torus Lights Out: ACTION6 toggles cell + 8 neighbors with wrap (lo02 + diagonals).",
+    "tags": [
+     "static",
+     "click",
+     "topology"
+    ],
+    "path": "community/environment_files/lo03/63be02fb",
+    "sha256": {
+     "lo03.py": "cdc01680d60f184b0948ce81b202d1db6e422dbd278461b312c579d029f62ee6",
+     "metadata.json": "ac7d9ef0ca6ba8a96df69550865c84a5a4c46014cbffddefc204c30b13d801e3"
+    }
+   },
+   {
+    "game_id": "lo04-v1",
+    "short": "lo04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "5–6",
+    "levels": "7",
+    "description": "Diagonal Lights Out: ACTION6 toggles cell + four diagonals only.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/lo04/v1",
+    "sha256": {
+     "lo04.py": "889ac01fd5a5b1f7fbf9330179e70548edbe072b9750a97e8c8c55220efac381",
+     "metadata.json": "02912772098de0d46f8979b8ad0d56cad8adaaa04ca0bdb0e685cd92255c237a"
+    }
+   },
+   {
+    "game_id": "lo05-v1",
+    "short": "lo05",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Knight kernel: ACTION6 toggles self + all chess-knight L-step neighbors — not lo01 orth neighborhood or gp01 single-cell paint.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/lo05/v1",
+    "sha256": {
+     "lo05.py": "cf0413dae1a59f3b58efbfcaf199de738f618d340bc17508b471d1cda30a95a8",
+     "metadata.json": "88b8232e822e08a0901540160a311ce054d0eba8fedeb23b020cff4ef4cf4f3f"
+    }
+   },
+   {
+    "game_id": "lp01-v1",
+    "short": "lp01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Ordering / Lexical",
+    "input": "keyboard",
+    "grid": "9×11",
+    "levels": "5",
+    "description": "Letter path: visit letter pads in the authored word order; wrong letter loses.",
+    "tags": [
+     "static",
+     "order"
+    ],
+    "path": "community/environment_files/lp01/v1",
+    "sha256": {
+     "lp01.py": "653bb38d132d231d90eeb98a3833a6f8b8a9e65c32518114f6e140c38745863c",
+     "metadata.json": "30aed01be63e85117d255f242f5c9c864f410de33d7d4bd40b463a83a8b4cf09"
+    }
+   },
+   {
+    "game_id": "lw01-63be02fb",
+    "short": "lw01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Topology",
+    "input": "click",
+    "grid": "24–32",
+    "levels": "5",
+    "description": "Line weave: connect colored starts to matching ends with orthogonal paths; colors cannot share cells.",
+    "tags": [
+     "static",
+     "puzzle",
+     "path",
+     "click"
+    ],
+    "path": "community/environment_files/lw01/63be02fb",
+    "sha256": {
+     "lw01.py": "bd21874729e11f675c92259684f372e90b34868ef79802267c25c6c78cc753e2",
+     "metadata.json": "7a9ba4d3d9fa9a1cc878fea88d8ba10320b204047896df8fa254532dc7d43cda"
+    }
+   },
+   {
+    "game_id": "lw02-63be02fb",
+    "short": "lw02",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Topology",
+    "input": "click",
+    "grid": "24–32",
+    "levels": "5",
+    "description": "Shared corridor weave: like lw01 but paths may share cells; perpendicular entry to another color’s visited cell is forbidden.",
+    "tags": [
+     "static",
+     "path",
+     "routing"
+    ],
+    "path": "community/environment_files/lw02/63be02fb",
+    "sha256": {
+     "lw02.py": "3ab4815625922b9b21a3d77e13792237ac1773203ff30c03e472e495752b397d",
+     "metadata.json": "17cad3d6dd372a49b725ce5be03b34baadc5c807fe0c1ceac4afb7da54b76ff7"
+    }
+   },
+   {
+    "game_id": "lw03-63be02fb",
+    "short": "lw03",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Topology",
+    "input": "click",
+    "grid": "24–32",
+    "levels": "5",
+    "description": "Shared edges OK (lw02 variant): relaxed perpendicular corridor rule; segment edge ownership.",
+    "tags": [
+     "static",
+     "path",
+     "routing"
+    ],
+    "path": "community/environment_files/lw03/63be02fb",
+    "sha256": {
+     "lw03.py": "23bfd6053811ca8616c7106653da707f3a391a1f36289267a172736719323864",
+     "metadata.json": "e57d28111eceacb7135d42fdc7b824eb7900d1b95e22c37533dec548d030a56a"
+    }
+   },
+   {
+    "game_id": "lw04-v1",
+    "short": "lw04",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Path / Click",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Corner budget: connect A→B with length and turn caps.",
+    "tags": [
+     "path",
+     "click",
+     "budget"
+    ],
+    "path": "community/environment_files/lw04/v1",
+    "sha256": {
+     "lw04.py": "ff08dd7167a4dc9a9c6ffbb13025425af85f3d3c922a202ab81ce2368bdd1257",
+     "metadata.json": "8c703c67806fc9ea773005ec81be8be6eba34ba0e8a42a86e430c4c290774bca"
+    }
+   },
+   {
+    "game_id": "mb01-63be02fb",
+    "short": "mb01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Magnet crates: after each move, metal crates slide one cell toward you when free.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "magnet"
+    ],
+    "path": "community/environment_files/mb01/63be02fb",
+    "sha256": {
+     "mb01.py": "69d9991d14d15165bc25f621335ebaae4f38cd64fe1dde4c9e6b2473dc640af2",
+     "metadata.json": "db4b2021fc60aa763610e245fd2a36b87504a83bc7d86734a596fbfc817739f8"
+    }
+   },
+   {
+    "game_id": "mc01-63be02fb",
+    "short": "mc01",
+    "family": "移动与协调",
+    "category": "Coordination",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Tandem: two players take the same Δ each step; ACTION5 swaps which avatar is “lead” for collision resolution; both must reach their goals.",
+    "tags": [
+     "static",
+     "coordination",
+     "puzzle"
+    ],
+    "path": "community/environment_files/mc01/63be02fb",
+    "sha256": {
+     "mc01.py": "500fbe529a366519d42e9230caa41a7ed8bfb53b23f592e2d93a9cdb20681b09",
+     "metadata.json": "8c0f0e32e75979f77959db85234ac11c699c65f62cf22853016f53c4b97667bc"
+    }
+   },
+   {
+    "game_id": "ml01-63be02fb",
+    "short": "ml01",
+    "family": "拓扑 / 几何",
+    "category": "Geometry",
+    "input": "click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Mirror laser (single goal): global ACTION6 clicks place/cycle mirrors (purple = /, light magenta = \\\\) on any valid floor cell; ACTION5 fires a full ray; 1–4 n…",
+    "tags": [
+     "static",
+     "puzzle",
+     "geometry"
+    ],
+    "path": "community/environment_files/ml01/63be02fb",
+    "sha256": {
+     "metadata.json": "5f7cae847ffe96f0075c8bdbc1f4cf0c40e4fedb9a26ccb7e3b78500290ea5e6",
+     "ml01.py": "4e2cf6b7162d0169dc23fccbab1aa1452eaf4c86bd0f8584cd81c2e619b3386b"
+    }
+   },
+   {
+    "game_id": "ml02-63be02fb",
+    "short": "ml02",
+    "family": "拓扑 / 几何",
+    "category": "Geometry",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Dual-receptor laser: like ml01 optics but all yellow receptors in one shot; blue technician moves (1–4); ACTION6 only on cells orthogonally adjacent to technic…",
+    "tags": [
+     "static",
+     "geometry",
+     "laser"
+    ],
+    "path": "community/environment_files/ml02/63be02fb",
+    "sha256": {
+     "metadata.json": "b4c3338e518d10931421901394a79e6ae197963b5f24e055b7b532ae35f1dea6",
+     "ml02.py": "898b2cfe36a5daaf3fb9ebc00c651e29089f48e7b490f41aab93467a88854a6b"
+    }
+   },
+   {
+    "game_id": "ml03-63be02fb",
+    "short": "ml03",
+    "family": "拓扑 / 几何",
+    "category": "Geometry",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Fragile mirrors (ml02 rules): same move + adjacent mirror play as ml02, but every mirror the beam reflects from is removed after that shot (failed shots eat op…",
+    "tags": [
+     "static",
+     "geometry",
+     "laser"
+    ],
+    "path": "community/environment_files/ml03/63be02fb",
+    "sha256": {
+     "metadata.json": "00dcdd41196a35e56aa222697b054c9e9929772f59122cde8c59350b14fa752d",
+     "ml03.py": "6e61c1fd6fc9fa05ce280a873df1e7fab6c7cc55facd6ab202a2bb3ff0201918"
+    }
+   },
+   {
+    "game_id": "ml04-v1",
+    "short": "ml04",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Laser",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Stepped bolt: ACTION5 advances laser one cell per press; ACTION6 cycles fixed mirror tiles / → \\\\ → empty (no placement inventory). Optional emit_dir in level…",
+    "tags": [
+     "laser",
+     "click"
+    ],
+    "path": "community/environment_files/ml04/v1",
+    "sha256": {
+     "metadata.json": "adca467520348203ca6752e937d9482c480d2388f03e56b5b4cd2474fb4d5669",
+     "ml04.py": "4bd8ac21d622887be4d289b263f1727230ea07104cff4db7ddbdb5bda65103db"
+    }
+   },
+   {
+    "game_id": "mm01-63be02fb",
+    "short": "mm01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Hidden State",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "7",
+    "description": "Memory Match. Level 1 has 2 pairs, then +1 pair per level up to 8 pairs. Flip pairs of hidden tiles to find matching colors. Match all pairs to win. Time runs…",
+    "tags": [
+     "memory",
+     "matching",
+     "hidden-state"
+    ],
+    "path": "community/environment_files/mm01/63be02fb",
+    "sha256": {
+     "metadata.json": "b3d9467945b03f5259366e668ca3ea4ec86a3c5d62cbdf972b082cd723ebdc15",
+     "mm01.py": "0ac57e05608ed9255461c43d76d091007e37da805692306c2ec202ba4398fd47"
+    }
+   },
+   {
+    "game_id": "mm02-63be02fb",
+    "short": "mm02",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Hidden State",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Memory triples: flip three tiles; clear when all three match color.",
+    "tags": [
+     "static",
+     "memory",
+     "hidden"
+    ],
+    "path": "community/environment_files/mm02/63be02fb",
+    "sha256": {
+     "metadata.json": "093f1eb0a76f25ed62c982c80671c71976dae90ba603ec6a5f7e5ccc9637065c",
+     "mm02.py": "35ee85e1328239dea21e142cfb0049a118077c0bbd15df5c4dec7d3a6cc8218a"
+    }
+   },
+   {
+    "game_id": "mm03-63be02fb",
+    "short": "mm03",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Hidden State",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Memory quads (mm02 variant): flip four tiles; clear when all four match.",
+    "tags": [
+     "static",
+     "memory",
+     "hidden"
+    ],
+    "path": "community/environment_files/mm03/63be02fb",
+    "sha256": {
+     "metadata.json": "eb612b229dce75816f46ed7addfa753c8bc8218983c377c0c6c985b796674fc5",
+     "mm03.py": "3e744cb3ec5f936dd8495ebc1eb10f545e38fcc91ad703ea0decff1ed1d4f799"
+    }
+   },
+   {
+    "game_id": "mm04-v1",
+    "short": "mm04",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory",
+    "input": "keyboard_click",
+    "grid": "64×64",
+    "levels": "7",
+    "description": "One peek / level: ACTION5 briefly reveals unmatched tiles.",
+    "tags": [
+     "memory",
+     "click"
+    ],
+    "path": "community/environment_files/mm04/v1",
+    "sha256": {
+     "metadata.json": "c4a9d714c0bc832515a9df00229afc72a7c196852969da09de11aeec6126df38",
+     "mm04.py": "324aa22ed64363577c49b34a02dd0b4588ad81644d7b86258a697bcd4be13be3"
+    }
+   },
+   {
+    "game_id": "mm05-v1",
+    "short": "mm05",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "7",
+    "description": "Sticky matches: an edge-aligned matched pair blocks flips on cells that sit orthogonally next to both tiles (diagonal pairs do not).",
+    "tags": [
+     "memory",
+     "click"
+    ],
+    "path": "community/environment_files/mm05/v1",
+    "sha256": {
+     "metadata.json": "17b88eaecee8227333ff2dc34f76efe64a11b0fe2ad6e51bcc6aa7f48b58b9a6",
+     "mm05.py": "5bd53e9d238140a32b9e209c67f05d15e6625f9802fa47e8d589b0cc0eebd688"
+    }
+   },
+   {
+    "game_id": "mo01-63be02fb",
+    "short": "mo01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Momentum: need ≥2 steps in a row before changing direction; early turn = lose.",
+    "tags": [
+     "static",
+     "puzzle",
+     "movement"
+    ],
+    "path": "community/environment_files/mo01/63be02fb",
+    "sha256": {
+     "metadata.json": "ccb5bbfef0ca085450c8ae6df5d43a798bf50826d4863c1b26d2d8146ca09751",
+     "mo01.py": "df05298c9e643c481440121ba91619a224ac71ff808e4939f094eaf2805f3656"
+    }
+   },
+   {
+    "game_id": "ms01-63be02fb",
+    "short": "ms01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Hidden State",
+    "input": "keyboard",
+    "grid": "8-16",
+    "levels": "5",
+    "description": "Blind Sapper. Navigate a hidden minefield using deduction. Safe tiles reveal adjacent mine counts. Step on a mine = lose. Reach the goal to win. Tests working…",
+    "tags": [
+     "deduction",
+     "memory",
+     "hidden-state"
+    ],
+    "path": "community/environment_files/ms01/63be02fb",
+    "sha256": {
+     "metadata.json": "fda4a6351efa964ea3d2b8ac5753ff0c9ba8cd6eeff997cd9e8e2fc671e376d0",
+     "ms01.py": "557d2a6aede3acdde05dba6903948c7d4ff4e009e4385b8547ed89f8f40cd275"
+    }
+   },
+   {
+    "game_id": "ms02-63be02fb",
+    "short": "ms02",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Hidden State",
+    "input": "keyboard_click",
+    "grid": "8-16",
+    "levels": "5",
+    "description": "Flag sapper: ACTION6 plants flags on hidden mines; wrong flag = lose; reach the goal.",
+    "tags": [
+     "static",
+     "mines",
+     "click"
+    ],
+    "path": "community/environment_files/ms02/63be02fb",
+    "sha256": {
+     "metadata.json": "2d9f212a406cf8145c2fd3066cc483dcd5d26d7a77f588e6ec4725b0dc1f7d67",
+     "ms02.py": "bbb6152f7e397ee5add99260fa73a243f997c99c09ef358d8e6f8bee6afb95a1"
+    }
+   },
+   {
+    "game_id": "ms03-63be02fb",
+    "short": "ms03",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Memory / Hidden State",
+    "input": "keyboard_click",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Chord sapper: clues count mines in Chebyshev radius 2; ACTION6 flags (display_to_grid).",
+    "tags": [
+     "static",
+     "hidden",
+     "logic"
+    ],
+    "path": "community/environment_files/ms03/63be02fb",
+    "sha256": {
+     "metadata.json": "2384d92a7e78dd9cabb90590cd6f2add1308dbb6643e6ff2bbc4a7bb60f24cc6",
+     "ms03.py": "23b25eb12a8cc0fd9492bd24faa9b8f8b2328605c52d7596196911a6c84b8942"
+    }
+   },
+   {
+    "game_id": "ms04-v1",
+    "short": "ms04",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Deduction",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Edge-adjacent clues: ACTION6 flags mines.",
+    "tags": [
+     "logic",
+     "click"
+    ],
+    "path": "community/environment_files/ms04/v1",
+    "sha256": {
+     "metadata.json": "72001a95729fd1ad8124b0e24abe665b05b6c9795f85fdbc306ec6cadb12b3db",
+     "ms04.py": "f85b2331f24777c5fdde7489f3f20f1081a273e86788b9a2ece853e427811b39"
+    }
+   },
+   {
+    "game_id": "mx01-63be02fb",
+    "short": "mx01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Melt (wall erosion): ACTION5 removes one adjacent wall tile up to a melt budget; open a path to exit — walls only, not dg01 mud.",
+    "tags": [
+     "static",
+     "puzzle",
+     "walls"
+    ],
+    "path": "community/environment_files/mx01/63be02fb",
+    "sha256": {
+     "metadata.json": "f02c265c3e5c13963ce08cf2a13d5c2f83515a0b71dcd638e21db1bee201327d",
+     "mx01.py": "6c1e69b153bedbdbc5e665d5500ed8fa295682121ee2a33b3904cc142e4d1282"
+    }
+   },
+   {
+    "game_id": "ng01-63be02fb",
+    "short": "ng01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Deduction",
+    "input": "keyboard_click",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Nonogram lite: ACTION1–4 move the cursor; ACTION6 (click) cycles empty / filled / mark on the clicked cell (cursor jumps to click); filled cells must match the…",
+    "tags": [
+     "static",
+     "puzzle",
+     "logic"
+    ],
+    "path": "community/environment_files/ng01/63be02fb",
+    "sha256": {
+     "metadata.json": "c6f984aa5a5748477eefcc83ea967f8f4853784a818937b6ad5a3d8ead9ccfbb",
+     "ng01.py": "b63d969cbde8145b0e688d949de27020c715eb22af0b6febb6454191651c500d"
+    }
+   },
+   {
+    "game_id": "ng04-v1",
+    "short": "ng04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern / Layer",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Multi-layer cycle path edit (ng01 family).",
+    "tags": [
+     "pattern",
+     "click"
+    ],
+    "path": "community/environment_files/ng04/v1",
+    "sha256": {
+     "metadata.json": "e285da205563024a1ccddd871a17516b536bbd33cea43a6aee1e5f107acc6ce4",
+     "ng04.py": "f85f39d4ba9b01963114105a376f32e12b0583d0012843a22aeb5ee78030542b"
+    }
+   },
+   {
+    "game_id": "nu01-63be02fb",
+    "short": "nu01",
+    "family": "收集",
+    "category": "Collection / Order",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Number fuse: collect numbered tokens in descending order; wrong pickup loses.",
+    "tags": [
+     "static",
+     "puzzle",
+     "10-grid"
+    ],
+    "path": "community/environment_files/nu01/63be02fb",
+    "sha256": {
+     "metadata.json": "f49b7f80ded92e88d37665686396dc612e76ca4ddc3e3ba3b2be1ed4206536a8",
+     "nu01.py": "10fb7db667c0e334252564e9b6d09ba03d2a206913a4741336c01c56187bd7cb"
+    }
+   },
+   {
+    "game_id": "nw01-63be02fb",
+    "short": "nw01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Arrow tiles: stepping onto one queues its direction; your next move uses that vector instead of your key (then it clears). Orange HUD = forced move queued.",
+    "tags": [
+     "static",
+     "puzzle",
+     "routing"
+    ],
+    "path": "community/environment_files/nw01/63be02fb",
+    "sha256": {
+     "metadata.json": "6209f912301f1f5ad724a690596b8c68304da2b719c8a46ab25b5473a8a9ad36",
+     "nw01.py": "7b08e366d180f2ffe7454fb1dbb5202cc48ac04733e625bce4ded95a8ee51e46"
+    }
+   },
+   {
+    "game_id": "nw02-63be02fb",
+    "short": "nw02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Vector arrows: arrow tiles add to a pending (dx,dy); next move executes the sum clamped to one step.",
+    "tags": [
+     "static",
+     "movement",
+     "arrows"
+    ],
+    "path": "community/environment_files/nw02/63be02fb",
+    "sha256": {
+     "metadata.json": "5ad96a2e633371cd1c323b003d4f62571b922ef5f109edb4c8c86096fce0b896",
+     "nw02.py": "c2124d826b6463102f348a8f42bf861299e2f2fcd611cc7a9b8797e096433d65"
+    }
+   },
+   {
+    "game_id": "nw03-63be02fb",
+    "short": "nw03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Sticky vector arrows: pending impulse is only consumed after a successful move (blocked moves keep the queue).",
+    "tags": [
+     "static",
+     "puzzle",
+     "vector"
+    ],
+    "path": "community/environment_files/nw03/63be02fb",
+    "sha256": {
+     "metadata.json": "2f668d107362fea3a69725af1b742f8557928cf944710c1e5ecfe744634cf1a5",
+     "nw03.py": "3a28e478ec142f00f949c61eb30cfcb04ace74ab83a16dacc826221b3911a11d"
+    }
+   },
+   {
+    "game_id": "ob01-63be02fb",
+    "short": "ob01",
+    "family": "移动与协调",
+    "category": "Multi-Agent",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Odd one out: three bodies; ACTION5 cycles which avatar ACTION1–4 moves; each reaches its pad.",
+    "tags": [
+     "static",
+     "multi-agent",
+     "puzzle"
+    ],
+    "path": "community/environment_files/ob01/63be02fb",
+    "sha256": {
+     "metadata.json": "fef18342ae5e1d8dcdadc2a82b76156fd801db06ce23f236a75598d81ba3d350",
+     "ob01.py": "da1f7ff3aa1e7cd59e929f6b98256d0d3f8ebb830be2c4b058585be620d32ed6"
+    }
+   },
+   {
+    "game_id": "op01-63be02fb",
+    "short": "op01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "One-push crate: each crate may be pushed at most once; second push loses.",
+    "tags": [
+     "static",
+     "movement",
+     "sokoban"
+    ],
+    "path": "community/environment_files/op01/63be02fb",
+    "sha256": {
+     "metadata.json": "d2b032e4568b9014bb8cbd41894785dc39554a3e43408d95339fc67fa77fccae",
+     "op01.py": "77609ac180f611989dfdac48468d85e9f9e30ebf9fe02354ff2520999c53cbb2"
+    }
+   },
+   {
+    "game_id": "or01-63be02fb",
+    "short": "or01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Timing",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Orbit keys: keys rotate clockwise around a pillar each step; pick up when orth-adjacent, then reach the goal.",
+    "tags": [
+     "static",
+     "timing",
+     "10-grid"
+    ],
+    "path": "community/environment_files/or01/63be02fb",
+    "sha256": {
+     "metadata.json": "281c11df3c1e05347fe45b48ab32efb7b3e7cf8605e1c08a8b083410402d3f40",
+     "or01.py": "c2700f6295789547d567396cdf2523e83b034b644f898def377ec44a3f60763c"
+    }
+   },
+   {
+    "game_id": "ox01-63be02fb",
+    "short": "ox01",
+    "family": "模拟 / 场",
+    "category": "Field / XOR",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "XOR hazards: red vs magenta hazard layers alternate collidable each step.",
+    "tags": [
+     "static",
+     "movement",
+     "hazard"
+    ],
+    "path": "community/environment_files/ox01/63be02fb",
+    "sha256": {
+     "metadata.json": "a8a5f7e24318e4860a5febe9eb0d1e3d383d451a84aa95d2abf3e6694c7cb0ed",
+     "ox01.py": "f8c688c7547e090aa087451764f39cc4f6cd68cef067c8edd0a9adc1b7202649"
+    }
+   },
+   {
+    "game_id": "pb01-63be02fb",
+    "short": "pb01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Single-crate sokoban: one box + one pad + normal walking; not multi-crate sk01 complexity. Step limit exceeded = lose.",
+    "tags": [
+     "static",
+     "planning",
+     "push"
+    ],
+    "path": "community/environment_files/pb01/63be02fb",
+    "sha256": {
+     "metadata.json": "dc20b08198b8f8a164c91155d89e2b0bdde8d71201b8efb11995684d872d98c6",
+     "pb01.py": "195c068d1e8ec9bd38fd200ed7c6c18bd43d5582a19d9bef479319dba996a298"
+    }
+   },
+   {
+    "game_id": "pb02-63be02fb",
+    "short": "pb02",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Two crates, two yellow goals; push both blocks onto pads (sk01-style).",
+    "tags": [
+     "static",
+     "planning",
+     "push"
+    ],
+    "path": "community/environment_files/pb02/63be02fb",
+    "sha256": {
+     "metadata.json": "b17633609cc0109b8230660e4dbb9838671a9e62f534e3e7fa93ae1e13b00e62",
+     "pb02.py": "1667216b9136d03d187a8d5ca40bb20cab929a7edaa03fbce54c0899ebfaf913"
+    }
+   },
+   {
+    "game_id": "pb03-63be02fb",
+    "short": "pb03",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Decoy orange pad — pushing a crate onto it loses; real goals stay yellow.",
+    "tags": [
+     "static",
+     "planning",
+     "push"
+    ],
+    "path": "community/environment_files/pb03/63be02fb",
+    "sha256": {
+     "metadata.json": "96ff6ae883bc9aed1c37653324ee13f3ac1515ca5c915c95891e2cca07e1522c",
+     "pb03.py": "11c5810b56202d0dae62c7cd1ef90dc8f4c0ba722739139241c3965d62504052"
+    }
+   },
+   {
+    "game_id": "pb04-v1",
+    "short": "pb04",
+    "family": "推箱 / 环境操作",
+    "category": "Push / Minimal",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "No player movement: cyan winch tile; ACTION5 pulls the nearest crate one step along the level’s (dx,dy) toward the winch; cover all yellow pads with crates — n…",
+    "tags": [
+     "push",
+     "abstract"
+    ],
+    "path": "community/environment_files/pb04/v1",
+    "sha256": {
+     "metadata.json": "2fd3db340de2550b5d0e08f17df82a67892ec751ffd430e83e3a054dcd6d792f",
+     "pb04.py": "123d879f4cd6effb76f172d68ac7226c42ba6a95fae59d2fa87bd1d66541cdcd"
+    }
+   },
+   {
+    "game_id": "pd01-63be02fb",
+    "short": "pd01",
+    "family": "图 / 电路",
+    "category": "Graph / Plumbing",
+    "input": "click",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Pipe drop: ACTION6 cycles empty → H → V pipe; connect cyan source to yellow sink.",
+    "tags": [
+     "static",
+     "click",
+     "plumbing",
+     "pipe-empty-h-v-cycle"
+    ],
+    "path": "community/environment_files/pd01/63be02fb",
+    "sha256": {
+     "metadata.json": "76ce59c27228539a791412561b5a432867ed62b77af9bf226e0382133e9feeca",
+     "pd01.py": "6e897b13cfd13fa98f30e5f089d16b64c97acf623ee37cbf419e0fc59d72f752"
+    }
+   },
+   {
+    "game_id": "pd04-v1",
+    "short": "pd04",
+    "family": "图 / 电路",
+    "category": "Graph / Plumbing",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Plus junction: toggle full + open/closed; connect flow.",
+    "tags": [
+     "plumbing",
+     "click",
+     "pipe-plus-four-way-toggle"
+    ],
+    "path": "community/environment_files/pd04/v1",
+    "sha256": {
+     "metadata.json": "134ebd3d2da3ce8adf3b9d60ec80807e79d744497c57be969d91032db4e2fbc7",
+     "pd04.py": "f339f0b150d414f5a28dfb731bc6ab9824a1ef7cdba6e0541324130aa31bc316"
+    }
+   },
+   {
+    "game_id": "ph01-63be02fb",
+    "short": "ph01",
+    "family": "模拟 / 场",
+    "category": "Field / Math",
+    "input": "click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Phase interference: phases 0–3; ACTION6 increments a cell; ACTION5 applies (self + Σ orth neighbors) mod 4 on non-walls; match marked targets.",
+    "tags": [
+     "static",
+     "puzzle",
+     "field"
+    ],
+    "path": "community/environment_files/ph01/63be02fb",
+    "sha256": {
+     "metadata.json": "8cd01c922d219f331fc5af9e778e70758fcad11587709bbad34e81c5dcfccc2f",
+     "ph01.py": "4b6cd710ca4ab32f1603cc0b4214d538819d5fb359a5ed15c6ec6e2e90d96629"
+    }
+   },
+   {
+    "game_id": "ph02-63be02fb",
+    "short": "ph02",
+    "family": "模拟 / 场",
+    "category": "Field / Math",
+    "input": "click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Phase multiply: ACTION5 applies multiply-style update with orthogonal neighbors mod N (mod_n in data).",
+    "tags": [
+     "static",
+     "field",
+     "math"
+    ],
+    "path": "community/environment_files/ph02/63be02fb",
+    "sha256": {
+     "metadata.json": "ac24a9b31beba029a58f67332ac5871fa33ebee12a60a9ea658f1b4eb4fac222",
+     "ph02.py": "75b43270bc4d75cc0420a43a22803fac0a635596e281c618a4f34a0525c58a0c"
+    }
+   },
+   {
+    "game_id": "ph03-63be02fb",
+    "short": "ph03",
+    "family": "模拟 / 场",
+    "category": "Field / Math",
+    "input": "click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "XOR neighbor step (ph02 variant): ACTION5 XORs cell with orth neighbors mod N.",
+    "tags": [
+     "static",
+     "field",
+     "math"
+    ],
+    "path": "community/environment_files/ph03/63be02fb",
+    "sha256": {
+     "metadata.json": "731498ab286562f1efc9b677fca5039906a577874804de6ede2904c0f7b1b60e",
+     "ph03.py": "6f2f93202110ce15f825f5f0305789242fad85632be3b5f7469e2531e184dc79"
+    }
+   },
+   {
+    "game_id": "ph04-v1",
+    "short": "ph04",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Algebra",
+    "input": "keyboard",
+    "grid": "8×1 row",
+    "levels": "7",
+    "description": "Mod row step: ACTION5 applies neighbor-sum mod R on a cyclic row.",
+    "tags": [
+     "logic",
+     "field"
+    ],
+    "path": "community/environment_files/ph04/v1",
+    "sha256": {
+     "metadata.json": "ed57f5ff77dc5dc69d14c35698557501040e193af502517c36b41c4b82e06b45",
+     "ph04.py": "bc5c7078990b15493640fc794395bd637f4584247b977a06bbc89e1887c2c681"
+    }
+   },
+   {
+    "game_id": "pj01-v1",
+    "short": "pj01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Deflect",
+    "input": "keyboard_click",
+    "grid": "14×14",
+    "levels": "5",
+    "description": "Bolt bounce: bolt steps each frame; ACTION6 toggles / vs \\\\ mirrors; sink the bolt without getting hit.",
+    "tags": [
+     "static",
+     "timing"
+    ],
+    "path": "community/environment_files/pj01/v1",
+    "sha256": {
+     "metadata.json": "592e2a608858c63696fb6bde52470f1bdaa522208fd8d790db4cc91471ad1c49",
+     "pj01.py": "9cc6584f79c731bbc265daf36e0e68a55d4db49282c03e544801753ff94421a8"
+    }
+   },
+   {
+    "game_id": "pj04-v1",
+    "short": "pj04",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Deflect",
+    "input": "keyboard_click",
+    "grid": "14×14",
+    "levels": "7",
+    "description": "Fixed shooter: ACTION5 bolt; ACTION6 places mirrors (minimal avatar).",
+    "tags": [
+     "timing",
+     "click"
+    ],
+    "path": "community/environment_files/pj04/v1",
+    "sha256": {
+     "metadata.json": "68abf7d78b530861f03ec18205bc764cf8963ef12768c08c2d6d52e3863c37da",
+     "pj04.py": "f01dafbfddd65a0fdac69c3b62cc296af781f4a1981538ab96a1f862211f706f"
+    }
+   },
+   {
+    "game_id": "pk01-v1",
+    "short": "pk01",
+    "family": "拓扑 / 几何",
+    "category": "Topology / Packing",
+    "input": "keyboard_click",
+    "grid": "8–12",
+    "levels": "5",
+    "description": "Polyomino pack: ACTION5 toggles domino vs straight-tromino mode; ACTION6 clicks place pieces on marked cells.",
+    "tags": [
+     "static",
+     "topology",
+     "packing"
+    ],
+    "path": "community/environment_files/pk01/v1",
+    "sha256": {
+     "metadata.json": "c0ed869a65ff342a208ae9027163321d79d64f50233d15a1d47685ae15f61fcd",
+     "pk01.py": "9f240aa578cc557948ccb95966cc0772a74e039e9dd39e77f2a5999e7bddb031"
+    }
+   },
+   {
+    "game_id": "pk02-v1",
+    "short": "pk02",
+    "family": "拓扑 / 几何",
+    "category": "Topology / Packing",
+    "input": "click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Ribbon edges: two-click adjacent vertices to claim a marked unit edge; cover all.",
+    "tags": [
+     "static",
+     "click",
+     "topology"
+    ],
+    "path": "community/environment_files/pk02/v1",
+    "sha256": {
+     "metadata.json": "0cbbf6f3f1aec13d5d038633d6adbebd560c8593acc4b27e6a12992ecb4c8977",
+     "pk02.py": "0dc50212441cc893376e504a905838dde6195ae857105d3c21489491285459c9"
+    }
+   },
+   {
+    "game_id": "pm01-63be02fb",
+    "short": "pm01",
+    "family": "移动与协调",
+    "category": "Movement / Meta",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Prime steps: cardinal moves only apply on prime step indices; composites no-op.",
+    "tags": [
+     "static",
+     "movement",
+     "math"
+    ],
+    "path": "community/environment_files/pm01/63be02fb",
+    "sha256": {
+     "metadata.json": "9840ae20571a87e7824c11937d618444aa1878f2b30d26f65540909f32a7b5a3",
+     "pm01.py": "d260c6c45b8e4e884f1aa8df6d2713bbe09dfd1ec725d3b01e6596f8512cadda"
+    }
+   },
+   {
+    "game_id": "pt01-63be02fb",
+    "short": "pt01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Pattern rotation puzzle. Click tiles to rotate them 90° clockwise and match the target pattern.",
+    "tags": [
+     "static",
+     "rotation",
+     "pattern-matching",
+     "click"
+    ],
+    "path": "community/environment_files/pt01/63be02fb",
+    "sha256": {
+     "metadata.json": "69dc348daff32e88f6ddd8f2f4516582f916d923b881a336d0db3b6b0c4a59fc",
+     "pt01.py": "8fe543833954cf207bb31bf93afa30898f8caf8e5e2c271c04224ce93d4eeedd"
+    }
+   },
+   {
+    "game_id": "pt02-63be02fb",
+    "short": "pt02",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Row/column rotate: ACTION6 rotates a full row or column of 3×3 tiles (nearest axis wins).",
+    "tags": [
+     "static",
+     "pattern",
+     "click"
+    ],
+    "path": "community/environment_files/pt02/63be02fb",
+    "sha256": {
+     "metadata.json": "52440c4a42eac1ed745368269e2d14413a6f484535a89bfb4649669d22476cda",
+     "pt02.py": "1121f1c5d7e5c58f476bd54d4120092d21b72939949e3886b22b2e3f296149ad"
+    }
+   },
+   {
+    "game_id": "pt03-63be02fb",
+    "short": "pt03",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Band lock: odd levels rotate rows only, even levels columns only (difficulty).",
+    "tags": [
+     "static",
+     "pattern",
+     "click"
+    ],
+    "path": "community/environment_files/pt03/63be02fb",
+    "sha256": {
+     "metadata.json": "4608a1a38a5620c9382141df3b832c91316c29b0fd39f2acc00b3be3f0eff8cd",
+     "pt03.py": "6974305a952d9e26abdeff274e40f1815d02118035b97fc602e65fb96223bbae"
+    }
+   },
+   {
+    "game_id": "pt04-v1",
+    "short": "pt04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Tile swap: two ACTION6 picks swap 1×1 colors; match the target grid.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/pt04/v1",
+    "sha256": {
+     "metadata.json": "f6d635a1a9f8418b845eb279aff603cec61d238fdb96ca088220d0d78913053a",
+     "pt04.py": "288abfd0542da6762f838e9c4870b1c48c665129bab82846fc2c26da296f2a5b"
+    }
+   },
+   {
+    "game_id": "pt05-v1",
+    "short": "pt05",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "Slide row: click yellow header (x=0) to cycle that row’s colors left; match key.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/pt05/v1",
+    "sha256": {
+     "metadata.json": "5c122bf53463c2725f12c83ee812f5b6e56375796fc19749955b537bcf1b1a1b",
+     "pt05.py": "495213192ec1baac96c2aa766c98c97a8a1f8a3806d28826a4a3d1b1fb23608a"
+    }
+   },
+   {
+    "game_id": "pu01-63be02fb",
+    "short": "pu01",
+    "family": "图 / 电路",
+    "category": "Graph / Plumbing",
+    "input": "click",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Pipe twist: ACTION6 toggles horizontal vs vertical pipe on a cell; connect cyan source to yellow sink with orthogonal flow.",
+    "tags": [
+     "static",
+     "click",
+     "graph",
+     "plumbing",
+     "pipe-hv-two-state"
+    ],
+    "path": "community/environment_files/pu01/63be02fb",
+    "sha256": {
+     "metadata.json": "d530095a108e87470f94438a1eebcab0f207a03d13b717adc71732ccbeb9eae5",
+     "pu01.py": "f3b3418bbd9a448e5fa58190cf3e2b48d0f9e6ebf7fc0ad4e8ca3363ae383f64"
+    }
+   },
+   {
+    "game_id": "pu04-v1",
+    "short": "pu04",
+    "family": "图 / 电路",
+    "category": "Graph / Plumbing",
+    "input": "click",
+    "grid": "16×16",
+    "levels": "7",
+    "description": "Tee pipes: ACTION6 cycles H / V / T; connect source→sink.",
+    "tags": [
+     "plumbing",
+     "click",
+     "pipe-tee-h-v-t"
+    ],
+    "path": "community/environment_files/pu04/v1",
+    "sha256": {
+     "metadata.json": "dbb37a3e82a7bd9bae054fb80d502cdff9396f629080aadff3976238a6c016c8",
+     "pu04.py": "cd2c3cfd4c98976e2d0ae8c976cc4034c042399cdc7fe179893b1a3b466cbdd0"
+    }
+   },
+   {
+    "game_id": "pw01-63be02fb",
+    "short": "pw01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Logic",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Two yellow pads + crates (pw01): each pad needs a crate on it, then touch goal — not a waypoint order puzzle (tw01 / cq01) or weight sum (wp01).",
+    "tags": [
+     "static",
+     "movement",
+     "sokoban"
+    ],
+    "path": "community/environment_files/pw01/63be02fb",
+    "sha256": {
+     "metadata.json": "92e2bed5c52d0fedd0232e40caf7fb815cbd5ea9526210abdd065e3ee61efc84",
+     "pw01.py": "4e3f25124e24fa2fe99811906498b5084160f444ac5fa86d9c7d72b86188daa7"
+    }
+   },
+   {
+    "game_id": "qr01-63be02fb",
+    "short": "qr01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Quad twist: ACTION6 rotates the 2×2 block of tiles anchored at the click clockwise; match the target pattern.",
+    "tags": [
+     "static",
+     "pattern",
+     "click"
+    ],
+    "path": "community/environment_files/qr01/63be02fb",
+    "sha256": {
+     "metadata.json": "aada03f71b104c7b73b07eea161a2fd45ab86ad8aecbdcd2c87c09794c0d62c5",
+     "qr01.py": "a508b8d75d9154f1b0900f63f0b03618baa574dbf1dd492c141e2d7b8b3be7ad"
+    }
+   },
+   {
+    "game_id": "qr04-v1",
+    "short": "qr04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "8×8",
+    "levels": "7",
+    "description": "3×3 twist: ACTION6 rotates a 3×3 color block clockwise (qr01 kernel).",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/qr04/v1",
+    "sha256": {
+     "metadata.json": "57022e67713a25c7b17f3a5cdbb58681d7707fa79350036a52b4ca9cf5a8b701",
+     "qr04.py": "0ee9bd99f1c4fb716af85583c095f6539ea6f4872d24d3914531f0d46425505b"
+    }
+   },
+   {
+    "game_id": "qt01-v1",
+    "short": "qt01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Split",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Quantum split: magenta splitter duplicates offset; cyan observer collapses; both ghosts cannot hit walls.",
+    "tags": [
+     "static",
+     "logic"
+    ],
+    "path": "community/environment_files/qt01/v1",
+    "sha256": {
+     "metadata.json": "0984f2839cd8ed3fe5db5196cda6ade08ab91ab33c1fd46a479d0edd8f635853",
+     "qt01.py": "79dbe9adc546e9b439d3f9e17b50c7063eb425b548e125962732b8cf153f2927"
+    }
+   },
+   {
+    "game_id": "rb01-v1",
+    "short": "rb01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Rhythm",
+    "input": "keyboard",
+    "grid": "11×11",
+    "levels": "5",
+    "description": "Global movement beat: all cardinal moves only register every B world steps — not tf01 where only orange crossing tiles are phase-gated.",
+    "tags": [
+     "static",
+     "timing"
+    ],
+    "path": "community/environment_files/rb01/v1",
+    "sha256": {
+     "metadata.json": "f0042fcaf96d2a671a00afec593a582688714150812d2d42f0c0dcfc30e03b55",
+     "rb01.py": "cc50a46d64d044345e8e67896b98647b622c12d818a3845f7cf8f89e263265c6"
+    }
+   },
+   {
+    "game_id": "rc01-63be02fb",
+    "short": "rc01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Teleport",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Recall to spawn: ACTION5 jumps you to level start (once) — teleport, not bl01 wall phasing.",
+    "tags": [
+     "static",
+     "movement",
+     "teleport"
+    ],
+    "path": "community/environment_files/rc01/63be02fb",
+    "sha256": {
+     "metadata.json": "33ae54456a3a5f12a3c4a0d9d4281f74ab502cdf83db5ce0cc4a4ec7f52a42b0",
+     "rc01.py": "ec1d8a689b1de0e96db36adc15aeec066abbd3d3b025c4a85c48861f97b83fea"
+    }
+   },
+   {
+    "game_id": "rf01-63be02fb",
+    "short": "rf01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Mirror half-plane: on x >= mid, left/right inputs are swapped.",
+    "tags": [
+     "static",
+     "puzzle",
+     "movement"
+    ],
+    "path": "community/environment_files/rf01/63be02fb",
+    "sha256": {
+     "metadata.json": "a1f04f430ab50ff04cb7e7352c97c6719941556fb94e84a9b35eafc284144042",
+     "rf01.py": "1df361e1bbc45d7d70a1356ac02ac5b16f4d4048abc01df32cfdd9ce22846b5d"
+    }
+   },
+   {
+    "game_id": "rh01-63be02fb",
+    "short": "rh01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Hazard",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Advancing band: lethal horizontal band shifts one row every N moves — sweeps down grid, not lf01 stationary blink row.",
+    "tags": [
+     "static",
+     "movement",
+     "hazard"
+    ],
+    "path": "community/environment_files/rh01/63be02fb",
+    "sha256": {
+     "metadata.json": "d86c0bed2a20885d3aeba5e8ce19bdc7251e6dbab4feb048d6e99df32d33f47b",
+     "rh01.py": "60d7681851afed8263a70f65b876f1ccb3f27bbd475e77e533933a13438387ac"
+    }
+   },
+   {
+    "game_id": "rk01-63be02fb",
+    "short": "rk01",
+    "family": "移动与协调",
+    "category": "Movement / Chess",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Rook courier: ACTION1–4 slide orthogonally until a wall blocks.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "chess"
+    ],
+    "path": "community/environment_files/rk01/63be02fb",
+    "sha256": {
+     "metadata.json": "2798e2143fcb56e429209ed5a9605e2c301855e49682d994cc77b97e214d4a3c",
+     "rk01.py": "a7659b65be8bf4c91e1a0deadbfb274e55f1c58b1a2671ed2ad81512767408ab"
+    }
+   },
+   {
+    "game_id": "rn01-v1",
+    "short": "rn01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental / Graph",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Rope anchors: ACTION6 two orth-adjacent anchors over water places a walkable rope on the middle cell.",
+    "tags": [
+     "static",
+     "planning",
+     "click"
+    ],
+    "path": "community/environment_files/rn01/v1",
+    "sha256": {
+     "metadata.json": "5f90beea163d11f4f48a50906c72ce94eaa88b4629867b3bfd5d0fdec6ee5453",
+     "rn01.py": "8b2d36abf1162546ca81923376e9fcdc2b3f25cfea97ca5a956def51d5bd67a9"
+    }
+   },
+   {
+    "game_id": "rp01-63be02fb",
+    "short": "rp01",
+    "family": "图 / 电路",
+    "category": "Graph / Logic",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Relay pulse: ACTION6 toggles relays; ACTION5 fires from the source; orthogonal relay chain must light every lamp (adjacent to a visited relay).",
+    "tags": [
+     "static",
+     "puzzle",
+     "graph"
+    ],
+    "path": "community/environment_files/rp01/63be02fb",
+    "sha256": {
+     "metadata.json": "3bffe746439ab5aad5cc868526cedb53b21681545808d0ecb2fc58d634a93718",
+     "rp01.py": "5c0a15f3394d8b3a280dc25f91f0b0aa569ba2b04da793d1d4206950d722c2b4"
+    }
+   },
+   {
+    "game_id": "rp02-63be02fb",
+    "short": "rp02",
+    "family": "图 / 电路",
+    "category": "Graph / Logic",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Pulse depth: relays + amplifiers reset hop budget (max_pulse_depth); light all lamps.",
+    "tags": [
+     "static",
+     "graph",
+     "pulse"
+    ],
+    "path": "community/environment_files/rp02/63be02fb",
+    "sha256": {
+     "metadata.json": "d594b84fc46418c7c74617f9da676869b1adbe4fccc8da1d9c7783579b5ed9e0",
+     "rp02.py": "a57a32eb8f9bac33034a0a893752afc56ce70274336a47b07c2b9ce91895e8a7"
+    }
+   },
+   {
+    "game_id": "rp03-63be02fb",
+    "short": "rp03",
+    "family": "图 / 电路",
+    "category": "Graph / Logic",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Splitter relay (rp02 variant): T-relays fork pulses to both arms.",
+    "tags": [
+     "static",
+     "graph",
+     "pulse"
+    ],
+    "path": "community/environment_files/rp03/63be02fb",
+    "sha256": {
+     "metadata.json": "f1c630187a7d653bc692d57c18bb4b8e6a5d0aff62ecd75e541dd505a8023451",
+     "rp03.py": "915016128ef54886875d49c1b416bc39da80cf61fa5e663212e95b1f4555134e"
+    }
+   },
+   {
+    "game_id": "rp04-v1",
+    "short": "rp04",
+    "family": "图 / 电路",
+    "category": "Graph / Relay",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Relay pulse: ACTION6 toggles relays; ACTION5 floods from source.",
+    "tags": [
+     "graph",
+     "click"
+    ],
+    "path": "community/environment_files/rp04/v1",
+    "sha256": {
+     "metadata.json": "086b1ebf46bf1ea6b88d609991251bcc2fad15d5e5a549914eab3cfb6884ed46",
+     "rp04.py": "4351db72498cc31f7c2f5bd87cb98320fff326f84c5143d8096a81f231fdcd48"
+    }
+   },
+   {
+    "game_id": "rr01-v1",
+    "short": "rr01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Dynamic / Physics",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Ramp rollout: ball keeps a heading; ACTION5 steps one cell (ramps rotate CW first); ACTION6 toggles a ramp on a free cell. Reach the green exit.",
+    "tags": [
+     "physics",
+     "click"
+    ],
+    "path": "community/environment_files/rr01/v1",
+    "sha256": {
+     "metadata.json": "4d77421e08f9b9cacd4597b77c8afe05303284a8f5c4f58547f8f994be0e9efa",
+     "rr01.py": "1a2e3d04591636be402d5419099a010ae039915ab643133f46de330439362b15"
+    }
+   },
+   {
+    "game_id": "rs01-63be02fb",
+    "short": "rs01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Cognitive Flexibility / Rule Switching",
+    "input": "keyboard",
+    "grid": "8-16",
+    "levels": "5",
+    "description": "Rule Switcher. Collect colored targets that match the signpost color at top. Wrong color = lose. After all colors cycle through as safe, collect remaining targ…",
+    "tags": [
+     "static",
+     "puzzle",
+     "rule-switching",
+     "cognitive-flexibility"
+    ],
+    "path": "community/environment_files/rs01/63be02fb",
+    "sha256": {
+     "metadata.json": "ee0ccc5f3090baf46d12c8a07c05818a06952aedf41dfb2fa5d18c677d9030e7",
+     "rs01.py": "af925bc3b6a50020c233242b8b5fb36003fff4ec30b15660a7d395a014929503"
+    }
+   },
+   {
+    "game_id": "rs02-63be02fb",
+    "short": "rs02",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Cognitive Flexibility",
+    "input": "keyboard",
+    "grid": "8-16",
+    "levels": "5",
+    "description": "Dual safe: collect targets matching either color of the active pair (dual_pairs); after all pairs have been safe, any remaining target is allowed.",
+    "tags": [
+     "static",
+     "rules",
+     "collection"
+    ],
+    "path": "community/environment_files/rs02/63be02fb",
+    "sha256": {
+     "metadata.json": "3b07c3848d5f9a859688a66ea83b7e49bda80bd9a2d3c4e3b0e14020bb0f8200",
+     "rs02.py": "d540d6c2c1ed189243eda1911649aa264a5b1b0a5ab868f9bccbf41a5c548b67"
+    }
+   },
+   {
+    "game_id": "rs03-63be02fb",
+    "short": "rs03",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Cognitive Flexibility",
+    "input": "keyboard",
+    "grid": "8-16",
+    "levels": "5",
+    "description": "Forbidden stripe: HUD shows a color that is never collectible; clear all other targets.",
+    "tags": [
+     "static",
+     "rules",
+     "collection"
+    ],
+    "path": "community/environment_files/rs03/63be02fb",
+    "sha256": {
+     "metadata.json": "d5a7154e563d078099ea704b75528b6897ca162b39a2e647f3975efbbf7205a9",
+     "rs03.py": "71bf4d56fe671f2b1d3ae0354a52be318d8e1e6c3a17ec49be2cebee0f3d7179"
+    }
+   },
+   {
+    "game_id": "rs04-v1",
+    "short": "rs04",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Phase",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "XOR-safe collect: phase bits pick which target color may clear.",
+    "tags": [
+     "logic",
+     "click"
+    ],
+    "path": "community/environment_files/rs04/v1",
+    "sha256": {
+     "metadata.json": "a06c03ea0ad5c23c13ce88d7c2ea3d39d56251271698513ba2d9dbd53c040204",
+     "rs04.py": "43d11423d7972e12dd74a77e9c3f051d4dd51117e2ec36f80a0d44bc0e5cd944"
+    }
+   },
+   {
+    "game_id": "rv01-v1",
+    "short": "rv01",
+    "family": "收集",
+    "category": "Collection / Hazard",
+    "input": "keyboard",
+    "grid": "8–16",
+    "levels": "5",
+    "description": "Rotating sparks: collect targets while red hazards step together in a wind direction that cycles N→E→S→W.",
+    "tags": [
+     "static",
+     "timing",
+     "hazard"
+    ],
+    "path": "community/environment_files/rv01/v1",
+    "sha256": {
+     "metadata.json": "e46e9eabc56777056e6716c7df068aa28350e3db78dfe1a44e2eb2782238a2b0",
+     "rv01.py": "8c334d686ed8c3e3a11d467a21bc1de464ada21d21c7102f63403f3d5fe4c1d1"
+    }
+   },
+   {
+    "game_id": "rz01-63be02fb",
+    "short": "rz01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Rush grid: push 1×2 cars along their axis like sokoban; clear the exit car.",
+    "tags": [
+     "static",
+     "push",
+     "car"
+    ],
+    "path": "community/environment_files/rz01/63be02fb",
+    "sha256": {
+     "metadata.json": "1c1867570262b9c523d888e604103c6de98f5d998484f2c6c2dab5c5bf2c5245",
+     "rz01.py": "b705d20ce9e8930092c43e1e6815e9fe25abd9ff6d789673163a94ad97df219b"
+    }
+   },
+   {
+    "game_id": "sb01-63be02fb",
+    "short": "sb01",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Sand fall: sand piles fall like rocks; crushed loses.",
+    "tags": [
+     "static",
+     "movement",
+     "physics"
+    ],
+    "path": "community/environment_files/sb01/63be02fb",
+    "sha256": {
+     "metadata.json": "d52a87a9aeeb0f68dc0d2adaa12edb915384c2798b3391e837624605db49912e",
+     "sb01.py": "8188bacb87eeef0d2654ecff3ea5531e3c0d2b130f8ba1cab6bf8c27e81c868a"
+    }
+   },
+   {
+    "game_id": "sc01-v1",
+    "short": "sc01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Stealth / Trail",
+    "input": "keyboard",
+    "grid": "14×14",
+    "levels": "5",
+    "description": "Scent + cone: guard sees eastward; high scent under LOS loses; ACTION5 masks scent briefly.",
+    "tags": [
+     "static",
+     "stealth"
+    ],
+    "path": "community/environment_files/sc01/v1",
+    "sha256": {
+     "metadata.json": "5e1f1ab78b188c46f2afa95f8533c232a156fa69a0da08d10ff10139bd4d4c5a",
+     "sc01.py": "6f6120c92e0bdf207ad94469fc301d9ad212a762f8914ec5811ebcacb03a6032"
+    }
+   },
+   {
+    "game_id": "sf01-63be02fb",
+    "short": "sf01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "keyboard",
+    "grid": "64×64",
+    "levels": "5",
+    "description": "Stencil paint: move a 3×3 stencil with ACTION1–4; ACTION5 paints all non-wall cells under it; match gray hints.",
+    "tags": [
+     "static",
+     "pattern",
+     "64-grid"
+    ],
+    "path": "community/environment_files/sf01/63be02fb",
+    "sha256": {
+     "metadata.json": "c59463e849eb864b05906f0e6bf9c466359fb04ab3ddcb664b28808e92fedeb7",
+     "sf01.py": "e7c1593f50bcbf68389f35c61e0cd9c46336aa9c40ccd559fe746ae16825bbc5"
+    }
+   },
+   {
+    "game_id": "sf04-v1",
+    "short": "sf04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern / Stencil",
+    "input": "keyboard_click",
+    "grid": "16×16",
+    "levels": "7",
+    "description": "Rotate stencil: ACTION5 spins L-tromino mask; ACTION6 paints.",
+    "tags": [
+     "static",
+     "click",
+     "stencil"
+    ],
+    "path": "community/environment_files/sf04/v1",
+    "sha256": {
+     "metadata.json": "6b65392d25216d16a0c4beb1b6f3f9af834cac30f98433202b83763dff0a7f55",
+     "sf04.py": "9933a893d4cbfa304b33a5cd9111f3884350081df9485ce20e922479e2abe623"
+    }
+   },
+   {
+    "game_id": "sg01-63be02fb",
+    "short": "sg01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Signal lock: sweeping cursor; ACTION5 in the green window scores; miss shrinks the window.",
+    "tags": [
+     "static",
+     "timing",
+     "skill"
+    ],
+    "path": "community/environment_files/sg01/63be02fb",
+    "sha256": {
+     "metadata.json": "5d4d311be7ba884066240a534087737ffaa2ee1352e8a3bd3cc986d65df101bd",
+     "sg01.py": "a3d49cd97dc036b78e27843d3bed874e913c7d0ed3fe16b8729617e632da1bc8"
+    }
+   },
+   {
+    "game_id": "sg04-v1",
+    "short": "sg04",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Rhythm",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Dual commit: two-arm timing like sg01.",
+    "tags": [
+     "timing",
+     "abstract"
+    ],
+    "path": "community/environment_files/sg04/v1",
+    "sha256": {
+     "metadata.json": "64572391a16d1109cfb737d6d54fe1e474e68db83ca7e1bb12026d709e6c495c",
+     "sg04.py": "d85c66b09777fed1414c5228d0e5168a92d15c6b6100b7682fa2a2ecd55b2d74"
+    }
+   },
+   {
+    "game_id": "sk01-63be02fb",
+    "short": "sk01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Classic multi-crate sokoban: several crates/pads; green = placed; harder topology than pb01 one-box intro. Step limit exceeded = lose.",
+    "tags": [
+     "static",
+     "puzzle",
+     "sokoban",
+     "environmental"
+    ],
+    "path": "community/environment_files/sk01/63be02fb",
+    "sha256": {
+     "metadata.json": "be888bd58d5f5c72054c68fa361fee726af012164dace16eb6dccc9f51622b5b",
+     "sk01.py": "d835aaeb2ef666618161d0a3d5f532362e23761bb5f59496e3d5365b14314eeb"
+    }
+   },
+   {
+    "game_id": "sk02-63be02fb",
+    "short": "sk02",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Sliding crate sokoban: after a successful push, if the cell beyond the crate is empty, the crate slides one more step.",
+    "tags": [
+     "static",
+     "push",
+     "puzzle"
+    ],
+    "path": "community/environment_files/sk02/63be02fb",
+    "sha256": {
+     "metadata.json": "e20d8757b7e193e548e7d6096ba7f442e90af05fe90ece7c1bb250301e5c3a4e",
+     "sk02.py": "c7a945014cacffba6b1166c42dba4d424888121e184f03f2246fdcdcafe5ccf5"
+    }
+   },
+   {
+    "game_id": "sk03-63be02fb",
+    "short": "sk03",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Sticky mud sokoban: sliding crate chain stops on mud floor (mud tag); mud is walkable.",
+    "tags": [
+     "static",
+     "push",
+     "mud"
+    ],
+    "path": "community/environment_files/sk03/63be02fb",
+    "sha256": {
+     "metadata.json": "a171523bf9cad50bc8f2a48a36f5f368a0f5e5772b43bbb76e68155c8342e70b",
+     "sk03.py": "ef30d7ebd457626793907cd0904800baa7a5d1a9e307cad1dd8c1597cca37a67"
+    }
+   },
+   {
+    "game_id": "sk04-v1",
+    "short": "sk04",
+    "family": "推箱 / 环境操作",
+    "category": "Manipulation",
+    "input": "click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Fixed avatar, click-pull: ACTION6 on an orth-adjacent crate pulls it one step toward you; ACTION1–4 no-op — not pb04’s remote ACTION5 winch.",
+    "tags": [
+     "push",
+     "click"
+    ],
+    "path": "community/environment_files/sk04/v1",
+    "sha256": {
+     "metadata.json": "6c9f83d319e75d37f78c36a6e9c8136bc22e9c8a778535e40e0cfefa16a44def",
+     "sk04.py": "27b9a28f8feb333d589b37920c19dedb62246c7c9e89eda7c953ce11b6431c6c"
+    }
+   },
+   {
+    "game_id": "sl01-v1",
+    "short": "sl01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Permutation / Puzzle",
+    "input": "keyboard",
+    "grid": "3×3",
+    "levels": "5",
+    "description": "Slide puzzle: swap the hole with adjacent tiles until the board matches the goal; step limit.",
+    "tags": [
+     "static",
+     "planning",
+     "permutation"
+    ],
+    "path": "community/environment_files/sl01/v1",
+    "sha256": {
+     "metadata.json": "fee73f563ee50733df494aee0737083a85d245ca3231d468c907ec7f49db08f0",
+     "sl01.py": "6f16930f8c1bbb6bc1de63f5fe92ac161ad40c9a3548ec1ad888e6bf5d845f01"
+    }
+   },
+   {
+    "game_id": "sn01-63be02fb",
+    "short": "sn01",
+    "family": "收集",
+    "category": "Collection / Classic",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Snake collect: eat all yellow food; grow; walls and self-collision lose.",
+    "tags": [
+     "static",
+     "movement",
+     "12-grid",
+     "snake"
+    ],
+    "path": "community/environment_files/sn01/63be02fb",
+    "sha256": {
+     "metadata.json": "7d38c50b424d6a625d62efdd167d578d91ddfe8ffbcc412cbbc83d2da36863ef",
+     "sn01.py": "fd77acfc92a776df334f9aaade435d2cb5c8018de877677a73dc91759ee22868"
+    }
+   },
+   {
+    "game_id": "sp01-63be02fb",
+    "short": "sp01",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Win: stable + Σ grains = target_sum (classic sandpile). ACTION6 adds a grain; ≥4 topples to neighbors; no sinks (sp04) / no mod goal (ab01).",
+    "tags": [
+     "static",
+     "simulation",
+     "click"
+    ],
+    "path": "community/environment_files/sp01/63be02fb",
+    "sha256": {
+     "metadata.json": "0938cf3809d8e9b4b97a5bb0cdf3b047596b2ffcb8a025caa0bed65f00878420",
+     "sp01.py": "129d184644f59902d87f88057e757f2adc8831f2757ae7d281de25f26dc2a183"
+    }
+   },
+   {
+    "game_id": "sp04-v1",
+    "short": "sp04",
+    "family": "模拟 / 场",
+    "category": "Simulation",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Win: stable + same target-sum rule as sp01, but grains that topple into cyan sink cells are removed (mass loss; not ab01 mod P/R).",
+    "tags": [
+     "simulation",
+     "click",
+     "sandpile-sinks"
+    ],
+    "path": "community/environment_files/sp04/v1",
+    "sha256": {
+     "metadata.json": "dae4f50e1790da0e380323c6adcebf307c8cdeefb0707e7094916e7d6774aacb",
+     "sp04.py": "58b2edd62aea0cece29c7c797277f3bd41b702d51301297efba9379dcaffc8ff"
+    }
+   },
+   {
+    "game_id": "sq01-63be02fb",
+    "short": "sq01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Sequencing / Ordering",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Sequencing. Click colored blocks in the correct order. Follow the sequence shown at the top!",
+    "tags": [
+     "sequencing",
+     "ordering",
+     "memory"
+    ],
+    "path": "community/environment_files/sq01/63be02fb",
+    "sha256": {
+     "metadata.json": "18ced4b9524d4421d508a47658ae24861cf34ce4ae32b22f699f51436b9edf23",
+     "sq01.py": "d828a19f40eca9934c8779c61ffbd69c8f2f643ff5cab960c247ee23b381211a"
+    }
+   },
+   {
+    "game_id": "sq02-63be02fb",
+    "short": "sq02",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Sequencing",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Shrinking queue: like sequencing, but only the current expected color block is eligible/visible until unlocked; wrong order resets progress.",
+    "tags": [
+     "static",
+     "click",
+     "ordering"
+    ],
+    "path": "community/environment_files/sq02/63be02fb",
+    "sha256": {
+     "metadata.json": "edc878ef7c83f437d137f6cd2273c16f574a98e82c3743038b5976ac6309c9a0",
+     "sq02.py": "6034b7b89d6858584ed6d8355de116ff689f445f69541052e6591f3bb8e47f5f"
+    }
+   },
+   {
+    "game_id": "sq03-63be02fb",
+    "short": "sq03",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Sequencing",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Dual queue: two color queues; ACTION6 on either head; wrong tap resets both.",
+    "tags": [
+     "static",
+     "sequencing",
+     "click"
+    ],
+    "path": "community/environment_files/sq03/63be02fb",
+    "sha256": {
+     "metadata.json": "d6391bb38c69dbe457c4b67ec09fbb0b93adfe2910ff36d1315eda20cc1c6294",
+     "sq03.py": "e5f8701a7f306150efe9c1b3a3de4ea06d3a0c53326ddfa2363aa46a1c54a909"
+    }
+   },
+   {
+    "game_id": "sq04-v1",
+    "short": "sq04",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Sequencing / Ordering",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "LIFO sequencing: clear blocks in stack order (last in HUD first), sq01-style clicks.",
+    "tags": [
+     "static",
+     "click",
+     "ordering"
+    ],
+    "path": "community/environment_files/sq04/v1",
+    "sha256": {
+     "metadata.json": "5c9d993c26e0d2d6895b4b5d730122308aec2cc5efcac25577824bd09dd365fb",
+     "sq04.py": "b3f6bcf18c03307894361a69b1e35d3914de3452dbf9687d4c8be74277393680"
+    }
+   },
+   {
+    "game_id": "sq05-v1",
+    "short": "sq05",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Sequencing / Ordering",
+    "input": "click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Double-tap lock: FIFO order; each block needs two consecutive correct taps to clear.",
+    "tags": [
+     "static",
+     "click",
+     "sequencing"
+    ],
+    "path": "community/environment_files/sq05/v1",
+    "sha256": {
+     "metadata.json": "69f461b8af85f075a80c8c9fc02084ae793a2d3e2aa7da142f753153495d3422",
+     "sq05.py": "b40c64dbc6ca2ff44e19cd945eca0543ff3a193f9a397b3bf4b9818ec1b5798f"
+    }
+   },
+   {
+    "game_id": "sr01-v1",
+    "short": "sr01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Algebra",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Aura XOR: RGB zones toggle aura bits; wash clears; door opens when aura matches the target triple.",
+    "tags": [
+     "static",
+     "logic"
+    ],
+    "path": "community/environment_files/sr01/v1",
+    "sha256": {
+     "metadata.json": "4c7fc530fb4120a5066b836d5ba3079024fecd4348db1876419d091a6d8003cf",
+     "sr01.py": "fbf3af4866c1d904db2b19c121c03123eee757be4fd8feca9b7458d7519e93a8"
+    }
+   },
+   {
+    "game_id": "st01-63be02fb",
+    "short": "st01",
+    "family": "记忆 / 隐藏信息 / 探索",
+    "category": "Stealth",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Sentry sweep: cone-vision guards; spotted = lose; ACTION5 whistles to nudge a guard forward one cell.",
+    "tags": [
+     "static",
+     "stealth",
+     "guard"
+    ],
+    "path": "community/environment_files/st01/63be02fb",
+    "sha256": {
+     "metadata.json": "b533f0a91f476184d4e70dfb2e858841b0f6d51703769c313bf179d42aac0705",
+     "st01.py": "6ddc5378ea61513f7b4dcd844117deca0c38ff1c3644a48404c33d87d7363fcc"
+    }
+   },
+   {
+    "game_id": "sv01-63be02fb",
+    "short": "sv01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "keyboard",
+    "grid": "8-24",
+    "levels": "5",
+    "description": "Survival game. Manage hunger and warmth. Green food restores hunger; orange warm zones stop warmth loss. Survive 60 frames to advance.",
+    "tags": [
+     "static",
+     "action",
+     "survival",
+     "hunger"
+    ],
+    "path": "community/environment_files/sv01/63be02fb",
+    "sha256": {
+     "metadata.json": "cbfb75bf5a3bee4df390b5c5aad38838329d1b535766ecc3393d89b376a4ccb8",
+     "sv01.py": "d0d03dd9da2ed0a612be27754d87c9d1888b66d602d84026bcafc2c41b1740df"
+    }
+   },
+   {
+    "game_id": "sv02-63be02fb",
+    "short": "sv02",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "keyboard",
+    "grid": "8-24",
+    "levels": "5",
+    "description": "Shelter survival: warmth decay pauses only inside magenta shelter zones; hunger rules unchanged; survive 60 steps per level.",
+    "tags": [
+     "static",
+     "survival",
+     "timing"
+    ],
+    "path": "community/environment_files/sv02/63be02fb",
+    "sha256": {
+     "metadata.json": "091c4282d6dc680dbfa4fcf4f660147f211c9c8524a55f53164cc84918490183",
+     "sv02.py": "dd37ad408b08c968ff1c0fe664288045f356e9c0ab576de82f596e11dce2e0db"
+    }
+   },
+   {
+    "game_id": "sv03-63be02fb",
+    "short": "sv03",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "keyboard",
+    "grid": "8-24",
+    "levels": "5",
+    "description": "Dual shelters: yellow pauses hunger decay, magenta pauses warmth; alternate shelter types on entry.",
+    "tags": [
+     "static",
+     "survival"
+    ],
+    "path": "community/environment_files/sv03/63be02fb",
+    "sha256": {
+     "metadata.json": "c0a949f44a559b6f93869cf44fe651e236ea5c754518d77460bfa3a2d9c291c8",
+     "sv03.py": "d7cd743692d1b6617981b0f7682755dda54404552a65da8aacea2b54d285e211"
+    }
+   },
+   {
+    "game_id": "sw01-63be02fb",
+    "short": "sw01",
+    "family": "推箱 / 环境操作",
+    "category": "Manipulation",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Swap positions: ACTION5 swaps you with the orth-adjacent magenta partner — no terrain removal (dg01 / dr01).",
+    "tags": [
+     "static",
+     "movement",
+     "swap"
+    ],
+    "path": "community/environment_files/sw01/63be02fb",
+    "sha256": {
+     "metadata.json": "849ec4a8277bb4508fa6e08ed2c22841bdb4dc994a843ac6a79f3f1d5ccfff22",
+     "sw01.py": "31081428049338c8511cb31ae4dff22611743dc462960e390ca371fcb3c9ac2d"
+    }
+   },
+   {
+    "game_id": "sy01-63be02fb",
+    "short": "sy01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "11×11",
+    "levels": "5",
+    "description": "Mirror Maker. Mirror the pattern from the left side onto the right side. Create a perfect reflection!",
+    "tags": [
+     "symmetry",
+     "reflection",
+     "spatial",
+     "puzzle"
+    ],
+    "path": "community/environment_files/sy01/63be02fb",
+    "sha256": {
+     "metadata.json": "3638cfcd0ccf4945aae73e9215e17876f028b7e232cffda858fbcc00ba3945ec",
+     "sy01.py": "cf4ec819f4702ec62d5f57ef05b69330f7dad18920f52f6ab260213de092f604"
+    }
+   },
+   {
+    "game_id": "sy02-63be02fb",
+    "short": "sy02",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "11×11",
+    "levels": "5",
+    "description": "Staggered mirror: mirror targets use half-row offset (mirror_stagger in data).",
+    "tags": [
+     "static",
+     "pattern",
+     "mirror"
+    ],
+    "path": "community/environment_files/sy02/63be02fb",
+    "sha256": {
+     "metadata.json": "cec5a38b1ff34d559ad1ff2142d260024eeb9671cc0b794e6ddd23ad4d67b44d",
+     "sy02.py": "26eac2425fbe8b486dea269df9d88dce401ab761c52bf863eb80201444e409f8"
+    }
+   },
+   {
+    "game_id": "sy03-63be02fb",
+    "short": "sy03",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "11×11",
+    "levels": "5",
+    "description": "Vertical mirror: template above divider y=5, build mirrored copy below (sy02 geometry rotated).",
+    "tags": [
+     "static",
+     "pattern",
+     "mirror"
+    ],
+    "path": "community/environment_files/sy03/63be02fb",
+    "sha256": {
+     "metadata.json": "e0973b855c633ff9c079eb891aee642959bd9a3fbe7c9675f8388e95577d5f8a",
+     "sy03.py": "d7bb1196fbb9a8b8f1f423042fc7712636e571db1ae7b6b7eeae54d9cfb6682d"
+    }
+   },
+   {
+    "game_id": "sy04-v1",
+    "short": "sy04",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Pattern Puzzles",
+    "input": "click",
+    "grid": "11×11",
+    "levels": "7",
+    "description": "Diagonal mirror: template on i<j; build matching dots on x>y across y=x.",
+    "tags": [
+     "static",
+     "click",
+     "pattern"
+    ],
+    "path": "community/environment_files/sy04/v1",
+    "sha256": {
+     "metadata.json": "51ced4f5ced7e2c6e4db34c07c30a434a76efc3bfcfa387c13003f48d00a2b37",
+     "sy04.py": "f82a4b8341866f1829938bcd7c711d48951df108eade13c2afc6306962adcc4a"
+    }
+   },
+   {
+    "game_id": "tb01-63be02fb",
+    "short": "tb01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Bridge Builder. Multi-island routes (waypoints + optional reef clusters); bridge open water (ACTION6), walk island-to-island to the green goal. Later levels ad…",
+    "tags": [
+     "static",
+     "puzzle",
+     "sub-goals",
+     "environmental",
+     "inventory"
+    ],
+    "path": "community/environment_files/tb01/63be02fb",
+    "sha256": {
+     "metadata.json": "7a502076f23c1100db2b5ccdfac5079c35bde6c4a6a1678b3bce464ccb5d92ae",
+     "tb01.py": "c462020d97421887d45900f111b7d9e9ea8f6e4dd0fec2d5a8c051614b2a248d"
+    }
+   },
+   {
+    "game_id": "tb02-63be02fb",
+    "short": "tb02",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Bridge decay: like bridge builder, but a bridge sprite is removed when you leave that water cell.",
+    "tags": [
+     "static",
+     "puzzle",
+     "environmental"
+    ],
+    "path": "community/environment_files/tb02/63be02fb",
+    "sha256": {
+     "metadata.json": "2a99c4db6372b75aaf424c36207d36fe9ba3345960d6a1ecfa0e35c18746166d",
+     "tb02.py": "eb67f04edcb10d7e2a66c52e834337ae9821071ab799bcac433dcbe2d0d0965a"
+    }
+   },
+   {
+    "game_id": "tb03-63be02fb",
+    "short": "tb03",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard_click",
+    "grid": "24×24",
+    "levels": "5",
+    "description": "Reef growth: like bridge decay, plus random rock spawns on water every M steps (reef_every).",
+    "tags": [
+     "static",
+     "bridge",
+     "dynamic-hazard"
+    ],
+    "path": "community/environment_files/tb03/63be02fb",
+    "sha256": {
+     "metadata.json": "7b428b17c94b021431c378638295913d9ac29723bd4447fa41e8708e6eb40b50",
+     "tb03.py": "1ab70ffb8e08f1e861aeb5d9fb027f0ec3bfe609956dae0aa65c0fb22507fc72"
+    }
+   },
+   {
+    "game_id": "tc01-63be02fb",
+    "short": "tc01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle / Fields",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Conveyor layer: after each resolved move, you are pushed one more step by the arrow at your destination cell (arrows in level data).",
+    "tags": [
+     "static",
+     "movement",
+     "field"
+    ],
+    "path": "community/environment_files/tc01/63be02fb",
+    "sha256": {
+     "metadata.json": "b7176382a5f85983024cf08029875ffe2056b51e2939f0962f52890f244d2cb9",
+     "tc01.py": "33d81c46d024c924ac70b11be3ee1d211a0193313b7da8017eb315e25be7e140"
+    }
+   },
+   {
+    "game_id": "tc04-v1",
+    "short": "tc04",
+    "family": "模拟 / 场",
+    "category": "Simulation / Routing",
+    "input": "keyboard_click",
+    "grid": "10×10",
+    "levels": "7",
+    "description": "Conveyor: ACTION5 moves packages on arrows; ACTION6 rotates arrow.",
+    "tags": [
+     "simulation",
+     "click"
+    ],
+    "path": "community/environment_files/tc04/v1",
+    "sha256": {
+     "metadata.json": "a9f84d91395f76c6d796224d6cdf574c903408e6325b70636d90fda187e24a6d",
+     "tc04.py": "67bc1c5aba45367510078a8bf12b4e1132f1d8bda6fc22b258ee0c56e8bff790"
+    }
+   },
+   {
+    "game_id": "tf01-v1",
+    "short": "tf01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Traffic",
+    "input": "keyboard",
+    "grid": "14×14",
+    "levels": "5",
+    "description": "Local crossing phase: orange marked cells may be entered only on green phase of a short cycle — other floor always walkable (unlike rb01 global beat).",
+    "tags": [
+     "static",
+     "timing"
+    ],
+    "path": "community/environment_files/tf01/v1",
+    "sha256": {
+     "metadata.json": "90d0b9b7368e289c7301b26900905b058891a08e089243c74d5939f81f042003",
+     "tf01.py": "817471f3ceaf6c1e9bbf241d778033951905f9021c0a0693d7bf63fedb5716ca"
+    }
+   },
+   {
+    "game_id": "tg01-63be02fb",
+    "short": "tg01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Tag evasion: chaser moves every other step; survive T steps or reach a safe zone.",
+    "tags": [
+     "static",
+     "chase",
+     "timing"
+    ],
+    "path": "community/environment_files/tg01/63be02fb",
+    "sha256": {
+     "metadata.json": "8a0b8595a3d6e4f1ce217623c6b64d5d2815269e4f2a33b3b4030d88eae72de3",
+     "tg01.py": "54fdb4bf7722606b1207a7b3a0f6a13fc1b80f8da4f79ed81824bfa6eb740e0f"
+    }
+   },
+   {
+    "game_id": "tk01-v1",
+    "short": "tk01",
+    "family": "推箱 / 环境操作",
+    "category": "Manipulation",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Telekinetic tug: ACTION5 pulls the nearest crate one greedy Manhattan hop toward you; else push sokoban-style.",
+    "tags": [
+     "static",
+     "push"
+    ],
+    "path": "community/environment_files/tk01/v1",
+    "sha256": {
+     "metadata.json": "e1226c01003cc44b04b945ed7b19e340d67c3037d62691f34cdeec047ed19c62",
+     "tk01.py": "b0d16ff4e59f8868676e453de3fb98da326963849e3c9e500a6d9448c4d36065"
+    }
+   },
+   {
+    "game_id": "tm01-63be02fb",
+    "short": "tm01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Resource",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Twin decay meters (not bt01): oxygen + heat each tick down; cyan / magenta pads refill respective bars; survive T steps. HUD shows two bar rows + time-left row.",
+    "tags": [
+     "static",
+     "movement",
+     "survival"
+    ],
+    "path": "community/environment_files/tm01/63be02fb",
+    "sha256": {
+     "metadata.json": "fcaecddb524e2db0aa012b00371b90b01b06a74b3e726e868b71c7cb05f9c6c4",
+     "tm01.py": "5dc34c0dfa5788d4f7fcfa85bd30f8b5d3e82206bee799a92ac8e05a2cb64d89"
+    }
+   },
+   {
+    "game_id": "tp01-63be02fb",
+    "short": "tp01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Symmetric teleporters: either end of a pair warps to the other (HUD: ↔ + pair ticks). Reach the yellow goal.",
+    "tags": [
+     "static",
+     "puzzle",
+     "teleport"
+    ],
+    "path": "community/environment_files/tp01/63be02fb",
+    "sha256": {
+     "metadata.json": "f66452e5a34ee29bc9a7424d8beb3d24afa3a2a441081d7fcee111e371449ec7",
+     "tp01.py": "fdcfddceafd0216f4cfbf4c5b41d9682a5b8c1c6f80ed578a2ec9aa0aa0cb91d"
+    }
+   },
+   {
+    "game_id": "tp02-63be02fb",
+    "short": "tp02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "One-way teleporters (directed_pairs): only the source tile warps; orange HUD arrows mark sources + exit direction.",
+    "tags": [
+     "static",
+     "puzzle",
+     "teleport"
+    ],
+    "path": "community/environment_files/tp02/63be02fb",
+    "sha256": {
+     "metadata.json": "7f59291144db39556f8146722c3de3f9bcf1b481cd447ac6923b8d5de4061568",
+     "tp02.py": "f804dc993352377dc22d4dbbb7e36f59b85364a334721992bad99e453095c442"
+    }
+   },
+   {
+    "game_id": "tp03-63be02fb",
+    "short": "tp03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Single-use links: each pair vanishes after one warp (HUD: remaining pair ticks + burn flash on landing).",
+    "tags": [
+     "static",
+     "puzzle",
+     "teleport"
+    ],
+    "path": "community/environment_files/tp03/63be02fb",
+    "sha256": {
+     "metadata.json": "5b160a2118bd4849bede8d287f810501c5370f1c2a1e665a8b3e9761848dbd03",
+     "tp03.py": "9566a467beb8040815d28639ef74330f5b3be0eec8b6f86d4e4936f93e4862d0"
+    }
+   },
+   {
+    "game_id": "tr01-63be02fb",
+    "short": "tr01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Hazard / Path",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Revisit rule: time-decay — after first visit, cell expires in ttl world steps; standing there when expired loses (not simple visit-count like gl01).",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "timer"
+    ],
+    "path": "community/environment_files/tr01/63be02fb",
+    "sha256": {
+     "metadata.json": "4ed8ad3dc1515d094073a1fda7b8871e2e74dd9e86aaa8bde828ce135f4b142c",
+     "tr01.py": "304f81dda6155e59d1a1923d5635b1241a49803b29aed6c56d560da0c9cd58e9"
+    }
+   },
+   {
+    "game_id": "tt01-63be02fb",
+    "short": "tt01",
+    "family": "收集",
+    "category": "Collection",
+    "input": "keyboard",
+    "grid": "8-24",
+    "levels": "3",
+    "description": "Collection game. Navigate grid to collect yellow targets while avoiding red hazards (static collidable cells).",
+    "tags": [
+     "static",
+     "collection",
+     "pre-defined-levels"
+    ],
+    "path": "community/environment_files/tt01/63be02fb",
+    "sha256": {
+     "metadata.json": "f6f95f8a834e64c92fffd0251285884d56df38b563a0583e991b65581703c94d",
+     "tt01.py": "d54581214dd5a76b9140334ac12e44c720a0dddd96c20dbd1afcd44e5fbe39f9"
+    }
+   },
+   {
+    "game_id": "tt02-63be02fb",
+    "short": "tt02",
+    "family": "收集",
+    "category": "Collection",
+    "input": "keyboard",
+    "grid": "16-24",
+    "levels": "3",
+    "description": "Patrol hazards: collect yellow targets while red patrol hazards step along authored tracks (patrols) every player step.",
+    "tags": [
+     "static",
+     "collection",
+     "dynamic-hazard"
+    ],
+    "path": "community/environment_files/tt02/63be02fb",
+    "sha256": {
+     "metadata.json": "a596c7c40f919510cbd826b8252cd27e46d4b42f2870e0ed4b70f805445afcc3",
+     "tt02.py": "cd4298f1ac1bfdb0930244efe34007008084a20d19f172dcf3f64d531ae360a8"
+    }
+   },
+   {
+    "game_id": "tt03-63be02fb",
+    "short": "tt03",
+    "family": "收集",
+    "category": "Collection",
+    "input": "keyboard",
+    "grid": "16-24",
+    "levels": "3",
+    "description": "Collector spawns: patrol collection plus new yellow targets every K steps until cap (spawn_every, target_cap).",
+    "tags": [
+     "static",
+     "collection",
+     "dynamic-target"
+    ],
+    "path": "community/environment_files/tt03/63be02fb",
+    "sha256": {
+     "metadata.json": "cdd83e524cbb3115c19955f2528d58731e1e054865449123145328e3e29316ca",
+     "tt03.py": "01e0bf593fc76ca9793f0a7a6835fe99080408188e9b73be1a4c10fd9d916247"
+    }
+   },
+   {
+    "game_id": "tw01-63be02fb",
+    "short": "tw01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Ordering",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Two-stop order: orange waypoint before green goal validates — only two landmarks, fixed order (not cq01 many ring markers).",
+    "tags": [
+     "static",
+     "movement",
+     "ordering"
+    ],
+    "path": "community/environment_files/tw01/63be02fb",
+    "sha256": {
+     "metadata.json": "5191191aa0ed41067c4cdff708febb7ab3ca4c39f4e2a0c09a5e10cf692c619b",
+     "tw01.py": "18ed61bc5ebb1897a619035ebf1fd6ca46182a7bfa9918ac6428389e6894b052"
+    }
+   },
+   {
+    "game_id": "ul01-63be02fb",
+    "short": "ul01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8×8",
+    "levels": "5",
+    "description": "Pick up the key to unlock the door and advance.",
+    "tags": [
+     "static",
+     "puzzle",
+     "key-door"
+    ],
+    "path": "community/environment_files/ul01/63be02fb",
+    "sha256": {
+     "metadata.json": "ad589f242d72d124b3c7f404b102334fd791e2682272291870c7cb95d58a8844",
+     "ul01.py": "d0712045e84c1833f4e985bcbcff291263f5bf251403de6352b7a9ed27b7ac97"
+    }
+   },
+   {
+    "game_id": "ul02-63be02fb",
+    "short": "ul02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-12",
+    "levels": "5",
+    "description": "Two-key unlock: key A before door A and key B before door B; wrong door order loses.",
+    "tags": [
+     "static",
+     "puzzle",
+     "keys"
+    ],
+    "path": "community/environment_files/ul02/63be02fb",
+    "sha256": {
+     "metadata.json": "6d33b92d641bcd47d9734fca63c73cd23a27bcbee44f885377b2eb9a0e7be7ee",
+     "ul02.py": "d7d7ebba0812671ba39e581eb6a285f46b38b785272b20e66c042079aae92d6a"
+    }
+   },
+   {
+    "game_id": "ul03-63be02fb",
+    "short": "ul03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Master key: both silver keys reveal gold; gold opens both doors.",
+    "tags": [
+     "static",
+     "puzzle",
+     "10-grid"
+    ],
+    "path": "community/environment_files/ul03/63be02fb",
+    "sha256": {
+     "metadata.json": "08ff3214166a49f9ae21bfacf61ab83d9b0a153a2945339ed9b357238c3a73f8",
+     "ul03.py": "5ca555364c575ecadf83cae1f6bb8adf771ba8700f643ae9b49e8847d2f29253"
+    }
+   },
+   {
+    "game_id": "va01-63be02fb",
+    "short": "va01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Coverage / Path",
+    "input": "keyboard",
+    "grid": "4-8",
+    "levels": "5",
+    "description": "Revisit rule: allowed — cover every walkable floor at least once; revisits OK. Goal: full coverage, not Hamiltonian.",
+    "tags": [
+     "static",
+     "puzzle",
+     "coverage"
+    ],
+    "path": "community/environment_files/va01/63be02fb",
+    "sha256": {
+     "metadata.json": "a09d7232d7193407be4cd99af4ed6fe5f51495a2740b4f5465291813d213a89e",
+     "va01.py": "a15370fe925e65ed80fc7bd5c07d84c6dda651d2f275b11d45e9aa2e35f61f09"
+    }
+   },
+   {
+    "game_id": "va02-63be02fb",
+    "short": "va02",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Coverage / Path",
+    "input": "keyboard",
+    "grid": "4-8",
+    "levels": "5",
+    "description": "Visit every non-hazard floor cell; red hazard cells never need coverage. Visited cells stay green (trail). Three blocked moves (OOB / wall / hazard) on a level…",
+    "tags": [
+     "static",
+     "puzzle",
+     "coverage"
+    ],
+    "path": "community/environment_files/va02/63be02fb",
+    "sha256": {
+     "metadata.json": "2a311526179686704a5905016e28fb6467ec3fb66664c6984e8edfad24296155",
+     "va02.py": "fd85c9e78490d47bf60b9797bc93d9fab42a90068ccc775cf76327bdf104f158"
+    }
+   },
+   {
+    "game_id": "va03-63be02fb",
+    "short": "va03",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Coverage / Path",
+    "input": "keyboard",
+    "grid": "4-8",
+    "levels": "5",
+    "description": "Visit yellow waypoints in order with a fixed move budget (shortest solve length). OOB/wall don’t use moves. Waste the budget or mistime the final step = lose.",
+    "tags": [
+     "static",
+     "puzzle",
+     "coverage"
+    ],
+    "path": "community/environment_files/va03/63be02fb",
+    "sha256": {
+     "metadata.json": "f68e0854ac643dbdd03193decf48ce28e351557c8e109a20fdb23189bffb1085",
+     "va03.py": "8122c60b04940b66cda8ce336fadb9252bf23f997ed55a7e3c2d2f831756bc5c"
+    }
+   },
+   {
+    "game_id": "vi01-63be02fb",
+    "short": "vi01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Hazard",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Infection: plague spreads every K steps; cyan vaccine then green exit.",
+    "tags": [
+     "static",
+     "hazard",
+     "12-grid"
+    ],
+    "path": "community/environment_files/vi01/63be02fb",
+    "sha256": {
+     "metadata.json": "54703769cd0f314e7054285bc77fdf0b5b60e7a73a1d4f9b24fe9e6c64e547f1",
+     "vi01.py": "0ec4fa332aca1118792815b74c08862338d738c0a79439bbaee2f92d5a15c871"
+    }
+   },
+   {
+    "game_id": "vp01-63be02fb",
+    "short": "vp01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Hazard / Path",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Revisit rule: one visit only — second entry to any cell loses (path hazard; not cq01/tw01 ordering or pw01 plates).",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid",
+     "coverage"
+    ],
+    "path": "community/environment_files/vp01/63be02fb",
+    "sha256": {
+     "metadata.json": "6b3709e495811526b44f543324314f912bc394ecad5ec8eb06c7a597f9069324",
+     "vp01.py": "b7b57b599d8c770af1af97a9cf7756096a9599a3c787a526f7866e384e905785"
+    }
+   },
+   {
+    "game_id": "vt01-v1",
+    "short": "vt01",
+    "family": "逻辑 / 推理 / 排序",
+    "category": "Logic / Weights",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Vote plates: sum of crate weights on the plate mod M opens the door; reach the goal.",
+    "tags": [
+     "static",
+     "logic"
+    ],
+    "path": "community/environment_files/vt01/v1",
+    "sha256": {
+     "metadata.json": "a4845f4e9d1dcf690bfd40b411a6e6eef78098d5d3d3da60139ceb999079ade2",
+     "vt01.py": "3b62a827d7c89077ca4b1547a301737ad6b88e860c15fd074edd1ad64c174a09"
+    }
+   },
+   {
+    "game_id": "wa01-63be02fb",
+    "short": "wa01",
+    "family": "移动与协调",
+    "category": "Movement",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "Warp line: crossing a warp band shifts +2 on its axis when clear.",
+    "tags": [
+     "static",
+     "movement",
+     "12-grid"
+    ],
+    "path": "community/environment_files/wa01/63be02fb",
+    "sha256": {
+     "metadata.json": "3332b60b221711379f92d4a8d1e3efe4fcedf44b6e96489bb35e71bbf4ebd303",
+     "wa01.py": "f8d0402554716545b4bb597e3253c21903b0ffa70ec86d6a472b54218905fe13"
+    }
+   },
+   {
+    "game_id": "wb01-v1",
+    "short": "wb01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Dynamic / Walls",
+    "input": "keyboard",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Wall belt: marked wall segments on a row shift east each step (wrap); crushed if a wall lands on you.",
+    "tags": [
+     "static",
+     "timing"
+    ],
+    "path": "community/environment_files/wb01/v1",
+    "sha256": {
+     "metadata.json": "40614a28fa1bdc307bd1cbb2f4f488785a8b049ed15613a3e6dd51d982f31323",
+     "wb01.py": "82484c329dba4347e5eaaab251928668de0ddc9156b6f357814b049032dc09e8"
+    }
+   },
+   {
+    "game_id": "wg01-63be02fb",
+    "short": "wg01",
+    "family": "移动与协调",
+    "category": "Movement / Chaos",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Wind gust: every K steps you are pushed one cell east when free.",
+    "tags": [
+     "static",
+     "movement",
+     "10-grid"
+    ],
+    "path": "community/environment_files/wg01/63be02fb",
+    "sha256": {
+     "metadata.json": "f3e57dcfad27dd2abbaadaad05e4e0187638f8d85a99a4d212d5c2665ddb2daf",
+     "wg01.py": "5c2a568f99b39e81570936a5031700f43b34d57a8e742322bd280db059753fbe"
+    }
+   },
+   {
+    "game_id": "wk01-63be02fb",
+    "short": "wk01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Weak floor: brown tiles collapse to holes after you leave; holes are lethal. HUD turns red on hole death.",
+    "tags": [
+     "static",
+     "puzzle",
+     "hazard"
+    ],
+    "path": "community/environment_files/wk01/63be02fb",
+    "sha256": {
+     "metadata.json": "32020702629c64c1e40d4cbb3a1d40cf9d414a06c00fb00463aabf0865e3df51",
+     "wk01.py": "8ffca95d41ef10c592e6ee9a47b07c75222fd63a044b351d40e4d24478bcc4a6"
+    }
+   },
+   {
+    "game_id": "wl01-63be02fb",
+    "short": "wl01",
+    "family": "推箱 / 环境操作",
+    "category": "Environmental Manipulation",
+    "input": "keyboard_click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Wall craft: maroon chasms are deadly—bridge them with ACTION6 (place/remove, budget); red hazards are separate one-touch deaths.",
+    "tags": [
+     "static",
+     "puzzle",
+     "building"
+    ],
+    "path": "community/environment_files/wl01/63be02fb",
+    "sha256": {
+     "metadata.json": "a085b88c6877ba96fa30eb1c09999c4f8c4d8a5048cac58386b938a3063f5cc2",
+     "wl01.py": "4401114b48f203a2b2272ba1c8c8ffaaa94ee6655f8d96db9a505b562ab8f616"
+    }
+   },
+   {
+    "game_id": "wm01-63be02fb",
+    "short": "wm01",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Whack-a-Mole! Click moles before they escape. Meet checkpoint requirements or lose.",
+    "tags": [
+     "static",
+     "action",
+     "whack-a-mole"
+    ],
+    "path": "community/environment_files/wm01/63be02fb",
+    "sha256": {
+     "metadata.json": "1e2bc9dcf1ac752adf4febeccaecd3231c4b411f3c6435f72c1e97a7daad5f83",
+     "wm01.py": "3bc4f55ca3f859a76e3f2404f8f9ba495eb823031dcb48cee8b9691d341186b0"
+    }
+   },
+   {
+    "game_id": "wm02-63be02fb",
+    "short": "wm02",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Lane moles: moles spawn in rotating lane columns; wrong-lane click while a mole is up costs a life.",
+    "tags": [
+     "static",
+     "timing",
+     "click"
+    ],
+    "path": "community/environment_files/wm02/63be02fb",
+    "sha256": {
+     "metadata.json": "5a92fe09dc5a94bdb72b6393bf72241757afd035883417e32f8b3146f4abdfe0",
+     "wm02.py": "73fa39c6fac2e384d295f255857e1f8c21ba9562af82701ef397351880c8b66b"
+    }
+   },
+   {
+    "game_id": "wm03-63be02fb",
+    "short": "wm03",
+    "family": "生存 / 时机 / 危险",
+    "category": "Survival / Timing",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "5",
+    "description": "Decoy moles: gray decoys in wrong lanes; whack decoy = lose life.",
+    "tags": [
+     "static",
+     "timing",
+     "32-grid"
+    ],
+    "path": "community/environment_files/wm03/63be02fb",
+    "sha256": {
+     "metadata.json": "42eeaad28dc508fad709672182fef40033da9c4898363162b30cd8655327bde5",
+     "wm03.py": "ff242ed20d7e3e5bce18a473611d301ecb215879e68286b782bfcde9bbb054a5"
+    }
+   },
+   {
+    "game_id": "wm04-v1",
+    "short": "wm04",
+    "family": "生存 / 时机 / 危险",
+    "category": "Timing / Reflex",
+    "input": "click",
+    "grid": "32×32",
+    "levels": "7",
+    "description": "Whack: wrong click shortens the timer.",
+    "tags": [
+     "timing",
+     "click"
+    ],
+    "path": "community/environment_files/wm04/v1",
+    "sha256": {
+     "metadata.json": "17717070796471534cd4fe2f2014337e0f272027282f47d4ce17c1237a93dc88",
+     "wm04.py": "177a74c1613d21786d2fddb6b42dce9b9dbf97df0b29de956f16ddcebf66405b"
+    }
+   },
+   {
+    "game_id": "wp01-63be02fb",
+    "short": "wp01",
+    "family": "推箱 / 环境操作",
+    "category": "Logistics",
+    "input": "keyboard",
+    "grid": "10×10",
+    "levels": "5",
+    "description": "Weight plate (wp01): one tile; sum of orth-adjacent weights (you=1, crate=2) = W unlocks — not pw01 dual yellow pads.",
+    "tags": [
+     "static",
+     "movement",
+     "logic"
+    ],
+    "path": "community/environment_files/wp01/63be02fb",
+    "sha256": {
+     "metadata.json": "c604c1038394b673565d9eb0aefd2f2794840ca35ee7e0a3a62ddd13a494875d",
+     "wp01.py": "f697674d28a707a0ff25358cad76435027b431e5bce1480a872326809524f5ef"
+    }
+   },
+   {
+    "game_id": "wr01-v1",
+    "short": "wr01",
+    "family": "图案 / 拼贴 / 对称",
+    "category": "Spatial / Rotation",
+    "input": "keyboard",
+    "grid": "12×12",
+    "levels": "5",
+    "description": "World rotation: entire level rotates 90° CW every N steps; ACTION5 braces to skip the next rotation (budget).",
+    "tags": [
+     "static",
+     "planning",
+     "rotation"
+    ],
+    "path": "community/environment_files/wr01/v1",
+    "sha256": {
+     "metadata.json": "e52d2fc10437d6bd7fede04a754c5285cd6ca9255cf8b001377788dbe9638c11",
+     "wr01.py": "56532097c0a49d14b7229190ae05318b0b514de3d76eb12528351aa0c364983c"
+    }
+   },
+   {
+    "game_id": "zm01-63be02fb",
+    "short": "zm01",
+    "family": "路径 / 覆盖 / 资源",
+    "category": "Territory",
+    "input": "keyboard_click",
+    "grid": "16×16",
+    "levels": "5",
+    "description": "Flood duel: two colors expand from seeds; ACTION5 switches the active color; ACTION6 claims a floor cell orthogonally adjacent to your region (cover a target f…",
+    "tags": [
+     "static",
+     "territory",
+     "click"
+    ],
+    "path": "community/environment_files/zm01/63be02fb",
+    "sha256": {
+     "metadata.json": "59d634da47321460af09f7035ae18d488a943209af4ce407caf5f0a0d0b09967",
+     "zm01.py": "c6ce389ee0ef6856f6e5f84a7c1ad1b2f4ad56cb41b092172e066870b835b96c"
+    }
+   },
+   {
+    "game_id": "zm04-v1",
+    "short": "zm04",
+    "family": "模拟 / 场",
+    "category": "Simulation / Spread",
+    "input": "keyboard_click",
+    "grid": "12×12",
+    "levels": "7",
+    "description": "Strains: ACTION5 switch+spread; ACTION6 blocks a cell.",
+    "tags": [
+     "simulation",
+     "click"
+    ],
+    "path": "community/environment_files/zm04/v1",
+    "sha256": {
+     "metadata.json": "bb28a116d322e99aa8476e4bdae75a17f57498c239c21e58a2dae5077c35bc7e",
+     "zm04.py": "daf8a688b7f920ac344353e997a6ef4f072a8ec36eb6ba5e462e50d5265772f1"
+    }
+   },
+   {
+    "game_id": "zq01-63be02fb",
+    "short": "zq01",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Zone timer: blinking red hazard cells toggle on a fixed period (period, hazard_cells).",
+    "tags": [
+     "static",
+     "puzzle",
+     "timing"
+    ],
+    "path": "community/environment_files/zq01/63be02fb",
+    "sha256": {
+     "metadata.json": "e57ff47bd1937c57cdcc585da4e81c48f705fc90abb9bbeaa1e58a3b7760107c",
+     "zq01.py": "b5a54ce7900ac3971a9bb5d997b9a67c1d8d969b839d5025d93303383336420f"
+    }
+   },
+   {
+    "game_id": "zq02-63be02fb",
+    "short": "zq02",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Dual-phase hazards: two independent blinking hazard sets with different period / phase offset in data.",
+    "tags": [
+     "static",
+     "timing",
+     "hazard"
+    ],
+    "path": "community/environment_files/zq02/63be02fb",
+    "sha256": {
+     "metadata.json": "b60cb4fb70ca922719af2418e70ef7eae8a4b173f246dde198e52a6a18654e07",
+     "zq02.py": "3d9581c22d04323bd1df26206d53b89f10c007dd5c09d888c8ad67f00bf7d799"
+    }
+   },
+   {
+    "game_id": "zq03-63be02fb",
+    "short": "zq03",
+    "family": "机关谜题（钥匙、开关、传送、冰面）",
+    "category": "Puzzle Mechanics",
+    "input": "keyboard",
+    "grid": "8-10",
+    "levels": "5",
+    "description": "Synced hazard masks: one safe beat per cycle where both fields are off (mask_a / mask_b).",
+    "tags": [
+     "static",
+     "hazard",
+     "timing"
+    ],
+    "path": "community/environment_files/zq03/63be02fb",
+    "sha256": {
+     "metadata.json": "80d2e119fe61f0eed6da7bb9065e6beafdb32e1fe03ac88c7efd8fce288494e5",
+     "zq03.py": "c0518c1703d03bb68239b433866f4311bc2daf40b9288831de365f1b2aca7526"
+    }
+   }
+  ]
+ },
+ "iteration_games": [
+  "ls20",
+  "vc33",
+  "tu93"
+ ]
+}
