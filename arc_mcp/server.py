@@ -218,9 +218,27 @@ def call_tool(name: str, args: dict[str, Any]) -> list[dict[str, Any]]:
     """MCP content for a tool call: text, plus the 4x frame image after acting cells."""
     game, kernel = os.environ["ARC_SOCKET"], os.environ["ARC_KERNEL"]
     if name == "arc_python":
-        r = request(kernel, {"code": args.get("code", ""), "purpose": args.get("purpose", ""),
-                             "parents": args.get("parents"), "expect": args.get("expect", ""),
-                             "revises": args.get("revises"), "check": args.get("check", "")})
+        try:
+            r = request(kernel, {"code": args.get("code", ""), "purpose": args.get("purpose", ""),
+                                 "parents": args.get("parents"), "expect": args.get("expect", ""),
+                                 "revises": args.get("revises"), "check": args.get("check", "")})
+        except (OSError, RuntimeError, ValueError):
+            # the kernel process died (out of memory, a hard crash); the runner restarts it
+            up = False
+            for _ in range(60):
+                time.sleep(1)
+                try:
+                    request(kernel, {"op": "dag", "last": 1}, timeout=10)
+                    up = True
+                    break
+                except (OSError, RuntimeError, ValueError):
+                    pass
+            return [{"type": "text", "text": (
+                "The REPL process crashed while running this cell or before it (out of memory or a hard crash). "
+                + ("It has been restarted: the game state, the action count and the DAG are intact, but your Python "
+                   "variables and helpers are gone; redefine what you need. This cell was not re-run: check the state "
+                   "(status line, grid) before acting again. Keep arrays small."
+                   if up else "It is not back yet; try again in a moment."))}]
         return [{"type": "text", "text": r["text"]}] + [{"type": "image", "data": b, "mimeType": "image/png"}
                                                         for b in r.get("images") or []]
     return [{"type": "text", "text": _call_text(name, args, game, kernel)}]

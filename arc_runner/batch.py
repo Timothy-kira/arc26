@@ -92,6 +92,16 @@ GOAL_OBJECTIVE = ("Win every level of the ARC game in this workspace, using as f
 FIRST_PROMPT = "Play the ARC game. Start by looking at the state in the REPL with arc_python (looking costs no actions). Keep playing until the game is won or the tools tell you to stop."
 
 
+
+KERNEL_MEMORY = int(os.getenv("ARC_KERNEL_MEMORY_GB", "6")) << 30
+
+
+def limit_memory() -> None:
+    """The REPL kernel's address space is capped: a runaway cell gets a MemoryError, not the OOM killer."""
+    import resource
+
+    resource.setrlimit(resource.RLIMIT_AS, (KERNEL_MEMORY, KERNEL_MEMORY))
+
 def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False,
                        api_key: str = "EMPTY") -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -296,12 +306,32 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         blocked.append("/kaggle/input")
     kenv = {**os.environ, "ARC_DAG": str(ws / "dag.json"), "ARC_BLOCK_PATHS": os.pathsep.join(blocked),
             "PYTHONPATH": str(ROOT)}
-    kernel = subprocess.Popen([args.server_python, "-m", "arc_mcp.kernel", str(ksock), str(sock)], env=kenv, cwd=str(ws),
-                              stdout=subprocess.DEVNULL, stderr=(ws / "kernel.stderr").open("w"))
-    for _ in range(300):
-        if ksock.exists() or kernel.poll() is not None:
-            break
-        time.sleep(0.1)
+    def spawn_kernel() -> subprocess.Popen:
+        ksock.unlink(missing_ok=True)
+        proc = subprocess.Popen([args.server_python, "-m", "arc_mcp.kernel", str(ksock), str(sock)], env=kenv,
+                                cwd=str(ws), stdout=subprocess.DEVNULL, stderr=(ws / "kernel.stderr").open("a"),
+                                preexec_fn=limit_memory)
+        for _ in range(300):
+            if ksock.exists() or proc.poll() is not None:
+                break
+            time.sleep(0.1)
+        if ksock.exists():
+            os.chmod(ksock, 0o666)
+        return proc
+
+    kernels = [spawn_kernel()]
+    stop_kernels = threading.Event()
+
+    def supervise() -> None:
+        """A dead REPL kernel (out of memory, a hard crash) is restarted; it reloads the DAG, the game
+        state lives in the daemon, only the model's variables are lost."""
+        while not stop_kernels.wait(1):
+            if kernels[-1].poll() is not None:
+                with (ws / "kernel.stderr").open("a") as f:
+                    f.write(f"[batch] kernel exited ({kernels[-1].returncode}); restarting\n")
+                kernels.append(spawn_kernel())
+
+    threading.Thread(target=supervise, daemon=True).start()
     (ws / ".mcp.json").write_text(json.dumps(
         {"mcpServers": {"arc": {"command": args.server_python, "args": [str(SERVER)],
                                 "env": {"ARC_SOCKET": str(sock), "ARC_KERNEL": str(ksock)}, "timeout": 300000}}}, indent=1))
@@ -385,7 +415,8 @@ def run_attempt(game: str, k: int, args: argparse.Namespace, card: Optional[str]
         if idle >= args.max_idle:
             break  # the agent keeps stopping without acting
     merge_skills(ws, Path(args.skills_dir).resolve(), game_key(game), t_attempt)
-    for proc in (kernel, daemon):
+    stop_kernels.set()
+    for proc in (kernels[-1], daemon):
         proc.terminate()
         try:
             proc.wait(10)
