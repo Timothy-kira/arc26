@@ -21,7 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
-def make_handler(upstream: str, key: str, inject: dict, log_path: str):
+def make_handler(upstream: str, key: str, inject: dict, log_path: str, drop: tuple = ()):
     lock = threading.Lock()
 
     class Handler(BaseHTTPRequestHandler):
@@ -38,6 +38,8 @@ def make_handler(upstream: str, key: str, inject: dict, log_path: str):
             if method == "POST" and path.startswith("/chat/completions") and body:
                 try:
                     d = json.loads(body)
+                    for k in drop:  # e.g. max_tokens: no output budget, the server's own limit applies
+                        d.pop(k, None)
                     for k, v in inject.items():
                         if isinstance(v, dict) and isinstance(d.get(k), dict):
                             d[k] = {**d[k], **v}
@@ -109,9 +111,11 @@ def main() -> int:
     p.add_argument("--port", type=int, default=8012)
     p.add_argument("--inject", default='{"chat_template_kwargs": {"enable_thinking": false}}')
     p.add_argument("--log", default="llm_proxy.jsonl")
+    p.add_argument("--drop", default="", help="comma-separated body fields to remove, e.g. max_tokens")
     a = p.parse_args()
     key = Path(a.api_key_file).read_text().strip()
-    srv = ThreadingHTTPServer(("127.0.0.1", a.port), make_handler(a.upstream, key, json.loads(a.inject), a.log))
+    srv = ThreadingHTTPServer(("127.0.0.1", a.port), make_handler(a.upstream, key, json.loads(a.inject), a.log,
+                                                                   tuple(k for k in a.drop.split(",") if k)))
     print(f"proxy on http://127.0.0.1:{a.port}/v1 -> {a.upstream}", file=sys.stderr, flush=True)
     srv.serve_forever()
     return 0

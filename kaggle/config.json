@@ -30,7 +30,7 @@
       "--reasoning-parser",
       "qwen3",
       "--default-chat-template-kwargs",
-      "{\"enable_thinking\": false}"
+      "{\"enable_thinking\": true}"
     ]
   },
   "dev_hours": 2.0,
@@ -40,18 +40,20 @@
   "kernel_sources": [
     "xishengfeng/arc26-mcode-build"
   ],
-  "output_limit": 8192,
+  "output_limit": 131072,
   "api": {
     "base_url": "https://note3-prev-api.askdiandian.com/v1",
     "model": "dots3-note-prev",
     "games": "ls20,vc33,tu93",
     "conc": 3,
     "hours": 0.9,
-    "game_seconds": 1200,
+    "game_seconds": 2700,
     "community": false,
     "dataset_sources": [
       "xishengfeng/arc26-secrets"
     ],
-    "k": 2
-  }
+    "k": 2,
+    "thinking": true
+  },
+  "thinking": true
 }
