@@ -215,7 +215,9 @@ class Kernel:
         same = NS["level"] == before and NS["state"] != "GAME_OVER"
         rec = {"n": NS["actions_used"], "action": int(a), "x": x, "y": y, "level": NS["level"], "state": NS["state"],
                "changed": changed, "note": note, "moves": [(m["color"], m["size"], m["d"]) for m in mv],
-               "small": percept.small_changes(KSTATE["prev"], KSTATE["grid"]) if same and changed else []}
+               "small": percept.small_changes(KSTATE["prev"], KSTATE["grid"]) if same and changed else [],
+               "target": percept.object_at(KSTATE["prev"], x, y) if int(a) == 6 else None,
+               "effect": percept.effect(KSTATE["prev"], KSTATE["grid"]) if same and changed else []}
         if NS["state"] == "GAME_OVER" and NS["level"] == before:
             rec["death"] = self._death_report(rec)
             ms = self._update_bands()
@@ -258,22 +260,44 @@ class Kernel:
         return "\n".join(ds) or "no deaths yet"
 
     def action_stats(self, level: Optional[int] = None) -> str:
-        """Facts from the history: for each action id, how often it was played and what it moved."""
+        """Facts from the history: for each action id (each clicked object for ACTION6), how often it was
+        played, how often it changed nothing, what it moved and which regions it changed."""
         from collections import Counter as C
+        N = percept.NAMES
         rows: dict = {}
         for h in NS["history"]:
             if level is not None and h["level"] != level:
                 continue
-            r = rows.setdefault(h["action"], {"n": 0, "noop": 0, "moves": C()})
+            if h["action"] == 0:
+                continue
+            key = (h["action"], tuple(h["target"]) if h.get("target") else None) if h["action"] == 6 else (h["action"], None)
+            r = rows.setdefault(key, {"n": 0, "noop": 0, "moves": C(), "fx": C(), "xy": (h.get("x"), h.get("y"))})
             r["n"] += 1
-            r["noop"] += h["changed"] == 0
             for c, size, d in h.get("moves") or []:
                 r["moves"][(c, tuple(size), tuple(d))] += 1
+            real = 0
+            if not h.get("moves"):
+                bands = KSTATE.get("bands", {}).get(h["level"], [])
+                for x0, y0, x1, y1, bef, aft in h.get("effect") or []:
+                    if any((k == "row" and p0 <= y0 and y1 <= p1) or (k == "col" and p0 <= x0 and x1 <= p1)
+                           for k, p0, p1 in bands):
+                        continue  # the budget meter, not this action's effect
+                    r["fx"][(x0, y0, x1, y1, bef, aft)] += 1
+                    real += 1
+            r["noop"] += h["changed"] == 0 or (not h.get("moves") and not real and h.get("effect") is not None
+                                               and h["state"] != "GAME_OVER")
         out = []
-        for a, r in sorted(rows.items()):
-            mv = ", ".join(f"{percept.NAMES[c]}#{c} {w}x{hh} d=({d[0]:+d},{d[1]:+d}) x{n}"
+        for (a, t), r in sorted(rows.items(), key=lambda kv: (kv[0][0], str(kv[0][1]))):
+            name = f"ACTION{a}"
+            if a == 6:
+                name += (f" on {N[t[0]]}#{t[0]} {t[3]}x{t[4]} at x={t[1]} y={t[2]}" if t else
+                         f" on background (e.g. {r['xy'][0]},{r['xy'][1]})")
+            mv = ", ".join(f"{N[c]}#{c} {w}x{hh} d=({d[0]:+d},{d[1]:+d}) x{n}"
                            for (c, (w, hh), d), n in r["moves"].most_common(3))
-            out.append(f"ACTION{a}: played {r['n']}, no change {r['noop']}" + (f"; moved {mv}" if mv else ""))
+            fx = ", ".join(f"x={x0}..{x1} y={y0}..{y1} {N[b]}->{N[f]} x{n}"
+                           for (x0, y0, x1, y1, b, f), n in r["fx"].most_common(2))
+            out.append(f"{name}: played {r['n']}, no effect {r['noop']}" + (f"; moved {mv}" if mv else "")
+                       + (f"; changed {fx}" if fx else ""))
         return "\n".join(out) or "no actions yet"
 
     def cells(self, step: Optional[int] = None, ox: Optional[int] = None, oy: Optional[int] = None,
@@ -415,6 +439,13 @@ class Kernel:
                 ms = percept.meters(NS["history"], KSTATE["grid"], NS["level"])
                 if ms:
                     per.append(percept.meters_text(ms))
+                played = NS["history"][-self.cell_actions:]
+                if NS["level"] > level0:  # a new level: what the actions did on the one just won usually carries over
+                    per.append(f"ACTION EFFECTS on the level just won (L{NS['level']}), usually the same here:\n"
+                               + self.action_stats(level=NS["level"] - 1))
+                elif any(h["action"] == 0 for h in played):  # after a RESET: what is already known, not to re-test
+                    per.append(f"ACTION EFFECTS known on this level (do not re-test them):\n"
+                               + self.action_stats(level=NS["level"]))
             lat = percept.infer_lattice(NS["history"], KSTATE["grid"])
             if lat and lat[0] >= 3 and getattr(self, "lattice_shown", None) != (NS["level"], lat):
                 self.lattice_shown = (NS["level"], lat)  # once per level and lattice; cells() any time

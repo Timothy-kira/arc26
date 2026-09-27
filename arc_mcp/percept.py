@@ -295,3 +295,26 @@ def meters_text(ms: list[dict]) -> str:
         f"{m['per_action']} cell(s) per action in {m['actions']} of the last {m['of']} actions, {m['left']} "
         f"{NAMES[m['colour']]} cells left (~{m['left'] // max(1, m['per_action'])} actions if it is a budget)"
         for m in ms)
+
+
+def object_at(grid: np.ndarray, x: int, y: int) -> Optional[tuple]:
+    """The object under pixel (x, y) as (colour, x0, y0, w, h), None on the background or off the frame."""
+    g = np.asarray(grid)
+    if x is None or y is None or not (0 <= y < g.shape[0] and 0 <= x < g.shape[1]):
+        return None
+    if g[y, x] == background(g):
+        return None
+    for o in objects(g):
+        y0, x0, y1, x1 = o["bbox"]
+        if o["color"] == g[y, x] and y0 <= y <= y1 and x0 <= x <= x1:
+            return (o["color"], x0, y0, x1 - x0 + 1, y1 - y0 + 1)
+    return None
+
+
+def effect(a: np.ndarray, b: np.ndarray, limit: int = 2) -> list[tuple]:
+    """The largest changed regions of one action as (x0, y0, x1, y1, before colour, after colour)."""
+    out = []
+    for r in change_regions(a, b)[:limit]:
+        y0, x0, y1, x1 = r["bbox"]
+        out.append((x0, y0, x1, y1, next(iter(r["before"])), next(iter(r["after"]))))
+    return out
