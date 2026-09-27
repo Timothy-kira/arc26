@@ -102,6 +102,7 @@ def limit_memory() -> None:
 
     resource.setrlimit(resource.RLIMIT_AS, (KERNEL_MEMORY, KERNEL_MEMORY))
 
+
 def write_mcode_config(data_dir: Path, base_url: str, model: str, context: int, output: int, reasoning: bool = False,
                        api_key: str = "EMPTY") -> None:
     data_dir.mkdir(parents=True, exist_ok=True)

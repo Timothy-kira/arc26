@@ -182,8 +182,10 @@ if not key:  # fallback: the private dataset xishengfeng/arc26-secrets
 assert key, "no API key: add the Kaggle secret DOTS_API_KEY or mount the private dataset arc26-secrets"
 os.makedirs("/tmp/secrets", exist_ok=True)
 open("/tmp/secrets/key", "w").write(key); os.chmod("/tmp/secrets/key", 0o600)
+THINK = bool(A.get("thinking"))  # thinking on: the proxy asks for it and MiniMax Code keeps the reasoning
 proxy = subprocess.Popen([sys.executable, CODE + "/arc_runner/llm_proxy.py", "--upstream", A["base_url"], "--api-key-file",
-                          "/tmp/secrets/key", "--port", "8012", "--log", WORK + "/llm_proxy.jsonl"])
+                          "/tmp/secrets/key", "--port", "8012", "--log", WORK + "/llm_proxy.jsonl",
+                          "--inject", json.dumps({"chat_template_kwargs": {"enable_thinking": THINK}})])
 time.sleep(3)
 sh("id arcagent || useradd -m arcagent", shell=True)
 os.chmod(WORK, 0o755)
@@ -193,10 +195,10 @@ env_dir = "/tmp/community/environment_files" if A.get("community") else COMP + "
 # the agent user may not read game files; the game daemon (root) still can
 shutil.copytree(env_dir, "/tmp/games", dirs_exist_ok=True); os.chmod("/tmp/games", 0o700)
 cmd = [sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8012/v1", "--model", A["model"],
-       "--context", "131072", "--output-limit", "8192", "--agent-user", "arcagent", "--node", NODE, "--mcode", MCODE,
+       "--context", "131072", "--output-limit", str(A.get("output_limit", 8192)), "--agent-user", "arcagent", "--node", NODE, "--mcode", MCODE,
        "--server-python", sys.executable, "--out-dir", WORK + "/api_run", "--games", A["games"], "--conc", str(A["conc"]),
        "--hours", str(A["hours"]), "--max-game-seconds", str(A["game_seconds"]), "--env-dir", "/tmp/games",
-       "--k", str(A.get("k", 1))]
+       "--k", str(A.get("k", 1))] + (["--reasoning"] if THINK else [])
 print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localhost"})
 os.makedirs(CODE + "/data", exist_ok=True)  # arc_eval reads the human baselines from data/environment_files
 if not os.path.exists(CODE + "/data/environment_files"):
