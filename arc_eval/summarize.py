@@ -104,7 +104,7 @@ def main() -> int:
         tot["revs"] += len(revised)
     print(f"{'game':14} lv    acts  actions/human per level        RHAE   tokens   time  cells surpr revis open")
     for g, lv, wl, acts, ratios, sc, tok, el, cells, fl, rv, op in rows:
-        print(f"{g[:14]:14} {lv}/{wl:<3} {acts or 0:5}  {' '.join(ratios)[:28]:28} {(round(sc, 3) if sc is not None else '-'):>6} "
+        print(f"{g[:14]:14} {lv}/{wl or 0:<3} {acts or 0:5}  {' '.join(ratios)[:28]:28} {(round(sc, 3) if sc is not None else '-'):>6} "
               f"{tok:8} {int(el or 0):5}s {cells:5} {fl:5} {rv:5} {op:4}")
     tools: Counter = Counter()
     repl: Counter = Counter()
