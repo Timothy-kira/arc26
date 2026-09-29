@@ -38,10 +38,10 @@ class LLM:
         self.call_seconds, self.retries, self.temperature = call_seconds, retries, temperature
         self.hurry = hurry  # appended to the messages of a retry, after an attempt was cut off
 
-    def _once(self, messages: list[dict], limit: float) -> Reply:
+    def _once(self, messages: list[dict], limit: float, thinking: bool) -> Reply:
         body: dict[str, Any] = {"model": self.model, "messages": messages, "stream": True,
                                 "stream_options": {"include_usage": True},
-                                "chat_template_kwargs": {"enable_thinking": self.thinking}}
+                                "chat_template_kwargs": {"enable_thinking": thinking}}
         if self.temperature is not None:
             body["temperature"] = self.temperature
         req = urllib.request.Request(self.url, data=json.dumps(body).encode(), method="POST",
@@ -73,7 +73,7 @@ class LLM:
                         reasoning.append(r_)
         return Reply("".join(content), "".join(reasoning), usage, time.time() - t0, 1)
 
-    def chat(self, messages: list[dict], deadline: Optional[float] = None) -> Reply:
+    def chat(self, messages: list[dict], deadline: Optional[float] = None, thinking: Optional[bool] = None) -> Reply:
         """One reply; each attempt is cut at ``call_seconds`` and nothing runs past ``deadline``."""
         failures: list[str] = []
         for attempt in range(1, self.retries + 2):
@@ -84,7 +84,7 @@ class LLM:
                 break
             try:
                 rep = self._once(messages if attempt == 1 or not self.hurry else messages + [
-                    {"role": "user", "content": self.hurry}], limit)
+                    {"role": "user", "content": self.hurry}], limit, self.thinking if thinking is None else thinking)
                 rep.attempts, rep.failures = attempt, tuple(failures)
                 if rep.content.strip():
                     return rep

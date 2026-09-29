@@ -46,7 +46,8 @@ JSON in a ```json block):
     "game_over": true | false,
     "text": "what exactly you expect to see after this action"
   }},
-  "handoff": "note to your next step: current goal, plan for the next few actions, what is still uncertain"
+  "handoff": "note to your next step: current goal, plan for the next few actions, what is still uncertain",
+  "think_next": true | false
 }}
 
 Rules for the graph:
@@ -63,6 +64,9 @@ Thinking time is the scarcest resource you have: every minute you think is a min
 - When you work something out (a map of walls and corridors, a route, the effect of a button), write
   the result into the graph so later steps can read it instead of working it out again.
 - Think hard only when a prediction was WRONG, a level just started, or the plan is finished.
+- Set "think_next" to false when the next step is a routine continuation of the plan in your handoff
+  (the next step may then run without deliberate reasoning); if this step's prediction fails, the
+  next step thinks anyway.
 
 Playing well: first learn what each action does (one test each is usually enough), find what you
 control and what the goal is, then move straight to it. The HUD (a bar or counter that changes every

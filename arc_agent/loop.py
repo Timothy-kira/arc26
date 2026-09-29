@@ -42,7 +42,11 @@ def make_session(game: str, env_dir: str, gateway: Optional[str], card: Optional
 
 
 def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optional[str] = None,
-         card: Optional[str] = None, seconds: float = 2700.0, max_actions: int = 2000) -> dict[str, Any]:
+         card: Optional[str] = None, seconds: float = 2700.0, max_actions: int = 2000,
+         adaptive: bool = False) -> dict[str, Any]:
+    """Play one game. ``adaptive``: the model may mark its next step routine (``think_next`` false);
+    that step then runs without thinking, unless the prediction just failed, a level ended or the
+    game is over."""
     out_dir.mkdir(parents=True, exist_ok=True)
     s, gid, info = make_session(game, env_dir, gateway, card)
     obs = s.start()
@@ -53,6 +57,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
     handoff, verdict, diff, problems = "", "", "", []
     prev_grid: Optional[np.ndarray] = None
     move_steps: list[int] = []  # displacements seen on this level (lattice cue)
+    think_next = True
     last_pos: Optional[tuple[int, int]] = None
     log = (out_dir / "steps.jsonl").open("a")
     step = 0
@@ -80,7 +85,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         tl = time.time()
         for _ in range(2):  # one repair round when the answer is unusable
             try:
-                rep = llm.chat(msgs, t_end)
+                rep = llm.chat(msgs, t_end, None if not adaptive or think_next else False)
             except RuntimeError as exc:
                 errs = [str(exc)]
                 break
@@ -96,7 +101,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         rec: dict[str, Any] = {"step": step, "t": round(time.time(), 1), "level": obs.levels_completed,
                                "llm_s": round(rep.seconds, 1) if rep else None, "attempts": rep.attempts if rep else 0,
                                "usage": rep.usage if rep else None,
-                               "llm_failures": list(rep.failures) if rep else None,
+                               "llm_failures": list(rep.failures) if rep else None, "thinking": (not adaptive) or think_next,
                                "reasoning_chars": len(rep.reasoning) if rep else None}
         if errs:
             rec["error"] = errs
@@ -135,6 +140,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             same = [m for m in facts["moves"] if (m["dx"], m["dy"]) == (m0["dx"], m0["dy"])]  # parts of one mover
             last_pos = (min(m["x"] for m in same), min(m["y"] for m in same))
         ok, verdict = prompt.check_prediction(pred, facts)
+        think_next = not (ok is True and not level_up and not facts["game_over"] and answer.get("think_next") is False)
         if level_up:
             verdict += f"\nLEVEL {before.levels_completed + 1} COMPLETED in {s.level_actions[-1]} actions: the frame is now level {obs.levels_completed + 1}."
             diff = "(new level: the whole frame changed)"
