@@ -60,6 +60,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
     think_next = True
     last_pos: Optional[tuple[int, int]] = None
     log = (out_dir / "steps.jsonl").open("a")
+    thoughts = (out_dir / "reasoning.jsonl").open("a")  # the model's reasoning per step, for analysis
     step = 0
     tokens = 0
     while time.time() < t_end and s.actions < max_actions:
@@ -163,8 +164,12 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
                    levels=obs.levels_completed)
         log.write(json.dumps(rec, default=str) + "\n")
         log.flush()
+        if rep is not None:
+            thoughts.write(json.dumps({"step": step, "reasoning": rep.reasoning[-20000:], "content": rep.content[-6000:]}) + "\n")
+            thoughts.flush()
         step += 1
     log.close()
+    thoughts.close()
     baseline = list(getattr(info, "baseline_actions", None) or [])
     result = {"game": gid, "levels": obs.levels_completed, "win_levels": s.win_levels, "actions": s.actions,
               "level_actions": s.level_actions, "baseline": baseline, "state": obs.state.name, "steps": step,
