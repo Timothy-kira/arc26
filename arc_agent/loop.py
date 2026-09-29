@@ -52,6 +52,8 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
     t_end = t0 + seconds
     handoff, verdict, diff, problems = "", "", "", []
     prev_grid: Optional[np.ndarray] = None
+    move_steps: list[int] = []  # displacements seen on this level (lattice cue)
+    last_pos: Optional[tuple[int, int]] = None
     log = (out_dir / "steps.jsonl").open("a")
     step = 0
     tokens = 0
@@ -64,9 +66,16 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         view = {"level": obs.levels_completed, "win_levels": s.win_levels or obs.win_levels, "state": state,
                 "level_actions": s.level_so_far, "actions": s.actions, "available": obs.available_actions,
                 "step": step, "time_left": t_end - time.time()}
+        lat = vision.infer_lattice(grid, move_steps)
+        lattice = ""
+        if lat:
+            st, ox, oy = lat
+            if ox is None:
+                ox, oy = (last_pos[0] % st, last_pos[1] % st) if last_pos else (0, 0)
+            lattice = vision.lattice_text(grid, st, ox, oy)
         msgs = [{"role": "system", "content": prompt.SYSTEM},
                 prompt.user_message(view, graph.render(), handoff, verdict, diff, vision.objects_text(grid),
-                                    vision.hex_grid(grid), vision.png(grid), problems)]
+                                    vision.hex_grid(grid), vision.png(grid), problems, lattice)]
         answer, errs, rep = None, [], None
         tl = time.time()
         for _ in range(2):  # one repair round when the answer is unusable
@@ -112,6 +121,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         level_up = obs.levels_completed > before.levels_completed
         if level_up:
             hud.reset()
+            move_steps, last_pos = [], None
         else:
             hud.update(prev_grid, after)
         diff, facts = vision.diff_text(prev_grid, after, None if level_up else hud.mask())
@@ -119,6 +129,11 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         if anim:
             diff += "\n" + anim
         facts.update(level_up=level_up, game_over=obs.state.name == "GAME_OVER")
+        if not level_up and facts["moves"]:
+            m0 = facts["moves"][0]
+            move_steps += [abs(v) for v in (m0["dx"], m0["dy"]) if v]
+            same = [m for m in facts["moves"] if (m["dx"], m["dy"]) == (m0["dx"], m0["dy"])]  # parts of one mover
+            last_pos = (min(m["x"] for m in same), min(m["y"] for m in same))
         ok, verdict = prompt.check_prediction(pred, facts)
         if level_up:
             verdict += f"\nLEVEL {before.levels_completed + 1} COMPLETED in {s.level_actions[-1]} actions: the frame is now level {obs.levels_completed + 1}."

@@ -57,6 +57,13 @@ Rules for the graph:
 - Keep nodes short and factual. Prefer rules that generalise ("ACTION1 moves the blue 5x5 up by 5").
 - Record the goal as soon as you have a hypothesis about what clears a level.
 
+Thinking time is the scarcest resource you have: every minute you think is a minute of game time.
+- When the handoff holds a plan and the last prediction was RIGHT, just take the next planned action;
+  do not re-derive the map or re-check rules that the graph marks confirmed.
+- When you work something out (a map of walls and corridors, a route, the effect of a button), write
+  the result into the graph so later steps can read it instead of working it out again.
+- Think hard only when a prediction was WRONG, a level just started, or the plan is finished.
+
 Playing well: first learn what each action does (one test each is usually enough), find what you
 control and what the goal is, then move straight to it. The HUD (a bar or counter that changes every
 action) is usually a move budget, not the board. Moves given by "moves" are shape-matched objects with
@@ -70,14 +77,17 @@ def status_text(obs: dict[str, Any]) -> str:
 
 
 def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: str, diff: str,
-                 objects: str, grid: str, image_b64: Optional[str], problems: list[str]) -> dict:
+                 objects: str, grid: str, image_b64: Optional[str], problems: list[str], lattice: str = "") -> dict:
     parts = [f"STATUS: {status_text(obs)}", "", "THE GRAPH:", graph_text, "",
              f"THE HANDOFF (from your previous step):\n{handoff or '(none: first step)'}", "",
              f"PREDICTION CHECK for the last action:\n{verdict or '(no previous action)'}", "",
              f"WHAT THE LAST ACTION CHANGED:\n{diff or '(no previous action)'}"]
     if problems:
         parts += ["", "PROBLEMS WITH YOUR LAST ANSWER (fix them this step):", *problems]
-    parts += ["", "CURRENT FRAME objects:", objects, "", "CURRENT FRAME grid (hex, row y then columns x):", grid,
+    parts += ["", "CURRENT FRAME objects:", objects]
+    if lattice:
+        parts += ["", "CURRENT FRAME as a cell map (use it for maps and paths; the full grid follows):", lattice]
+    parts += ["", "CURRENT FRAME grid (hex, row y then columns x):", grid,
               "", "Answer with the JSON object now."]
     content: list[dict] = [{"type": "text", "text": "\n".join(parts)}]
     if image_b64:

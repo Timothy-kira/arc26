@@ -202,7 +202,7 @@ def diff_text(a: np.ndarray, b: np.ndarray, hud: Optional[np.ndarray] = None, li
     regs = regions(a, b, hud)
     mv = moves(a, b)
     facts = {"changed": total, "board_changed": board, "hud_changed": total - board,
-             "moves": [{"color": m["color"], "dx": m["dx"], "dy": m["dy"]} for m in mv]}
+             "moves": [{"color": m["color"], "dx": m["dx"], "dy": m["dy"], "x": m["to"][0], "y": m["to"][1]} for m in mv]}
     if total == 0:
         return "no cell changed", facts
     lines = [f"{total} cells changed ({board} on the board, {total - board} in the HUD)"]
@@ -229,3 +229,47 @@ def anim_text(frames: list[np.ndarray], prev: np.ndarray) -> str:
         n = int((seq[i - 1] != seq[i]).sum())
         parts.append(str(n))
     return f"animation: {len(frames)} frames, cells changed per frame: {' '.join(parts)}"
+
+
+def infer_lattice(grid: np.ndarray, move_steps: list[int]) -> Optional[tuple[int, int, int]]:
+    """(step, ox, oy) of the board's cell lattice, or None. Cues: a square tile size repeated across the
+    board (at least 8 tiles), and the gcd of the displacements actions caused. The tile wins when it
+    divides the move step (a move that jumps a wall tile) or when nothing has moved yet."""
+    from math import gcd
+
+    objs = objects(grid)
+    sq = Counter(o["bbox"][2] - o["bbox"][0] + 1 for o in objs
+                 if o["bbox"][2] - o["bbox"][0] == o["bbox"][3] - o["bbox"][1] and o["size"] > 1)
+    tile = next((t for t, n in sq.most_common() if t >= 2 and n >= 8), None)
+    step = 0
+    for v in move_steps:
+        step = gcd(step, abs(int(v)))
+    if tile and (step < 2 or step % tile == 0):
+        xs = Counter(o["bbox"][0] % tile for o in objs if o["bbox"][2] - o["bbox"][0] + 1 == tile)
+        ys = Counter(o["bbox"][1] % tile for o in objs if o["bbox"][3] - o["bbox"][1] + 1 == tile)
+        return tile, xs.most_common(1)[0][0], ys.most_common(1)[0][0]
+    if step < 3:
+        return None
+    return step, None, None
+
+
+def lattice_text(grid: np.ndarray, step: int, ox: int, oy: int) -> str:
+    """The frame on a lattice of step x step cells from (ox, oy): the dominant colour of each cell as
+    a hex map, cropped to the cells that are not background (indices stay absolute)."""
+    g = np.asarray(grid)
+    rows, cols = (g.shape[0] - oy) // step, (g.shape[1] - ox) // step
+    cells = np.zeros((rows, cols), dtype=np.int64)
+    for r in range(rows):
+        for c in range(cols):
+            blk = g[oy + r * step: oy + (r + 1) * step, ox + c * step: ox + (c + 1) * step]
+            cells[r, c] = np.bincount(blk.ravel(), minlength=16).argmax()
+    bg = background(cells)
+    ys, xs = np.where(cells != bg)
+    if not len(ys):
+        return ""
+    r0, r1, c0, c1 = ys.min(), ys.max(), xs.min(), xs.max()
+    head = (f"cell lattice: {step}x{step} cells from x={ox}, y={oy}; cell (col c, row r) covers x={ox}+{step}c.., "
+            f"y={oy}+{step}r..; dominant colour per cell (rows {r0}-{r1}, cols {c0}-{c1})")
+    colhdr = "     " + "".join(str(c % 10) for c in range(c0, c1 + 1))
+    body = [f"{r:3d}  " + "".join(HEX[int(v)] for v in cells[r, c0:c1 + 1]) for r in range(r0, r1 + 1)]
+    return "\n".join([head, colhdr, *body])
