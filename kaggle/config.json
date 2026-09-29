@@ -33,7 +33,7 @@
       "{\"enable_thinking\": true}"
     ]
   },
-  "dev_hours": 2.0,
+  "dev_hours": 2.3,
   "qwen_slug": "qwen3-8-27b-fp8-repacked",
   "max_actions": 100000,
   "api": {
@@ -51,6 +51,7 @@
     "call_seconds": 180
   },
   "thinking": true,
-  "game_seconds": 2400,
-  "call_seconds": 180
+  "game_seconds": 1500,
+  "call_seconds": 180,
+  "dev_games": "all"
 }
