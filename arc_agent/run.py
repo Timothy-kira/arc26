@@ -33,7 +33,7 @@ def one(game: str, k: int, a: dict[str, Any], card: Optional[str], seconds: floa
     llm = LLM(a["base_url"], a["model"], key, thinking=not a["no_thinking"], call_seconds=a["call_seconds"], hurry=HURRY)
     out = Path(a["out_dir"]) / "games" / f"{game}_k{k}"
     try:
-        return play(game, out, llm, a["env_dir"], a["gateway"], card, seconds, a["max_actions"], not a["no_adaptive"])
+        return play(game, out, llm, a["env_dir"], a["gateway"], card, seconds, a["max_actions"], a["think_policy"])
     except Exception as exc:  # one broken game must not stop the batch
         return {"game": game, "k": k, "error": f"{type(exc).__name__}: {exc}"}
 
@@ -50,8 +50,9 @@ def main() -> int:
     p.add_argument("--model", required=True)
     p.add_argument("--api-key-file", default="")
     p.add_argument("--no-thinking", action="store_true")
-    p.add_argument("--no-adaptive", action="store_true",
-                   help="think on every step (default: steps the model marks routine run without thinking)")
+    p.add_argument("--think-policy", default="model", choices=["always", "model", "exception"],
+                   help="which steps think: every step, those the model does not mark routine (default), or "
+                        "only when needed (first steps, failed prediction, new level, game over, model asks)")
     p.add_argument("--call-seconds", type=float, default=180.0, help="wall-clock limit of one LLM call")
     p.add_argument("--game-seconds", type=float, default=2700.0)
     p.add_argument("--hours", type=float, default=8.0, help="whole-run budget; games share what is left")

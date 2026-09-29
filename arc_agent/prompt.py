@@ -64,9 +64,9 @@ Thinking time is the scarcest resource you have: every minute you think is a min
 - When you work something out (a map of walls and corridors, a route, the effect of a button), write
   the result into the graph so later steps can read it instead of working it out again.
 - Think hard only when a prediction was WRONG, a level just started, or the plan is finished.
-- Set "think_next" to false when the next step is a routine continuation of the plan in your handoff
-  (the next step may then run without deliberate reasoning); if this step's prediction fails, the
-  next step thinks anyway.
+- "think_next": true when the next step needs fresh analysis, false when it is a routine continuation of
+  the plan in your handoff (it may then run without deliberate reasoning). If this step's prediction
+  fails, a level ends or the game is over, the next step thinks anyway.
 
 Playing well: first learn what each action does (one test each is usually enough), find what you
 control and what the goal is, then move straight to it. The HUD (a bar or counter that changes every
