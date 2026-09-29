@@ -1,14 +1,12 @@
-"""Build a self-contained Kaggle notebook: MiniMax Code (``mcode exec``) + Qwen3.8-27B play ARC-AGI-3.
-
-The notebook serves Qwen3.8-27B (tool calling, qwen3 reasoning parser) with vLLM on the RTX PRO 6000,
-unpacks MiniMax Code + Node 22 from the ``xishengfeng/mcode-offline`` dataset, and runs
-``arc_runner/batch.py`` (embedded below together with ``arc_mcp/server.py``): one headless
-``mcode exec`` per game, the game exposed to it as an MCP server.
+"""Build a self-contained Kaggle notebook that plays ARC-AGI-3 with the hand-written agent loop.
 
 Variants:
-  submit - competition rerun: play the gateway's hidden games (one scorecard, closed at the end).
-           Outside the rerun it only writes the placeholder submission Kaggle requires.
-  dev    - play all public games offline; outputs per-game results, workspaces and learned skills.
+  submit - competition rerun: vLLM serves Qwen3.8-27B on the RTX PRO 6000 and ``arc_agent.run`` plays
+           the gateway's hidden games (one scorecard, closed at the end). Outside the rerun it only
+           writes the placeholder submission Kaggle requires.
+  dev    - the same on the public games offline, with per-game logs and graphs in the output.
+  api    - CPU notebook with internet: the hosted model (Dots) instead of vLLM, for long evaluation
+           runs that a restarting container cannot hold.
 
 Usage: python kaggle/build_notebook.py --variant dev
 """
@@ -28,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def code_blob() -> str:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for name in ("arc_mcp", "arc_runner", "arc_eval", "plugin", "skills"):
+        for name in ("arc_agent", "arc_eval"):
             p = ROOT / name
             if p.exists():
                 tar.add(p, arcname=name, filter=lambda ti: None if "__pycache__" in ti.name else ti)
@@ -73,28 +71,8 @@ if NEED_GPU:
 '''
 
 TOOLS = r'''
-# The game engine for the MCP server (kernel python); Node 22 and MiniMax Code from their datasets
-# (Kaggle's own node is v20, which MiniMax Code does not run on).
+# The game engine, from the competition's wheels.
 sh([sys.executable, "-m", "pip", "install", "-q", "--no-index", "--find-links", COMP + "/arc_agi_3_wheels", "arc-agi"])
-import zipfile
-def stage(part, dest):
-    # Copy a mounted dataset to a writable dir, unpacking any archives it holds.
-    src = next((r for r, _, _ in os.walk("/kaggle/input") if part in os.path.basename(r)), None)
-    assert src, f"dataset {part!r} is not mounted"
-    shutil.copytree(src, dest, symlinks=True, dirs_exist_ok=True)
-    for a in glob.glob(dest + "/**/*.zip", recursive=True):
-        zipfile.ZipFile(a).extractall(os.path.dirname(a))
-    for a in glob.glob(dest + "/**/*.tar*", recursive=True):
-        tarfile.open(a).extractall(os.path.dirname(a))
-    return dest
-# Built inside Kaggle from github.com/Timothy-kira/minimax-code by the arc26-mcode-build utility kernel.
-stage("arc26-mcode-build", "/tmp/mcode")
-NODE = next(p for p in glob.glob("/tmp/mcode/**/bin/node", recursive=True))
-MCODE = next(p for p in glob.glob("/tmp/mcode/**/@minimax-ai/code/cli.js", recursive=True))
-for f in [NODE] + glob.glob("/tmp/mcode/**/rg", recursive=True) + glob.glob("/tmp/mcode/**/*.node", recursive=True):
-    os.chmod(f, 0o755)
-ok = sh([NODE, MCODE, "--version"])
-assert ok.returncode == 0, "MiniMax Code does not start; stopping before the GPU is used"
 '''
 
 VLLM = r'''
@@ -167,8 +145,7 @@ echo_vllm_errors()
 '''
 
 API_RUN = r'''
-# Long local-style runs on Kaggle (CPU + internet): the hosted model through the local proxy, the game
-# harness exactly as in the repo (goal mode over ACP, arc26 plugin, sandboxed agent user).
+# Long evaluation runs on Kaggle (CPU + internet) with the hosted model.
 A = CFG["api"]
 key = None
 try:
@@ -176,42 +153,17 @@ try:
     key = UserSecretsClient().get_secret("DOTS_API_KEY")
 except Exception as exc:
     print("no Kaggle secret DOTS_API_KEY:", type(exc).__name__)
-if not key:  # fallback: the private dataset xishengfeng/arc26-secrets
+if not key:  # fallback: the private dataset arc26-secrets
     kf = next((os.path.join(r, "dots_api_key") for r, _, fs in os.walk("/kaggle/input") if "dots_api_key" in fs), None)
     key = open(kf).read().strip() if kf else None
 assert key, "no API key: add the Kaggle secret DOTS_API_KEY or mount the private dataset arc26-secrets"
 os.makedirs("/tmp/secrets", exist_ok=True)
 open("/tmp/secrets/key", "w").write(key); os.chmod("/tmp/secrets/key", 0o600)
-THINK = bool(A.get("thinking"))  # thinking on: the proxy asks for it and MiniMax Code keeps the reasoning
-proxy = subprocess.Popen([sys.executable, CODE + "/arc_runner/llm_proxy.py", "--upstream", A["base_url"], "--api-key-file",
-                          "/tmp/secrets/key", "--port", "8012", "--log", WORK + "/llm_proxy.jsonl",
-                          "--inject", json.dumps({"chat_template_kwargs": {"enable_thinking": THINK}})]
-                         + (["--drop", "max_tokens,max_completion_tokens"] if THINK else []))  # no output budget
-time.sleep(3)
-sh("id arcagent || useradd -m arcagent", shell=True)
-os.chmod(WORK, 0o755)
-if A.get("community"):
-    sh(["git", "clone", "--depth", "1", "https://github.com/theredbluepill/arc-interactive", "/tmp/community"])
-env_dir = "/tmp/community/environment_files" if A.get("community") else COMP + "/environment_files"
-# the agent user may not read game files; the game daemon (root) still can
-shutil.copytree(env_dir, "/tmp/games", dirs_exist_ok=True); os.chmod("/tmp/games", 0o700)
-cmd = [sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8012/v1", "--model", A["model"],
-       "--context", "131072", "--output-limit", str(65536 if THINK else 8192), "--agent-user", "arcagent", "--node", NODE, "--mcode", MCODE,
-       "--server-python", sys.executable, "--out-dir", WORK + "/api_run", "--games", A["games"], "--conc", str(A["conc"]),
-       "--hours", str(A["hours"]), "--max-game-seconds", str(A["game_seconds"]), "--env-dir", "/tmp/games",
-       "--k", str(A.get("k", 1))] + (["--reasoning"] if THINK else [])
-print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localhost"})
-os.makedirs(CODE + "/data", exist_ok=True)  # arc_eval reads the human baselines from data/environment_files
-if not os.path.exists(CODE + "/data/environment_files"):
-    os.symlink(COMP + "/environment_files", CODE + "/data/environment_files")
-subprocess.run([sys.executable, "-m", "arc_eval.summarize", WORK + "/api_run", "--set", "community" if A.get("community") else "official"],
-               cwd=CODE, env={**os.environ, "PYTHONPATH": CODE})
-proxy.terminate()
-for d in glob.glob(WORK + "/api_run/ws/*/.mcode-data"):
-    logs = d + "/v2/sessions"
-    if os.path.isdir(logs):  # keep the transcripts (feature-use stats), drop the rest
-        shutil.copytree(logs, os.path.dirname(d) + "/mcode-sessions", dirs_exist_ok=True)
-    shutil.rmtree(d, ignore_errors=True)
+cmd = [sys.executable, "-m", "arc_agent.run", "--out-dir", WORK + "/run", "--games", A["games"], "--k", str(A.get("k", 1)),
+       "--conc", str(A["conc"]), "--env-dir", COMP + "/environment_files", "--base-url", A["base_url"], "--model", A["model"],
+       "--api-key-file", "/tmp/secrets/key", "--game-seconds", str(A["game_seconds"]), "--hours", str(A["hours"]),
+       "--call-seconds", str(A.get("call_seconds", 300))] + ([] if A.get("thinking", True) else ["--no-thinking"])
+print(cmd); subprocess.run(cmd, cwd=CODE, env={**os.environ, "PYTHONPATH": CODE})
 import pandas as pd
 pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
 '''
@@ -219,36 +171,28 @@ pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game
 
 def batch_cmd(extra: str) -> str:
     return (
-        '[sys.executable, CODE + "/arc_runner/batch.py", "--base-url", "http://127.0.0.1:8000/v1", '
-        '"--model", CFG["vllm"]["served_model_name"], "--context", str(CFG["vllm"]["max_model_len"]), "--output-limit", str(CFG.get("output_limit", 16384)), '
-        '"--conc", str(CFG["concurrency"]), "--max-actions", str(CFG["max_actions"]), '
-        '"--max-steps", str(CFG["max_steps"]), "--node", NODE, "--mcode", MCODE, '
-        '"--server-python", sys.executable, "--skills-dir", WORK + "/skills", ' + extra + "]"
-        ' + (["--reasoning"] if CFG.get("thinking") else [])'
+        '[sys.executable, "-m", "arc_agent.run", "--base-url", "http://127.0.0.1:8000/v1", '
+        '"--model", CFG["vllm"]["served_model_name"], "--conc", str(CFG["concurrency"]), '
+        '"--max-actions", str(CFG["max_actions"]), "--game-seconds", str(CFG["game_seconds"]), '
+        '"--call-seconds", str(CFG["call_seconds"]), ' + extra + "]"
+        ' + ([] if CFG.get("thinking", True) else ["--no-thinking"])'
     )
 
 
 SUBMIT_RUN = r'''
 if RERUN:
     sh("curl -s --fail --retry 999 --retry-all-errors --retry-delay 5 --retry-max-time 900 http://gateway:8001/api/games > /dev/null", shell=True)
-    shutil.copytree(CODE + "/skills", WORK + "/skills", dirs_exist_ok=True) if os.path.isdir(CODE + "/skills") else os.makedirs(WORK + "/skills", exist_ok=True)
     cmd = BATCH_SUBMIT
-    print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localhost,gateway"})
+    print(cmd); subprocess.run(cmd, cwd=CODE, env={**os.environ, "PYTHONPATH": CODE, "NO_PROXY": "127.0.0.1,localhost,gateway"})
 else:
     import pandas as pd
     pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
 '''
 
 DEV_RUN = r'''
-shutil.copytree(CODE + "/skills", WORK + "/skills", dirs_exist_ok=True) if os.path.isdir(CODE + "/skills") else os.makedirs(WORK + "/skills", exist_ok=True)
 cmd = BATCH_DEV
-print(cmd); subprocess.run(cmd, env={**os.environ, "NO_PROXY": "127.0.0.1,localhost"})
-print(open(WORK + "/dev_run/summary.json").read() if os.path.exists(WORK + "/dev_run/summary.json") else "no summary")
+print(cmd); subprocess.run(cmd, cwd=CODE, env={**os.environ, "PYTHONPATH": CODE, "NO_PROXY": "127.0.0.1,localhost"})
 VLLM_PROC.terminate()
-for d in glob.glob(WORK + "/dev_run/ws/*/.mcode-data"):
-    if os.path.isdir(d + "/v2/observability/logs"):  # MiniMax Code's runtime logs are small; keep them
-        shutil.copytree(d + "/v2/observability/logs", os.path.dirname(d) + "/mcode-logs", dirs_exist_ok=True)
-    shutil.rmtree(d, ignore_errors=True)  # keep outputs small: sessions are large, results/notes/skills stay
 import pandas as pd
 pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
 '''
@@ -262,13 +206,14 @@ def build(variant: str, out: Path) -> Path:
     )
     dev = DEV_RUN.replace(
         "BATCH_DEV",
-        batch_cmd('"--out-dir", WORK + "/dev_run", "--games", CFG.get("dev_games", "all"), "--env-dir", COMP + "/environment_files", "--hours", str(CFG["dev_hours"])'),
+        batch_cmd('"--out-dir", WORK + "/run", "--games", CFG.get("dev_games", "all"), "--env-dir", COMP + "/environment_files", "--hours", str(CFG["dev_hours"])'),
     )
     cells = [
         cell(
-            f"# arc26 — MiniMax Code × Qwen3.8-27B on ARC-AGI-3 ({variant})\n\n"
-            "Agent: MiniMax Code (`mcode exec`, unmodified) with the game as an MCP server. "
-            "Model: Qwen3.8-27B FP8 via vLLM on the RTX PRO 6000. Code: github.com/timothy-kira/arc26.",
+            f"# arc26 — hand-written agent loop on ARC-AGI-3 ({variant})\n\n"
+            "One LLM call per action from a fresh context: reasoning graph + handoff + checked prediction + "
+            "frame diff. Model: Qwen3.8-27B FP8 via vLLM on the RTX PRO 6000 (api variant: hosted model). "
+            "Code: github.com/timothy-kira/arc26.",
             "markdown",
         ),
         cell("CODE_TGZ = " + repr(code_blob()) + "\nCFG_JSON = " + repr(json.dumps(cfg))
@@ -302,7 +247,7 @@ def build(variant: str, out: Path) -> Path:
         "kernel_type": "notebook", "is_private": True, "enable_gpu": variant != "api", "enable_tpu": False,
         "enable_internet": variant == "api",
         "dataset_sources": cfg["api"].get("dataset_sources", []) if variant == "api" else cfg["dataset_sources"],
-        "competition_sources": [cfg["competition"]], "kernel_sources": cfg.get("kernel_sources", []),
+        "competition_sources": [cfg["competition"]], "kernel_sources": [],
         "model_sources": [] if variant == "api" else cfg["model_sources"],
     }
     if variant != "api":
