@@ -89,27 +89,56 @@ class Graph:
             self.nodes[k].status = st
         return new_ids, problems
 
-    def render(self, max_chars: int = 60000) -> str:
-        """The whole graph as text: nodes grouped by level, each with its outgoing edges. Closed action/
-        outcome pairs of earlier levels are folded into one line per level to keep long games readable."""
+    def render(self, max_chars: int = 60000, recent: int = 10, obs_window: int = 15) -> str:
+        """The graph as text: nodes grouped by level, each with its outgoing edges. Everything the model
+        wrote that states knowledge (rules, goals, hypotheses, plans, questions, and observations that
+        were confirmed, refuted or linked) is always shown. What only records history is folded:
+        action/outcome pairs of earlier levels, and in the current level the RIGHT pairs older than the
+        last ``recent`` actions (WRONG ones stay: they are what was learned) and unlinked open
+        observations and plans older than ``obs_window`` steps (earlier levels: all unlinked open ones)."""
         out_edges: dict[int, list[Edge]] = {}
+        linked: set[int] = set()
         for e in self.edges:
             out_edges.setdefault(e.src, []).append(e)
+            if self.nodes[e.src].type not in ("action", "outcome"):  # the loop's own tests-edges do not count
+                linked.add(e.dst)
         lines: list[str] = []
         levels = sorted({n.level for n in self.nodes})
         current = levels[-1] if levels else 0
+        last_step = max((n.step for n in self.nodes), default=0)
         for lv in levels:
             lines.append(f"## level {lv + 1}")
             nodes = [n for n in self.nodes if n.level == lv]
-            if lv < current:
-                acts = [n for n in nodes if n.type in ("action", "outcome")]
-                if acts:
-                    lines.append(f"  ({len([n for n in acts if n.type == 'action'])} actions played; action/outcome nodes folded)")
-                nodes = [n for n in nodes if n.type not in ("action", "outcome")]
+            acts = [n for n in nodes if n.type == "action"]
+            keep: set[int] = set()
+            if lv == current:
+                outcome_of = {e.src: e.dst for e in self.edges if e.rel == "leads_to"}
+                for a in acts[-recent:]:
+                    keep |= {a.id, outcome_of.get(a.id, -1)}
+                for a in acts:
+                    o = outcome_of.get(a.id)
+                    if o is not None and self.nodes[o].status == "refuted":
+                        keep |= {a.id, o}
+            folded_acts = sum(1 for a in acts if a.id not in keep)
+            shown = []
+            folded_obs = 0
             for n in nodes:
+                if n.type in ("action", "outcome"):
+                    if n.id in keep:
+                        shown.append(n)
+                elif n.type in ("observation", "plan") and n.status == "open" and n.id not in linked and (
+                        lv < current or last_step - n.step > obs_window):
+                    folded_obs += 1  # superseded snapshots and plans
+                else:
+                    shown.append(n)
+            if folded_acts or folded_obs:
+                lines.append(f"  ({folded_acts} earlier actions whose predictions came true and {folded_obs} old "
+                             "observations/plans are folded)")
+            for n in shown:
                 edges = "".join(f" -{e.rel}->{e.dst}" for e in out_edges.get(n.id, []))
                 mark = "" if n.status == "open" else f" [{n.status}]"
-                lines.append(f"  {n.id} {n.type}{mark} s{n.step}: {n.text}{edges}")
+                text = "RIGHT" if n.type == "outcome" and n.status == "confirmed" else n.text
+                lines.append(f"  {n.id} {n.type}{mark} s{n.step}: {text}{edges}")
         text = "\n".join(lines) or "(empty graph: this is the first step)"
         if len(text) > max_chars:  # keep the head (rules, goals) and the most recent part
             text = text[: max_chars // 3] + "\n  ...\n" + text[-(2 * max_chars) // 3:]
