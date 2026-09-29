@@ -1,8 +1,9 @@
 """OpenAI-compatible chat client (standard library only) for the agent loop.
 
 Thinking is on and there is no output-token budget; instead each call has a wall-clock limit:
-the reply is streamed and a call that runs past ``call_seconds`` (a runaway chain of thought) is
-dropped and retried, with ``hurry`` appended so the retry decides quickly.
+the reply is streamed and a call that runs past ``call_seconds`` (a runaway chain of thought) is cut; the
+reasoning it produced is kept and the next call continues from it with the thinking closed, so
+the model answers from what it has already worked out.
 """
 
 from __future__ import annotations
@@ -26,7 +27,9 @@ class Reply:
 
 
 class CallTimeout(Exception):
-    pass
+    def __init__(self, msg: str, reasoning: str = "", content: str = "") -> None:
+        super().__init__(msg)
+        self.reasoning, self.content = reasoning, content
 
 
 class LLM:
@@ -38,10 +41,13 @@ class LLM:
         self.call_seconds, self.retries, self.temperature = call_seconds, retries, temperature
         self.hurry = hurry  # appended to the messages of a retry, after an attempt was cut off
 
-    def _once(self, messages: list[dict], limit: float, thinking: bool) -> Reply:
+    def _once(self, messages: list[dict], limit: float, thinking: bool, prefill: Optional[str] = None) -> Reply:
         body: dict[str, Any] = {"model": self.model, "messages": messages, "stream": True,
                                 "stream_options": {"include_usage": True},
                                 "chat_template_kwargs": {"enable_thinking": thinking}}
+        if prefill is not None:  # continue a cut-off reasoning: the reply starts with it, thinking closed
+            body["messages"] = messages + [{"role": "assistant", "content": prefill}]
+            body.update(continue_final_message=True, add_generation_prompt=False)
         if self.temperature is not None:
             body["temperature"] = self.temperature
         req = urllib.request.Request(self.url, data=json.dumps(body).encode(), method="POST",
@@ -51,7 +57,7 @@ class LLM:
         with urllib.request.urlopen(req, timeout=120) as r:
             for raw in r:
                 if time.time() - t0 > limit:
-                    raise CallTimeout(f"call ran past {limit:.0f}s")
+                    raise CallTimeout(f"call ran past {limit:.0f}s", "".join(reasoning), "".join(content))
                 line = raw.decode("utf-8", "replace").strip()
                 if not line.startswith("data:"):
                     continue
@@ -74,8 +80,13 @@ class LLM:
         return Reply("".join(content), "".join(reasoning), usage, time.time() - t0, 1)
 
     def chat(self, messages: list[dict], deadline: Optional[float] = None, thinking: Optional[bool] = None) -> Reply:
-        """One reply; each attempt is cut at ``call_seconds`` and nothing runs past ``deadline``."""
+        """One reply; each attempt is cut at ``call_seconds`` and nothing runs past ``deadline``. When an
+        attempt is cut off mid-reasoning, the next one continues from that reasoning with the thinking
+        closed, so the work already done turns into an answer instead of being thrown away; if that is
+        not possible the retry starts over with ``hurry`` appended."""
         failures: list[str] = []
+        partial = ""
+        think = self.thinking if thinking is None else thinking
         for attempt in range(1, self.retries + 2):
             t0 = time.time()
             limit = self.call_seconds if deadline is None else min(self.call_seconds, deadline - t0)
@@ -83,13 +94,23 @@ class LLM:
                 failures.append("no time left before the deadline")
                 break
             try:
-                rep = self._once(messages if attempt == 1 or not self.hurry else messages + [
-                    {"role": "user", "content": self.hurry}], limit, self.thinking if thinking is None else thinking)
+                if partial:
+                    rep = self._once(messages, limit, False, prefill="<think>\n" + partial.strip() + "\n</think>\n\n")
+                    rep.reasoning = partial + rep.reasoning
+                else:
+                    rep = self._once(messages if attempt == 1 or not self.hurry else messages + [
+                        {"role": "user", "content": self.hurry}], limit, think)
                 rep.attempts, rep.failures = attempt, tuple(failures)
                 if rep.content.strip():
                     return rep
                 failures.append(f"empty reply after {rep.seconds:.0f}s ({len(rep.reasoning)} reasoning chars)")
-            except (CallTimeout, urllib.error.URLError, TimeoutError, ConnectionError, OSError) as exc:
+                partial = ""
+            except CallTimeout as exc:
+                failures.append(f"CallTimeout after {time.time() - t0:.0f}s" + (" (continuing it)" if exc.reasoning and not partial else ""))
+                partial = exc.reasoning if exc.reasoning and not partial and not exc.content else ""
+            except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as exc:
                 failures.append(f"{type(exc).__name__} after {time.time() - t0:.0f}s: {exc}")
-            time.sleep(min(30, 3 * attempt))
+                partial = ""
+            if not partial:
+                time.sleep(min(30, 3 * attempt))
         raise RuntimeError(f"LLM call failed after {self.retries + 1} attempts: {'; '.join(failures)}")
