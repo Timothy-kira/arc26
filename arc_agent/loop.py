@@ -43,7 +43,7 @@ def make_session(game: str, env_dir: str, gateway: Optional[str], card: Optional
 
 def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optional[str] = None,
          card: Optional[str] = None, seconds: float = 2700.0, max_actions: int = 2000,
-         adaptive: bool = False) -> dict[str, Any]:
+         adaptive: bool = True) -> dict[str, Any]:
     """Play one game. ``adaptive``: the model may mark its next step routine (``think_next`` false);
     that step then runs without thinking, unless the prediction just failed, a level ended or the
     game is over."""

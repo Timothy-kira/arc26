@@ -163,7 +163,7 @@ cmd = [sys.executable, "-m", "arc_agent.run", "--out-dir", WORK + "/run", "--gam
        "--conc", str(A["conc"]), "--env-dir", COMP + "/environment_files", "--base-url", A["base_url"], "--model", A["model"],
        "--api-key-file", "/tmp/secrets/key", "--game-seconds", str(A["game_seconds"]), "--hours", str(A["hours"]),
        "--call-seconds", str(A.get("call_seconds", 180))] + ([] if A.get("thinking", True) else ["--no-thinking"]) \
-      + (["--adaptive-thinking"] if A.get("adaptive") else [])
+      + ([] if A.get("adaptive", True) else ["--no-adaptive"])
 print(cmd); subprocess.run(cmd, cwd=CODE, env={**os.environ, "PYTHONPATH": CODE})
 import pandas as pd
 pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
