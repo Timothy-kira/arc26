@@ -48,9 +48,9 @@
     ],
     "k": 3,
     "thinking": true,
-    "call_seconds": 300
+    "call_seconds": 180
   },
   "thinking": true,
   "game_seconds": 2400,
-  "call_seconds": 300
+  "call_seconds": 180
 }

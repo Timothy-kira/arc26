@@ -2,7 +2,7 @@
 
 Thinking is on and there is no output-token budget; instead each call has a wall-clock limit:
 the reply is streamed and a call that runs past ``call_seconds`` (a runaway chain of thought) is
-dropped and retried with the same messages.
+dropped and retried, with ``hurry`` appended so the retry decides quickly.
 """
 
 from __future__ import annotations
@@ -31,10 +31,12 @@ class CallTimeout(Exception):
 
 class LLM:
     def __init__(self, base_url: str, model: str, api_key: str = "EMPTY", thinking: bool = True,
-                 call_seconds: float = 300.0, retries: int = 2, temperature: Optional[float] = None) -> None:
+                 call_seconds: float = 180.0, retries: int = 2, temperature: Optional[float] = None,
+                 hurry: str = "") -> None:
         self.url = base_url.rstrip("/") + "/chat/completions"
         self.model, self.key, self.thinking = model, api_key, thinking
         self.call_seconds, self.retries, self.temperature = call_seconds, retries, temperature
+        self.hurry = hurry  # appended to the messages of a retry, after an attempt was cut off
 
     def _once(self, messages: list[dict], limit: float) -> Reply:
         body: dict[str, Any] = {"model": self.model, "messages": messages, "stream": True,
@@ -81,7 +83,8 @@ class LLM:
                 failures.append("no time left before the deadline")
                 break
             try:
-                rep = self._once(messages, limit)
+                rep = self._once(messages if attempt == 1 or not self.hurry else messages + [
+                    {"role": "user", "content": self.hurry}], limit)
                 rep.attempts, rep.failures = attempt, tuple(failures)
                 if rep.content.strip():
                     return rep

@@ -28,7 +28,9 @@ def one(game: str, k: int, a: dict[str, Any], card: Optional[str], seconds: floa
 
     logging.disable(logging.CRITICAL)
     key = Path(a["api_key_file"]).read_text().strip() if a["api_key_file"] else "EMPTY"
-    llm = LLM(a["base_url"], a["model"], key, thinking=not a["no_thinking"], call_seconds=a["call_seconds"])
+    from arc_agent.prompt import HURRY
+
+    llm = LLM(a["base_url"], a["model"], key, thinking=not a["no_thinking"], call_seconds=a["call_seconds"], hurry=HURRY)
     out = Path(a["out_dir"]) / "games" / f"{game}_k{k}"
     try:
         return play(game, out, llm, a["env_dir"], a["gateway"], card, seconds, a["max_actions"])
@@ -48,7 +50,7 @@ def main() -> int:
     p.add_argument("--model", required=True)
     p.add_argument("--api-key-file", default="")
     p.add_argument("--no-thinking", action="store_true")
-    p.add_argument("--call-seconds", type=float, default=300.0, help="wall-clock limit of one LLM call")
+    p.add_argument("--call-seconds", type=float, default=180.0, help="wall-clock limit of one LLM call")
     p.add_argument("--game-seconds", type=float, default=2700.0)
     p.add_argument("--hours", type=float, default=8.0, help="whole-run budget; games share what is left")
     p.add_argument("--max-actions", type=int, default=2000)

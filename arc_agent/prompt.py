@@ -70,6 +70,10 @@ action) is usually a move budget, not the board. Moves given by "moves" are shap
 their displacement in grid cells (dx right, dy down)."""
 
 
+HURRY = ("Your previous attempt at this step thought past the time limit and was discarded. Decide now: keep "
+         "the reasoning short, rely on the graph and the handoff, and answer with the JSON object.")
+
+
 def status_text(obs: dict[str, Any]) -> str:
     return (f"level {obs['level'] + 1}/{obs['win_levels']} | state {obs['state']} | actions this level "
             f"{obs['level_actions']} | total {obs['actions']} | available actions {obs['available']} | "
