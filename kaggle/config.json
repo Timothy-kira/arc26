@@ -12,10 +12,10 @@
   "notebook_accelerator": "nvidiaRtxPro6000",
   "expected_gpu": "rtx pro 6000",
   "hours": 8.0,
-  "concurrency": 12,
+  "concurrency": 25,
   "vllm": {
     "served_model_name": "qwen3.8-27b",
-    "max_model_len": 262144,
+    "max_model_len": 65536,
     "gpu_memory_utilization": 0.9,
     "max_num_seqs": 64,
     "extra_args": [
@@ -33,7 +33,7 @@
       "{\"enable_thinking\": true}"
     ]
   },
-  "dev_hours": 2.3,
+  "dev_hours": 1.2,
   "qwen_slug": "qwen3-8-27b-fp8-repacked",
   "max_actions": 100000,
   "api": {
@@ -51,7 +51,8 @@
     "call_seconds": 180
   },
   "thinking": true,
-  "game_seconds": 1500,
+  "game_seconds": 2400,
   "call_seconds": 180,
-  "dev_games": "all"
+  "dev_games": "all",
+  "think_policy": "exception"
 }
