@@ -42,7 +42,7 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int, max_seconds: f
     from arc_agi import Arcade, OperationMode
     from arcengine import GameAction, GameState
 
-    from arc_mcp.session import Session
+    from arc_agent.session import Session
 
     arc = Arcade(operation_mode=OperationMode.OFFLINE, environments_dir=str(info.env_dir))
     card = arc.open_scorecard()
@@ -66,7 +66,7 @@ def play(info: GameInfo, agent: str, max_actions: int, seed: int, max_seconds: f
 
 
 def _run(agent, s, info, max_actions, seed):
-    """LLM-free reference agents (the LLM agent is evaluated through arc_runner/batch.py)."""
+    """LLM-free reference agents (the LLM agent is evaluated through arc_agent.run)."""
     from arcengine import GameState
 
     if agent == "random":

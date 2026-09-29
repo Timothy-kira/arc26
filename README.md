@@ -1,37 +1,42 @@
-# arc26：ARC Prize 2026（ARC-AGI-3），MiniMax Code 加实时 Python REPL
+# arc26：ARC Prize 2026（ARC-AGI-3）手写 Agent Loop
 
-智能体是**不做修改的 MiniMax Code**（ACP 模式加 Goal 模式）。每局游戏都当作一个交互式编程题来解：游戏状态放在一个常驻 Python REPL 的变量里，模型写代码、运行、执行动作、观察结果。每个格子都记成探索 DAG 里的一个节点。
+**每一步动作就是一轮，每一轮都从全新的上下文开始。** 模型看不到之前的对话，它能看到的只有下面这些：
 
-- **比赛提交：** Qwen3.8-27B 在 Kaggle RTX PRO 6000 上用 vLLM 离线运行。
-- **日常迭代：** 用托管 API（Dots）。
+1. **图（graph）：** 所有观察、规则、假设、目标、计划、问题，以及每个动作和它核对过的结果。节点之间用有类型的边做符号连接，例如 supports、refutes、causes、leads_to、tests。**每一轮开始前都要完整读一遍图，每一轮都必须新增至少一个节点。**
+2. **交接文档：** 上一轮写给这一轮的说明，包括当前目标、接下来的计划、还不确定的地方。
+3. **预测核对：** 上一轮对这一步的预测，已经和实际结果自动比对过（RIGHT / WRONG）。
+4. **画面 diff：** 这个游戏每步画面变化很小，所以观测以变化为中心：
+   - 哪些格子变了，聚成区域；
+   - 哪些物体移动了、位移多少；
+   - 哪些变化属于 HUD（步数条），单独报告；
+   - 动画帧。
 
-| 目录 | 内容 |
+   另外附上当前帧的物体列表、十六进制网格和 4 倍放大图。
+
+每一轮模型输出一个 JSON：`graph_update`（新节点、边、状态变更）、`action`、`prediction`（可自动核对：棋盘是否变化、哪些物体怎么移动、是否过关、是否死亡）、`handoff`。
+
+| 文件 | 作用 |
 |---|---|
-| `arc_mcp/` | 游戏守护进程和账本（`server.py`、`session.py`、`ledger.py`）、REPL kernel（`kernel.py`）、感知（`percept.py`：4 倍图、物体、变化区域、位移、格子地图、计量条） |
-| `plugin/arc26/` | MiniMax Code 原生插件：SessionStart 注入状态和笔记，PreToolUse 只允许用 arc 工具，PostToolUse 把工具调用记进 DAG |
-| `arc_runner/` | `batch.py`：每局一个 MiniMax Code 会话，负责沙箱、kernel 守护、技能隔离。`acp_driver.py`：Goal 模式驱动。`llm_proxy.py`：托管 API 代理，控制思考开关、去掉输出上限 |
-| `arc_eval/` | 游戏集与切分（`datasets.py`）、RHAE 计算、`summarize.py`（成绩和功能使用统计） |
-| `kaggle/` | `build_notebook.py`：submit（比赛提交）、dev（GPU 自测）、api（托管 API）三种 notebook |
-| `games/manifest.json` | 我们运行的全部游戏：切分、人类基线、sha256 |
-| `scripts/` | `fetch_games.sh` 下载并校验游戏；`games_manifest.py` 生成或校验清单 |
-| `docs/` | [MCP 与 REPL 工具参考](docs/MCP_TOOLS.md)、[游戏清单](docs/GAMES.md)、[实验记录](docs/RESULTS.md) |
+| `arc_agent/loop.py` | 单局循环：读取、调 LLM、校验、更新图、执行动作、算 diff、核对预测 |
+| `arc_agent/graph.py` | 图的存储、更新、序列化 |
+| `arc_agent/vision.py` | 帧 diff、变化区域、物体位移、HUD 识别、物体列表、4 倍图 |
+| `arc_agent/prompt.py` | 系统说明、每轮输入、JSON 解析与校验、预测核对 |
+| `arc_agent/llm.py` | OpenAI 兼容客户端：开思考、不设输出上限、单次调用限时后重试、不超过本局截止时间 |
+| `arc_agent/run.py` / `report.py` | 批量运行（每局一个进程、比赛模式计分卡）/ 成绩汇总 |
+| `arc_agent/session.py` | 比赛计步规则（与官方 scorecard 一致） |
+| `arc_eval/` | 游戏集与切分、RHAE |
+| `games/manifest.json`、`scripts/` | 全部游戏的清单与校验、下载脚本 |
+| `docs/` | [游戏清单](docs/GAMES.md)、[实验记录](docs/RESULTS.md) |
 
-## 快速开始
+旧的 MiniMax Code 加 MCP 方案保存在历史提交 `6ea847c`。
+
+## 运行
 
 ```bash
-# 1. 游戏：官方 25 个来自 Kaggle 比赛数据（需要 .kaggle/access_token），社区 249 个（已排除官方游戏副本）来自 arc-interactive
-scripts/fetch_games.sh
-
-# 2. 用托管 API 跑 3 个迭代游戏：本地代理加沙箱用户 arcagent
-python arc_runner/llm_proxy.py --upstream https://<host>/v1 --api-key-file .secrets/api_key --port 8012 \
-    --inject '{"chat_template_kwargs": {"enable_thinking": true}}' --drop max_tokens,max_completion_tokens &
-python arc_runner/batch.py --out-dir runs/demo --games ls20,vc33,tu93 --conc 2 --max-game-seconds 2700 \
-    --base-url http://127.0.0.1:8012/v1 --model <model> --reasoning --context 131072 --output-limit 65536 \
-    --agent-user arcagent --node <node22> --mcode <mcode cli.js>
-python -m arc_eval.summarize runs/demo
-
-# 3. Kaggle
-python kaggle/build_notebook.py --variant api     # 或 dev / submit；然后 kaggle kernels push -p build/<variant>
+scripts/fetch_games.sh                                   # 官方 25 个 + 社区 249 个游戏，按 sha256 校验
+python -m arc_agent.run --out-dir runs/a1 --games ls20,vc33,tu93 --conc 3 --game-seconds 2700 \
+    --base-url https://<host>/v1 --model <model> --api-key-file .secrets/dots_api_key --call-seconds 300
+python -m arc_agent.report runs/a1
 ```
 
-密钥只放在被 git 忽略的 `.secrets/` 和 `.kaggle/` 里，不要提交。
+密钥只放在被 git 忽略的 `.secrets/` 和 `.kaggle/` 里。
