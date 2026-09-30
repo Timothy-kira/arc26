@@ -70,8 +70,9 @@ Thinking time is the scarcest resource you have: every minute you think is a min
 
 Playing well: first learn what each action does (one test each is usually enough), find what you
 control and what the goal is, then move straight to it. The HUD (a bar or counter that changes every
-action) is usually a move budget, not the board. Moves given by "moves" are shape-matched objects with
-their displacement in grid cells (dx right, dy down)."""
+action) is usually a move budget, not the board. A predicted move (color, dx, dy) counts as seen when an
+object of that colour moved by it, or when an edge of that colour's extent moved by it (so a bar that
+grows by 2 upwards is {{"color": c, "dx": 0, "dy": -2}}); dx is right, dy is down, in grid cells."""
 
 
 HURRY = ("Your previous attempt at this step thought past the time limit and was discarded. Decide now: keep "
@@ -150,13 +151,27 @@ def check_prediction(pred: dict, facts: dict) -> tuple[Optional[bool], str]:
         checks.append((f"board changes: expected {pred['board_changes']}, got {facts['board_changed'] > 0}",
                        pred["board_changes"] == (facts["board_changed"] > 0)))
     actual = {(m["color"], m["dx"], m["dy"]) for m in facts["moves"]}
+    ext: dict[int, list] = {}
+    for c, *e in facts.get("extents") or []:
+        ext.setdefault(int(c), []).append(e)
+
+    def seen(c: int, dx: int, dy: int) -> bool:
+        """A matched object moved by (dx, dy), or an edge of the colour's extent did (a bar that grows
+        or shrinks, one of several identical tokens)."""
+        if (c, dx, dy) in actual:
+            return True
+        for l, t, r, b in ext.get(c, []):
+            if (dx in (l, r) or dx == 0 and 0 in (l, r)) and (dy in (t, b) or dy == 0 and 0 in (t, b)):
+                return True
+        return False
+
     for m in pred.get("moves") or []:
         try:
             key = (int(m["color"]), int(m["dx"]), int(m["dy"]))
         except (KeyError, TypeError, ValueError):
             continue
-        checks.append((f"move colour {key[0]} by ({key[1]:+d},{key[2]:+d}): {'seen' if key in actual else 'not seen'}",
-                       key in actual))
+        hit = seen(*key)
+        checks.append((f"move colour {key[0]} by ({key[1]:+d},{key[2]:+d}): {'seen' if hit else 'not seen'}", hit))
     for k in ("level_up", "game_over"):
         if isinstance(pred.get(k), bool):
             checks.append((f"{k}: expected {pred[k]}, got {facts[k]}", pred[k] == facts[k]))

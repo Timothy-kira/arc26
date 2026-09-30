@@ -193,6 +193,70 @@ class HudTracker:
         return m
 
 
+def _components(g: np.ndarray, color: int, seed: np.ndarray) -> list[np.ndarray]:
+    """Masks of the 4-connected components of ``color`` that contain a cell of ``seed``."""
+    h, w = g.shape
+    todo = (g == color) & seed
+    seen = np.zeros_like(todo)
+    out = []
+    for y0, x0 in zip(*np.where(todo)):
+        if seen[y0, x0]:
+            continue
+        m = np.zeros((h, w), dtype=bool)
+        q = deque([(y0, x0)])
+        m[y0, x0] = seen[y0, x0] = True
+        while q:
+            y, x = q.popleft()
+            for yy, xx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                if 0 <= yy < h and 0 <= xx < w and not m[yy, xx] and g[yy, xx] == color:
+                    m[yy, xx] = True
+                    seen[yy, xx] |= todo[yy, xx]
+                    q.append((yy, xx))
+        out.append(m)
+    return out
+
+
+def _bbox(m: np.ndarray) -> tuple[int, int, int, int]:
+    ys, xs = np.where(m)
+    return int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())
+
+
+def extents(a: np.ndarray, b: np.ndarray, hud: np.ndarray) -> list[tuple[int, int, int, int, int]]:
+    """Shapes that grew, shrank or moved: for every colour on the changed cells, the components of that
+    colour touching the change before and after, paired by overlap, and how far each edge of the pair's
+    bounding box moved: (colour, left, top, right, bottom), + is right/down. Catches what shape matching
+    cannot: a bar that extends, two same-coloured columns of which one grows while the other shrinks."""
+    d = (a != b) & ~hud
+    if not d.any():
+        return []
+    near = d.copy()  # the changed cells and their neighbours: the shapes the change belongs to
+    near[1:, :] |= d[:-1, :]
+    near[:-1, :] |= d[1:, :]
+    near[:, 1:] |= d[:, :-1]
+    near[:, :-1] |= d[:, 1:]
+    out = []
+    for c in sorted(set(np.unique(a[d])) | set(np.unique(b[d]))):
+        c = int(c)
+        if c == background(a):
+            continue
+        ca, cb = _components(a, c, near), _components(b, c, near)
+        used: set[int] = set()
+        for ma in ca:
+            best, j = 0, -1
+            for k, mb in enumerate(cb):
+                ov = int((ma & mb).sum())
+                if ov > best and k not in used:
+                    best, j = ov, k
+            if j < 0:
+                continue
+            used.add(j)
+            ea, eb = _bbox(ma), _bbox(cb[j])
+            e = (eb[0] - ea[0], eb[1] - ea[1], eb[2] - ea[2], eb[3] - ea[3])
+            if any(e):
+                out.append((c, *e))
+    return out
+
+
 def diff_text(a: np.ndarray, b: np.ndarray, hud: Optional[np.ndarray] = None, limit: int = 6) -> tuple[str, dict]:
     """Human-readable diff of one action and the facts used to check a prediction."""
     a, b = np.asarray(a), np.asarray(b)
@@ -201,8 +265,10 @@ def diff_text(a: np.ndarray, b: np.ndarray, hud: Optional[np.ndarray] = None, li
     board = int(((a != b) & ~hud).sum())
     regs = regions(a, b, hud)
     mv = moves(a, b)
+    ext = extents(a, b, hud) if board else []
     facts = {"changed": total, "board_changed": board, "hud_changed": total - board,
-             "moves": [{"color": m["color"], "dx": m["dx"], "dy": m["dy"], "x": m["to"][0], "y": m["to"][1]} for m in mv]}
+             "moves": [{"color": m["color"], "dx": m["dx"], "dy": m["dy"], "x": m["to"][0], "y": m["to"][1]} for m in mv],
+             "extents": [list(e) for e in ext]}
     if total == 0:
         return "no cell changed", facts
     lines = [f"{total} cells changed ({board} on the board, {total - board} in the HUD)"]
@@ -216,6 +282,9 @@ def diff_text(a: np.ndarray, b: np.ndarray, hud: Optional[np.ndarray] = None, li
     for m in mv:
         lines.append(f"  moved {cname(m['color'])} {m['w']}x{m['h']} ({m['from'][0]},{m['from'][1]}) -> "
                      f"({m['to'][0]},{m['to'][1]}) d=({m['dx']:+d},{m['dy']:+d})")
+    for c, l, t, r, bt in ext[:limit]:
+        if (l, t) != (r, bt):  # a pure translation is already listed as a move
+            lines.append(f"  {cname(c)} shape resized: left {l:+d} top {t:+d} right {r:+d} bottom {bt:+d}")
     return "\n".join(lines), facts
 
 
