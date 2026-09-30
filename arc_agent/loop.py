@@ -104,9 +104,14 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             segments += 1
             compact = False
         else:
-            grid_text = vision.hex_grid(grid) if need_grid or not lattice else None
+            grid_text = vision.hex_grid(grid) if need_grid else None
+            rows = vision.changed_rows(prev_grid, grid) if prev_grid is not None and not need_grid else ""
             user = prompt.step_message(view, graph.lines(added_ids) or "(none)", verdict, diff,
-                                       vision.objects_text(grid), lattice, grid_text, img, problems)
+                                       vision.objects_text(grid), lattice, grid_text, img, problems, rows)
+            # only the newest turn carries an image: older turns keep their text
+            for m in convo:
+                if m["role"] == "user" and isinstance(m["content"], list) and len(m["content"]) > 1:
+                    m["content"] = m["content"][:1]
         msgs = [{"role": "system", "content": prompt.SYSTEM}] + convo + [user]
         answer, errs, rep = None, [], None
         tl = time.time()

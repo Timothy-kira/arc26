@@ -55,6 +55,19 @@ def hex_grid(grid: np.ndarray) -> str:
     return note + head + "\n" + "\n".join(f"{y:2d}  " + "".join(HEX[int(v)] for v in g[y, x0:x1 + 1]) for y in range(y0, y1 + 1))
 
 
+def changed_rows(a: np.ndarray, b: np.ndarray, limit: int = 24) -> str:
+    """The rows of ``b`` that differ from ``a``, in the hex_grid format (all 64 columns, absolute labels):
+    with the full grid given once, these keep the conversation's picture of the frame exact."""
+    a, b = np.asarray(a), np.asarray(b)
+    rows = [y for y in range(b.shape[0]) if (a[y] != b[y]).any()]
+    if not rows:
+        return "(no row changed)"
+    head = "    " + "".join(str(x // 10) for x in range(b.shape[1])) + "\n    " + "".join(str(x % 10) for x in range(b.shape[1]))
+    body = [f"{y:2d}  " + "".join(HEX[int(v)] for v in b[y]) for y in rows[:limit]]
+    more = f"\n  ... {len(rows) - limit} more rows changed (ask need_grid for the whole frame)" if len(rows) > limit else ""
+    return head + "\n" + "\n".join(body) + more
+
+
 def background(grid: np.ndarray) -> int:
     return int(np.bincount(np.asarray(grid).ravel(), minlength=16).argmax())
 

@@ -118,7 +118,8 @@ def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: st
 
 
 def step_message(obs: dict[str, Any], new_nodes: str, verdict: str, diff: str, objects: str,
-                 lattice: str, grid: Optional[str], image_b64: Optional[str], problems: list[str]) -> dict:
+                 lattice: str, grid: Optional[str], image_b64: Optional[str], problems: list[str],
+                 rows: str = "") -> dict:
     """The next turn of a continuing conversation: only what is new since the last answer. The graph
     and the handoff are already in the conversation (the full graph opens every segment)."""
     parts = [f"GRAPH NODES ADDED BY THIS STEP (your nodes with their ids, and the loop's action/outcome):\n{new_nodes}",
@@ -131,8 +132,9 @@ def step_message(obs: dict[str, Any], new_nodes: str, verdict: str, diff: str, o
         parts += ["", "CURRENT FRAME as a cell map:", lattice]
     if grid:
         parts += ["", "CURRENT FRAME grid (hex; background-only rows and columns left out, labels absolute):", grid]
-    else:
-        parts += ["", "(full hex grid left out: set \"need_grid\": true in your answer to get it next step)"]
+    elif rows:
+        parts += ["", "ROWS OF THE FRAME THAT CHANGED (hex, full width; every other row is as in the last full grid "
+                  "or row update; set \"need_grid\": true to get the whole frame next step):", rows]
     parts += ["", "Update the graph and answer with the JSON object now."]
     content: list[dict] = [{"type": "text", "text": "\n".join(parts)}]
     if image_b64:
