@@ -1,0 +1,6 @@
+# The game engine (arc_agi, arcengine) comes as wheels with the competition data: `make data`, then
+#   pip install data/arc_agi_3_wheels/arc_agi-*.whl data/arc_agi_3_wheels/arcengine-*.whl
+numpy
+pillow
+kaggle
+pandas

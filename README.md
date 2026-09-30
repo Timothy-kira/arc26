@@ -34,9 +34,9 @@
 | `arc_agent/session.py` | 比赛计步规则（与官方 scorecard 一致） |
 | `arc_eval/` | 游戏集与切分、RHAE |
 | `games/manifest.json`、`scripts/` | 全部游戏的清单与校验、下载脚本 |
-| `docs/` | [游戏清单](docs/GAMES.md)、[实验记录](docs/RESULTS.md) |
+| `docs/` | [交接文档](docs/HANDOFF.md)、[游戏清单](docs/GAMES.md)、[实验记录](docs/RESULTS.md) |
 
-旧的 MiniMax Code 加 MCP 方案保存在历史提交 `6ea847c`。
+旧的 MiniMax Code 加 MCP 方案已从仓库删除，需要时看历史提交 `6ea847c`。本地开发从 [交接文档](docs/HANDOFF.md) 开始。
 
 ## 运行
 
