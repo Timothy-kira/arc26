@@ -130,7 +130,7 @@ python -m arc_agent.report runs/x1   # 汇总
 - **notebook：** 用 `python kaggle/build_notebook.py --variant loop|api|dev|submit` 生成到 `build/<variant>/`，再用 `kaggle kernels push -p build/<variant>` 推送。
 - **密钥：** 放在私有数据集 `xishengfeng/arc26-secrets` 里。
 - **`arc26-agent-loop`（CPU，Dots 调参循环）：**
-  - 每轮 `git clone` 分支 `claude/arc-prize-local-setup-u7haly` 的最新代码。分支名在 `kaggle/config.json` 的 `loop.branch`，改成你开发用的分支，循环就跟着你的代码跑。
+  - 每轮 `git clone` `main` 分支的最新代码（分支名在 `kaggle/config.json` 的 `loop.branch`）。notebook 在构建时就定下了拉哪个分支，所以改了分支名要重新构建并推送 notebook 才生效。09-30 在跑的两版是改成 main 之前推的，仍然拉 `claude/arc-prize-local-setup-u7haly`。
   - 读同一文件里 `loop` 段的设置：每局 4 小时，每个游戏 2 局。
   - 在日志里打印每轮的报告。平均分达到 30 以后，自动把 25 个公开游戏各跑一遍。
 - **正在运行（09-30）：**

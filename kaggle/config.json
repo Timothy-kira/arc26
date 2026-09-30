@@ -62,7 +62,7 @@
   "compact_tokens": 40000,
   "image": true,
   "loop": {
-    "branch": "claude/arc-prize-local-setup-u7haly",
+    "branch": "main",
     "base_url": "https://note3-prev-api.askdiandian.com/v1",
     "model": "dots3-note-prev",
     "games": "cd82,tu93,wa30",

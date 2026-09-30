@@ -182,7 +182,7 @@ LOOP_RUN = r'''
 # settings of its kaggle/config.json "loop" section. When a round reaches the target mean RHAE, all
 # public games are played once and the loop ends. Each round's report is printed here.
 import datetime
-REPO, BRANCH = "https://github.com/Timothy-kira/arc26", CFG.get("loop", {}).get("branch", "claude/arc-prize-local-setup-u7haly")
+REPO, BRANCH = "https://github.com/Timothy-kira/arc26", CFG.get("loop", {}).get("branch", "main")
 t_start = time.time()
 def fresh_code(r):
     d = f"/tmp/code_{r}"
