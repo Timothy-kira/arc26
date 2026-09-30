@@ -60,5 +60,27 @@
   "think_policy": "exception",
   "context": "rolling",
   "compact_tokens": 40000,
-  "image": true
+  "image": true,
+  "loop": {
+    "branch": "claude/arc-prize-local-setup-u7haly",
+    "base_url": "https://note3-prev-api.askdiandian.com/v1",
+    "model": "dots3-note-prev",
+    "games": "cd82,tu93,wa30",
+    "k": 2,
+    "conc": 6,
+    "game_seconds": 1800,
+    "round_hours": 0.75,
+    "hours": 11.5,
+    "call_seconds": 180,
+    "target": 30.0,
+    "full_hours": 3.0,
+    "flags": [
+      "--context",
+      "rolling",
+      "--compact-tokens",
+      "60000",
+      "--think-policy",
+      "model"
+    ]
+  }
 }

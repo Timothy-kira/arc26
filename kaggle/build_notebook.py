@@ -145,9 +145,8 @@ def echo_vllm_errors(path=WORK + "/vllm.log", limit=300):
 echo_vllm_errors()
 '''
 
-API_RUN = r'''
-# Long evaluation runs on Kaggle (CPU + internet) with the hosted model.
-A = CFG["api"]
+API_KEY = r'''
+# The hosted model's key: a Kaggle secret, or the private dataset arc26-secrets.
 key = None
 try:
     from kaggle_secrets import UserSecretsClient
@@ -160,6 +159,11 @@ if not key:  # fallback: the private dataset arc26-secrets
 assert key, "no API key: add the Kaggle secret DOTS_API_KEY or mount the private dataset arc26-secrets"
 os.makedirs("/tmp/secrets", exist_ok=True)
 open("/tmp/secrets/key", "w").write(key); os.chmod("/tmp/secrets/key", 0o600)
+'''
+
+API_RUN = r'''
+# Long evaluation runs on Kaggle (CPU + internet) with the hosted model.
+A = CFG["api"]
 cmd = [sys.executable, "-m", "arc_agent.run", "--out-dir", WORK + "/run", "--games", A["games"], "--k", str(A.get("k", 1)),
        "--conc", str(A["conc"]), "--env-dir", COMP + "/environment_files", "--base-url", A["base_url"], "--model", A["model"],
        "--api-key-file", "/tmp/secrets/key", "--game-seconds", str(A["game_seconds"]), "--hours", str(A["hours"]),
@@ -167,6 +171,52 @@ cmd = [sys.executable, "-m", "arc_agent.run", "--out-dir", WORK + "/run", "--gam
       + ["--think-policy", A.get("think_policy", "model")] \
       + ["--context", A.get("context", "fresh"), "--compact-tokens", str(A.get("compact_tokens", 30000))]
 print(cmd); subprocess.run(cmd, cwd=CODE, env={**os.environ, "PYTHONPATH": CODE})
+import pandas as pd
+pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
+'''
+
+
+LOOP_RUN = r'''
+# The tuning loop: round after round on the three tuning games with the hosted model, each round with
+# the newest code of the development branch (so every pushed improvement is picked up) and the
+# settings of its kaggle/config.json "loop" section. When a round reaches the target mean RHAE, all
+# public games are played once and the loop ends. Each round's report is printed here.
+import datetime
+REPO, BRANCH = "https://github.com/Timothy-kira/arc26", CFG.get("loop", {}).get("branch", "claude/arc-prize-local-setup-u7haly")
+t_start = time.time()
+def fresh_code(r):
+    d = f"/tmp/code_{r}"
+    ok = subprocess.run(["git", "clone", "-q", "--depth", "1", "-b", BRANCH, REPO, d]).returncode == 0
+    if not ok:
+        print("git clone failed; using the embedded code"); d = CODE
+    head = subprocess.run(["git", "-C", d, "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip() or "embedded"
+    L = json.load(open(d + "/kaggle/config.json")).get("loop", CFG.get("loop", {}))
+    return d, head, L
+def play(d, L, out, games, k):
+    cmd = [sys.executable, "-m", "arc_agent.run", "--out-dir", out, "--games", games, "--k", str(k), "--conc", str(L.get("conc", 6)),
+           "--env-dir", COMP + "/environment_files", "--base-url", L["base_url"], "--model", L["model"],
+           "--api-key-file", "/tmp/secrets/key", "--game-seconds", str(L.get("game_seconds", 1800)),
+           "--hours", str(L.get("round_hours", 1.0)), "--call-seconds", str(L.get("call_seconds", 180))] + L.get("flags", [])
+    subprocess.run(cmd, cwd=d, env={**os.environ, "PYTHONPATH": d})
+    rep = subprocess.run([sys.executable, "-m", "arc_agent.report", out], cwd=d, capture_output=True, text=True,
+                         env={**os.environ, "PYTHONPATH": d}).stdout
+    return rep
+r = 0
+while True:
+    d, head, L = fresh_code(r)
+    if time.time() - t_start > L.get("hours", 11.0) * 3600 - L.get("round_hours", 1.0) * 3600:
+        print("time is up"); break
+    out = f"{WORK}/rounds/{r:02d}"
+    print(f"=== round {r} code {head} {datetime.datetime.utcnow():%H:%M} games {L['games']} x{L.get('k', 2)} flags {L.get('flags')}", flush=True)
+    rep = play(d, L, out, L["games"], L.get("k", 2))
+    print(rep, flush=True)
+    mean = float(rep.split("mean RHAE ")[1].split()[0]) if "mean RHAE " in rep else 0.0
+    open(WORK + "/loop_log.txt", "a").write(f"round {r} {head} mean {mean:.2f}\n" + rep + "\n")
+    if mean >= L.get("target", 30.0):
+        print(f"=== target reached ({mean:.2f}): playing all public games", flush=True)
+        print(play(d, {**L, "round_hours": L.get("full_hours", 3.0)}, f"{WORK}/full", "all", 1), flush=True)
+        break
+    r += 1
 import pandas as pd
 pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game", "score"]).to_parquet(WORK + "/submission.parquet", index=False)
 '''
@@ -225,22 +275,25 @@ def build(variant: str, out: Path, overrides: Optional[dict] = None) -> Path:
             "markdown",
         ),
         cell("CODE_TGZ = " + repr(code_blob()) + "\nCFG_JSON = " + repr(json.dumps(cfg))
-             + f"\nNEED_GPU = {variant != 'api'}"),
+             + f"\nNEED_GPU = {variant not in ('api', 'loop')}"),
         cell(SETUP),
     ]
     if variant == "submit":
         cells.append(cell("if RERUN:\n" + "\n".join("    " + l for l in (TOOLS + VLLM).strip().splitlines())))
         cells.append(cell(submit))
     elif variant == "api":
-        cells += [cell(TOOLS), cell(API_RUN)]
+        cells += [cell(TOOLS), cell(API_KEY), cell(API_RUN)]
+    elif variant == "loop":
+        cells += [cell(TOOLS), cell(API_KEY), cell(LOOP_RUN)]
     else:
         cells += [cell(TOOLS), cell(VLLM), cell(dev)]
+    cpu = variant in ("api", "loop")  # hosted model: CPU notebook with internet
     nb = {
         "metadata": {
             "kernelspec": {"language": "python", "display_name": "Python 3", "name": "python3"},
             "language_info": {"name": "python"},
-            "kaggle": {"accelerator": "none" if variant == "api" else cfg["notebook_accelerator"],
-                       "isInternetEnabled": variant == "api", "isGpuEnabled": variant != "api",
+            "kaggle": {"accelerator": "none" if cpu else cfg["notebook_accelerator"],
+                       "isInternetEnabled": cpu, "isGpuEnabled": not cpu,
                        "language": "python", "sourceType": "notebook"},
         },
         "nbformat": 4,
@@ -252,13 +305,13 @@ def build(variant: str, out: Path, overrides: Optional[dict] = None) -> Path:
     slug = cfg["kernel_slug"] + ("" if variant == "submit" else f"-{variant}")
     meta = {
         "id": f"{cfg['username']}/{slug}", "title": slug, "code_file": "notebook.ipynb", "language": "python",
-        "kernel_type": "notebook", "is_private": True, "enable_gpu": variant != "api", "enable_tpu": False,
-        "enable_internet": variant == "api",
-        "dataset_sources": cfg["api"].get("dataset_sources", []) if variant == "api" else cfg["dataset_sources"],
+        "kernel_type": "notebook", "is_private": True, "enable_gpu": not cpu, "enable_tpu": False,
+        "enable_internet": cpu,
+        "dataset_sources": cfg["api"].get("dataset_sources", []) if cpu else cfg["dataset_sources"],
         "competition_sources": [cfg["competition"]], "kernel_sources": [],
-        "model_sources": [] if variant == "api" else cfg["model_sources"],
+        "model_sources": [] if cpu else cfg["model_sources"],
     }
-    if variant != "api":
+    if not cpu:
         meta["machine_shape"] = cfg["machine_shape"]
     (out / "kernel-metadata.json").write_text(json.dumps(meta, indent=2))
     return out
@@ -266,7 +319,7 @@ def build(variant: str, out: Path, overrides: Optional[dict] = None) -> Path:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--variant", default="dev", choices=["submit", "dev", "api"])
+    ap.add_argument("--variant", default="dev", choices=["submit", "dev", "api", "loop"])
     ap.add_argument("--out", default="")
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
                     help="override a config value (JSON value), e.g. --set kernel_slug=\"arc26-val\" --set api.k=2")
