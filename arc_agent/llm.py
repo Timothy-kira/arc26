@@ -40,6 +40,7 @@ class LLM:
         self.model, self.key, self.thinking = model, api_key, thinking
         self.call_seconds, self.retries, self.temperature = call_seconds, retries, temperature
         self.hurry = hurry  # appended to the messages of a retry, after an attempt was cut off
+        self.continue_chars = 12000  # how much of a cut-off reasoning a continuation carries
 
     def _once(self, messages: list[dict], limit: float, thinking: bool, prefill: Optional[str] = None) -> Reply:
         body: dict[str, Any] = {"model": self.model, "messages": messages, "stream": True,
@@ -95,7 +96,10 @@ class LLM:
                 break
             try:
                 if partial:
-                    rep = self._once(messages, limit, False, prefill="<think>\n" + partial.strip() + "\n</think>\n\n")
+                    # continue from the end of the cut-off reasoning (its conclusions are at the end; a very
+                    # long prefill made the model return nothing)
+                    tail = partial.strip()[-self.continue_chars:]
+                    rep = self._once(messages, limit, False, prefill="<think>\n" + tail + "\n</think>\n\n")
                     rep.reasoning = partial + rep.reasoning
                 else:
                     rep = self._once(messages if attempt == 1 or not self.hurry else messages + [
@@ -104,7 +108,7 @@ class LLM:
                 if rep.content.strip():
                     return rep
                 failures.append(f"empty reply after {rep.seconds:.0f}s ({len(rep.reasoning)} reasoning chars)")
-                partial = ""
+                partial = ""  # the next attempt starts over, with the hurry note
             except CallTimeout as exc:
                 failures.append(f"CallTimeout after {time.time() - t0:.0f}s" + (" (continuing it)" if exc.reasoning and not partial else ""))
                 partial = exc.reasoning if exc.reasoning and not partial and not exc.content else ""
