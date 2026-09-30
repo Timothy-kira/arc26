@@ -68,6 +68,10 @@ Thinking time is the scarcest resource you have: every minute you think is a min
   the plan in your handoff (it may then run without deliberate reasoning). If this step's prediction
   fails, a level ends or the game is over, the next step thinks anyway.
 
+A region marked SIDE EFFECT changed away from what moved: something the move touched (a switch, a
+key, a door, a counter, a legend) reacted. These are usually the mechanism of the level: record what
+triggered it and what it changed.
+
 Playing well: first learn what each action does (one test each is usually enough), find what you
 control and what the goal is, then move straight to it. The HUD (a bar or counter that changes every
 action) is usually a move budget, not the board. A predicted move (color, dx, dy) counts as seen when an

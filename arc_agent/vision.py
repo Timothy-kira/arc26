@@ -269,19 +269,34 @@ def diff_text(a: np.ndarray, b: np.ndarray, hud: Optional[np.ndarray] = None, li
     facts = {"changed": total, "board_changed": board, "hud_changed": total - board,
              "moves": [{"color": m["color"], "dx": m["dx"], "dy": m["dy"], "x": m["to"][0], "y": m["to"][1]} for m in mv],
              "extents": [list(e) for e in ext]}
+    facts["side_effects"] = 0
     if total == 0:
         return "no cell changed", facts
     lines = [f"{total} cells changed ({board} on the board, {total - board} in the HUD)"]
+    # the area the moved objects swept (with a small margin): a change elsewhere is a side effect
+    main = [m for m in mv if mv and (m["dx"], m["dy"]) == (mv[0]["dx"], mv[0]["dy"])]  # the largest mover and its parts
+    sweep = [(min(m["from"][0], m["to"][0]) - 2, min(m["from"][1], m["to"][1]) - 2,
+              max(m["from"][0], m["to"][0]) + m["w"] + 1, max(m["from"][1], m["to"][1]) + m["h"] + 1) for m in main]
+    remote = 0
     for r in regs[:limit]:
         x0, y0, x1, y1 = r["bbox"]
         bef = ",".join(cname(c) for c, _ in r["before"])
         aft = ",".join(cname(c) for c, _ in r["after"])
-        lines.append(f"  region x={x0}..{x1} y={y0}..{y1}: {r['cells']} cells {bef} -> {aft}")
+        away = bool(sweep) and not any(x0 <= sx1 and x1 >= sx0 and y0 <= sy1 and y1 >= sy0 for sx0, sy0, sx1, sy1 in sweep)
+        edge_bar = (min(y1 - y0, x1 - x0) <= 1 and (y0 <= 2 or y1 >= a.shape[0] - 3 or x0 <= 2 or x1 >= a.shape[1] - 3))
+        tag = ""
+        if away and edge_bar:
+            tag = "  <- thin strip at the frame edge: probably the HUD (step counter)"
+        elif away:
+            tag = "  <- SIDE EFFECT away from what moved (a switch, key, door or counter?)"
+            remote += 1
+        lines.append(f"  region x={x0}..{x1} y={y0}..{y1}: {r['cells']} cells {bef} -> {aft}{tag}")
     if len(regs) > limit:
         lines.append(f"  ... {len(regs) - limit} smaller regions")
     for m in mv:
         lines.append(f"  moved {cname(m['color'])} {m['w']}x{m['h']} ({m['from'][0]},{m['from'][1]}) -> "
                      f"({m['to'][0]},{m['to'][1]}) d=({m['dx']:+d},{m['dy']:+d})")
+    facts["side_effects"] = remote
     for c, l, t, r, bt in ext[:limit]:
         if (l, t) != (r, bt):  # a pure translation is already listed as a move
             lines.append(f"  {cname(c)} shape resized: left {l:+d} top {t:+d} right {r:+d} bottom {bt:+d}")
