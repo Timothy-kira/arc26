@@ -74,6 +74,10 @@ Thinking time is the scarcest resource you have: every minute you think is a min
   the plan in your handoff (it may then run without deliberate reasoning). If this step's prediction
   fails, a level ends or the game is over, the next step thinks anyway.
 
+"need_grid": the segment's first turn holds the full grid and every later turn the rows that changed, so
+together they are the whole frame; ask for a full grid again only when you have lost track (it is sent
+at most once every 8 turns, and it stays in the conversation, taking room).
+
 A region marked SIDE EFFECT changed away from what moved: something the move touched (a switch, a
 key, a door, a counter, a legend) reacted. These are usually the mechanism of the level: record what
 triggered it and what it changed.

@@ -26,6 +26,7 @@ from arc_agent.graph import Graph
 from arc_agent.llm import LLM
 from arc_agent.session import Session
 
+GRID_EVERY = 8  # rolling mode: at most one full grid per this many turns of a segment
 ACTION_NAMES = {0: "RESET", 1: "ACTION1", 2: "ACTION2", 3: "ACTION3", 4: "ACTION4", 5: "ACTION5", 6: "ACTION6", 7: "UNDO"}
 
 
@@ -74,6 +75,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
     compact = True  # the next step opens a fresh segment
     added_ids: list[int] = []  # graph nodes added since the model's last turn
     need_grid = False
+    grid_turn = 0  # the turn of this segment that last carried the full grid
     segments = 0
     while time.time() < t_end and s.actions < max_actions:
         tp = time.time()
@@ -103,15 +105,24 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             convo = []
             segments += 1
             compact = False
+            grid_turn = 0
         else:
-            grid_text = vision.hex_grid(grid) if need_grid else None
-            rows = vision.changed_rows(prev_grid, grid) if prev_grid is not None and not need_grid else ""
+            # a full grid stays in the segment until the next compaction, so a request for one is honoured
+            # only when none was sent in the last GRID_EVERY turns; otherwise the changed rows go
+            turn = len(convo) // 2
+            full = need_grid and turn - grid_turn >= GRID_EVERY
+            if full:
+                grid_turn = turn
+            grid_text = vision.hex_grid(grid) if full else None
+            rows = vision.changed_rows(prev_grid, grid) if prev_grid is not None and not full else ""
+            if need_grid and not full:
+                rows = (f"(need_grid: a full grid was sent {turn - grid_turn} turns ago; it and the changed rows "
+                        f"since then give the whole frame)\n") + rows
+            # earlier turns are never edited (the server's prefix cache only hits a byte-identical prefix),
+            # so a step turn carries no image: the frame is in the changed rows / grid, and the image is
+            # in the turn that opened the segment
             user = prompt.step_message(view, graph.lines(added_ids) or "(none)", verdict, diff,
-                                       vision.objects_text(grid), lattice, grid_text, img, problems, rows)
-            # only the newest turn carries an image: older turns keep their text
-            for m in convo:
-                if m["role"] == "user" and isinstance(m["content"], list) and len(m["content"]) > 1:
-                    m["content"] = m["content"][:1]
+                                       vision.objects_text(grid), lattice, grid_text, None, problems, rows)
         msgs = [{"role": "system", "content": prompt.SYSTEM}] + convo + [user]
         answer, errs, rep = None, [], None
         tl = time.time()

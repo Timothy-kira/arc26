@@ -18,7 +18,7 @@ from arc_eval.eval import rhae  # noqa: E402
 
 def report(run: Path) -> str:
     rows, scores = [], []
-    tot = {"steps": 0, "right": 0, "wrong": 0, "errors": 0, "llm_s": 0.0, "out_tokens": 0}
+    tot = {"steps": 0, "right": 0, "wrong": 0, "errors": 0, "llm_s": 0.0, "out_tokens": 0, "in_tokens": 0, "cached": 0}
     for d in sorted((run / "games").glob("*_k*")):
         r = json.loads((d / "result.json").read_text()) if (d / "result.json").exists() else {}
         steps = [json.loads(l) for l in open(d / "steps.jsonl")] if (d / "steps.jsonl").exists() else []
@@ -31,6 +31,10 @@ def report(run: Path) -> str:
         llm = sum((s.get("timing") or {}).get("llm") or s.get("llm_s") or 0 for s in steps)
         out_tok = sum(int((s.get("usage") or {}).get("completion_tokens") or 0) for s in steps)
         tot["out_tokens"] += out_tok
+        for s in steps:
+            u = s.get("usage") or {}
+            tot["in_tokens"] += int(u.get("prompt_tokens") or 0)
+            tot["cached"] += int((u.get("prompt_tokens_details") or {}).get("cached_tokens") or 0)
         tot.update(steps=tot["steps"] + len(steps), right=tot["right"] + right, wrong=tot["wrong"] + wrong,
                    errors=tot["errors"] + errs, llm_s=tot["llm_s"] + llm)
         ratio = " ".join(f"{n}/{base[i]}" if i < len(base) else str(n) for i, n in enumerate(la))
@@ -44,7 +48,8 @@ def report(run: Path) -> str:
     return "\n".join([head, *rows, "", f"games {len(scores)}  mean RHAE {sum(scores) / n:.3f}  steps {tot['steps']}  "
                       f"prediction accuracy {acc:.0%}  answer errors {tot['errors']}  "
                       f"LLM {tot['llm_s'] / max(1, tot['steps']):.0f}s/step  output {tot['out_tokens'] / max(1, tot['steps']):.0f} "
-                      f"tokens/step, {tot['out_tokens'] / n / 1000:.0f}k per game"])
+                      f"tokens/step, {tot['out_tokens'] / n / 1000:.0f}k per game  prompt cached "
+                      f"{tot['cached'] / max(1, tot['in_tokens']):.0%} of {tot['in_tokens'] / max(1, tot['steps']):.0f} tokens/step"])
 
 
 if __name__ == "__main__":
