@@ -103,6 +103,7 @@ class Graph:
             if self.nodes[e.src].type not in ("action", "outcome"):  # the loop's own tests-edges do not count
                 linked.add(e.dst)
         lines: list[str] = []
+        folded_note: list[str] = []
         levels = sorted({n.level for n in self.nodes})
         current = levels[-1] if levels else 0
         last_step = max((n.step for n in self.nodes), default=0)
@@ -131,14 +132,16 @@ class Graph:
                     folded_obs += 1  # superseded snapshots and plans
                 else:
                     shown.append(n)
-            if folded_acts or folded_obs:
-                lines.append(f"  ({folded_acts} earlier actions whose predictions came true and {folded_obs} old "
-                             "observations/plans are folded)")
+            if folded_acts or folded_obs:  # noted at the end so the text above stays stable (prefix cache)
+                folded_note.append(f"level {lv + 1}: {folded_acts} earlier actions whose predictions came true and "
+                                   f"{folded_obs} old observations/plans are folded")
             for n in shown:
                 edges = "".join(f" -{e.rel}->{e.dst}" for e in out_edges.get(n.id, []))
                 mark = "" if n.status == "open" else f" [{n.status}]"
                 text = "RIGHT" if n.type == "outcome" and n.status == "confirmed" else n.text
                 lines.append(f"  {n.id} {n.type}{mark} s{n.step}: {text}{edges}")
+        if folded_note:
+            lines.append("(" + "; ".join(folded_note) + ")")
         text = "\n".join(lines) or "(empty graph: this is the first step)"
         if len(text) > max_chars:  # keep the head (rules, goals) and the most recent part
             text = text[: max_chars // 3] + "\n  ...\n" + text[-(2 * max_chars) // 3:]

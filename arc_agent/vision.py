@@ -42,10 +42,17 @@ def png(grid: np.ndarray, scale: int = 4) -> str:
 
 
 def hex_grid(grid: np.ndarray) -> str:
-    """One line per row, one hex digit per cell, with column and row labels."""
+    """One line per row, one hex digit per cell, cropped to the rows and columns that hold anything but
+    the background (labels stay absolute: column digits on top, row number on the left)."""
     g = np.asarray(grid)
-    head = "    " + "".join(str(x // 10) for x in range(g.shape[1])) + "\n    " + "".join(str(x % 10) for x in range(g.shape[1]))
-    return head + "\n" + "\n".join(f"{y:2d}  " + "".join(HEX[int(v)] for v in row) for y, row in enumerate(g))
+    bg = background(g)
+    ys, xs = np.where(g != bg)
+    if not len(ys):
+        return f"(the whole frame is {cname(bg)})"
+    y0, y1, x0, x1 = int(ys.min()), int(ys.max()), int(xs.min()), int(xs.max())
+    head = "    " + "".join(str(x // 10) for x in range(x0, x1 + 1)) + "\n    " + "".join(str(x % 10) for x in range(x0, x1 + 1))
+    note = f"(background {cname(bg)} outside x={x0}..{x1}, y={y0}..{y1})\n" if (y0, x0, y1, x1) != (0, 0, 63, 63) else ""
+    return note + head + "\n" + "\n".join(f"{y:2d}  " + "".join(HEX[int(v)] for v in g[y, x0:x1 + 1]) for y in range(y0, y1 + 1))
 
 
 def background(grid: np.ndarray) -> int:

@@ -82,14 +82,18 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             if ox is None:
                 ox, oy = (last_pos[0] % st, last_pos[1] % st) if last_pos else (0, 0)
             lattice = vision.lattice_text(grid, st, ox, oy)
+        thinks = policy == "always" or think_next
+        # a routine step reads the cell map and the objects; the full hex grid (~4k tokens) only when
+        # the model thinks or there is no cell map
+        grid_text = vision.hex_grid(grid) if thinks or not lattice else "(left out on routine steps: use the cell map and objects)"
         msgs = [{"role": "system", "content": prompt.SYSTEM},
                 prompt.user_message(view, graph.render(), handoff, verdict, diff, vision.objects_text(grid),
-                                    vision.hex_grid(grid), vision.png(grid), problems, lattice)]
+                                    grid_text, vision.png(grid), problems, lattice)]
         answer, errs, rep = None, [], None
         tl = time.time()
         for _ in range(2):  # one repair round when the answer is unusable
             try:
-                rep = llm.chat(msgs, t_end, None if policy == "always" or think_next else False)
+                rep = llm.chat(msgs, t_end, None if thinks else False)
             except RuntimeError as exc:
                 errs = [str(exc)]
                 break

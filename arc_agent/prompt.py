@@ -91,17 +91,20 @@ def status_text(obs: dict[str, Any]) -> str:
 
 def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: str, diff: str,
                  objects: str, grid: str, image_b64: Optional[str], problems: list[str], lattice: str = "") -> dict:
-    parts = [f"STATUS: {status_text(obs)}", "", "THE GRAPH:", graph_text, "",
+    """Ordered for the server's prefix cache: the graph (which mostly grows at its end) comes right after
+    the fixed system prompt, and everything that changes every step (handoff, check, diff, status,
+    frame) follows it."""
+    parts = ["THE GRAPH:", graph_text, "",
              f"THE HANDOFF (from your previous step):\n{handoff or '(none: first step)'}", "",
              f"PREDICTION CHECK for the last action:\n{verdict or '(no previous action)'}", "",
              f"WHAT THE LAST ACTION CHANGED:\n{diff or '(no previous action)'}"]
     if problems:
         parts += ["", "PROBLEMS WITH YOUR LAST ANSWER (fix them this step):", *problems]
-    parts += ["", "CURRENT FRAME objects:", objects]
+    parts += ["", f"STATUS: {status_text(obs)}", "", "CURRENT FRAME objects:", objects]
     if lattice:
         parts += ["", "CURRENT FRAME as a cell map (use it for maps and paths; the full grid follows):", lattice]
-    parts += ["", "CURRENT FRAME grid (hex, row y then columns x):", grid,
-              "", "Answer with the JSON object now."]
+    parts += ["", "CURRENT FRAME grid (hex; rows and columns that are only background are left out, labels "
+              "are absolute y and x):", grid, "", "Answer with the JSON object now."]
     content: list[dict] = [{"type": "text", "text": "\n".join(parts)}]
     if image_b64:
         content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}})
