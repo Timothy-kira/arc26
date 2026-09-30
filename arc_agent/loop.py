@@ -21,13 +21,54 @@ from typing import Any, Optional
 
 import numpy as np
 
-from arc_agent import prompt, vision
+from arc_agent import prompt, sim, vision
 from arc_agent.graph import Graph
 from arc_agent.llm import LLM
 from arc_agent.session import Session
 
 GRID_EVERY = 8  # rolling mode: at most one full grid per this many turns of a segment
+TRANSITIONS = 20  # recent real actions a new simulator is replayed on
+SIM_AFTER = 5  # actions on a level after which a missing simulator is asked for every turn
+PLAN_MAX = 40  # longest route played from one search
+SEARCH_SECONDS = 40.0
 ACTION_NAMES = {0: "RESET", 1: "ACTION1", 2: "ACTION2", 3: "ACTION3", 4: "ACTION4", 5: "ACTION5", 6: "ACTION6", 7: "UNDO"}
+
+
+def route_text(route: list[tuple]) -> str:
+    return "ROUTE " + ", ".join(ACTION_NAMES.get(a, str(a)) + (f"({x},{y})" if a == 6 else "") for a, x, y in route)
+
+
+def replay_text(code: str, version: int, transitions: list[dict], mask: np.ndarray) -> str:
+    """A new simulator replayed on the level's recent real actions."""
+    if not transitions:
+        return f"SIMULATOR v{version} saved (no actions on this level yet to replay it on)"
+    res = sim.run(code, "replay", 15, transitions=[dict(t) for t in transitions], mask=mask)
+    if "error" in res:
+        return f"SIMULATOR v{version} saved; replaying it failed: " + sim.error_text(res)
+    w = res["wrong"]
+    exact = sum(1 for n in w if n == 0)
+    return (f"SIMULATOR v{version} saved; replayed on this level's last {len(w)} actions it predicts {exact} "
+            f"exactly; board cells wrong per action, oldest first: {w}")
+
+
+def plan_route(code: str, grid: np.ndarray, available: list[int], t_end: float,
+               fallback: list[tuple]) -> tuple[list[tuple], str]:
+    """Search the simulator for a route to goal(); the model's own action when there is none."""
+    if not code:
+        return fallback, "PLAN: there is no simulator yet (write step() and goal()); your action was played"
+    secs = min(SEARCH_SECONDS, t_end - time.time() - 30)
+    if secs < 5:
+        return fallback, "PLAN: no time left to search; your action was played"
+    res = sim.run(code, "search", secs, grid=grid, actions=[a for a in available if a != 0])
+    if "error" in res:
+        return fallback, "PLAN: " + sim.error_text(res) + "; your action was played"
+    if res["found"] and res["path"]:
+        path = [tuple(p) for p in res["path"]]
+        note = f"PLAN: the search found a route of {len(path)} actions ({res['nodes']} simulated actions)"
+        return path[:PLAN_MAX], note + (f"; its first {PLAN_MAX} are played" if len(path) > PLAN_MAX else "")
+    if res["found"]:
+        return fallback, "PLAN: goal() already holds for the current frame, yet the level is not cleared: goal() is wrong; your action was played"
+    return fallback, f"PLAN: {res['reason']}; your action was played"
 
 
 def make_session(game: str, env_dir: str, gateway: Optional[str], card: Optional[str]) -> tuple[Session, str, Any]:
@@ -77,6 +118,9 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
     need_grid = False
     grid_turn = 0  # the turn of this segment that last carried the full grid
     segments = 0
+    sim_code, sim_version = "", 0  # the model's simulator (arc_agent.sim)
+    transitions: list[dict] = []  # this level's recent real actions, for replaying a new simulator
+    sim_wrong = 0  # board cells the simulator got wrong on the last action (-1: it failed)
     while time.time() < t_end and s.actions < max_actions:
         tp = time.time()
         grid = np.asarray(obs.grid)
@@ -95,13 +139,21 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             lattice = vision.lattice_text(grid, st, ox, oy)
         thinks = policy == "always" or think_next
         img = vision.png(grid) if image else None
+        asks = list(problems)
+        if not sim_code and s.level_so_far >= SIM_AFTER and state != "GAME_OVER":
+            asks.append(f"NO SIMULATOR YET after {s.level_so_far} actions on this level: write step() (and goal()) in a "
+                        "```python block this step, from what the graph says the actions do. It may be rough; the "
+                        "reports on it tell you what to fix.")
+        elif sim_code and sim_wrong:
+            asks.append("YOUR SIMULATOR was wrong on the last action (see SIMULATOR above): send a corrected ```python "
+                        "block this step, or record in the graph why the difference does not matter.")
         if context == "fresh" or compact:
             # a routine step reads the cell map and the objects; the full hex grid (~4k tokens) only when
             # the model thinks or there is no cell map
             grid_text = vision.hex_grid(grid) if thinks or not lattice or context != "fresh" else \
                 "(left out on routine steps: use the cell map and objects)"
             user = prompt.user_message(view, graph.render(), handoff, verdict, diff, vision.objects_text(grid),
-                                       grid_text, img, problems, lattice)
+                                       grid_text, img, asks, lattice, sim_code)
             convo = []
             segments += 1
             compact = False
@@ -122,7 +174,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             # so a step turn carries no image: the frame is in the changed rows / grid, and the image is
             # in the turn that opened the segment
             user = prompt.step_message(view, graph.lines(added_ids) or "(none)", verdict, diff,
-                                       vision.objects_text(grid), lattice, grid_text, None, problems, rows)
+                                       vision.objects_text(grid), lattice, grid_text, None, asks, rows)
         msgs = [{"role": "system", "content": prompt.SYSTEM}] + convo + [user]
         answer, errs, rep = None, [], None
         tl = time.time()
@@ -146,6 +198,9 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             # the reasoning, nor any prose written before the JSON)
             kept = json.dumps(answer, ensure_ascii=False, separators=(",", ":")) if answer is not None else \
                 (rep.content[-2000:] if rep else "")
+            code = prompt.parse_code(rep.content) if rep and answer is not None else None  # a block (a JSON field is in kept)
+            if code:
+                kept += "\n```python\n" + code + "\n```"
             convo += [user, {"role": "assistant", "content": kept}]
             used = int((rep.usage or {}).get("prompt_tokens") or 0) if rep else compact_tokens + 1
             if used > compact_tokens:
@@ -157,6 +212,10 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
                                "reasoning_chars": len(rep.reasoning) if rep else None}
         if errs:
             rec["error"] = errs
+            if rep is not None:
+                thoughts.write(json.dumps({"step": step, "error": errs, "reasoning": rep.reasoning[-8000:],
+                                           "content": rep.content[-6000:]}) + "\n")
+                thoughts.flush()
             log.write(json.dumps(rec) + "\n")
             log.flush()
             problems = errs
@@ -167,32 +226,66 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         assert answer is not None
         new_ids, problems = graph.apply(answer.get("graph_update") or {}, obs.levels_completed, step)
         need_grid = answer.get("need_grid") is True
+        sim_lines: list[str] = []
+        code = prompt.parse_code(rep.content, answer) if rep else None
+        if code and code != sim_code:
+            sim_code, sim_version = code, sim_version + 1
+            sim_lines.append(replay_text(sim_code, sim_version, transitions, hud.mask()))
         a = answer["action"]
         aid = int(a["id"])
         x, y = (int(a["x"]), int(a["y"])) if aid == 6 else (None, None)
+        todo: list[tuple] = [(aid, x, y)]
+        if answer.get("plan") is True:
+            todo, note = plan_route(sim_code, grid, obs.available_actions, t_end, todo)
+            sim_lines.append(note)
         pred = answer.get("prediction") or {}
         before = obs
         prev_grid = grid
-        obs = s.step(aid, x, y)
+        played: list[tuple] = []
+        level_up = False
+        for i, (aid, x, y) in enumerate(todo):
+            g0 = np.asarray(obs.grid)
+            lv = obs.levels_completed
+            obs = s.step(aid, x, y)
+            after = np.asarray(obs.grid)
+            played.append((aid, x, y))
+            up = obs.levels_completed > lv
+            wrong: Optional[int] = None
+            if up:
+                hud.reset()
+                move_steps, last_pos, transitions, sim_wrong = [], None, [], 0
+            elif aid != 0:
+                hud.update(g0, after)
+                transitions = (transitions + [{"grid": g0, "action": aid, "x": x, "y": y, "after": after}])[-TRANSITIONS:]
+                if sim_code:
+                    res = sim.run(sim_code, "check", 8, grid=g0, action=aid, x=x, y=y, after=after, mask=hud.mask())
+                    wrong = -1 if "error" in res else res["wrong"]
+                    sim_wrong = wrong
+                    if len(todo) == 1 or wrong != 0 or i == len(todo) - 1:
+                        sim_lines.append((f"[route action {i + 1}] " if len(todo) > 1 else "") + sim.check_text(res))
+            level_up = level_up or up
+            if up or obs.state.name in ("GAME_OVER", "WIN") or time.time() > t_end:
+                break
+            if len(todo) > 1 and wrong != 0 and i < len(todo) - 1:
+                sim_lines.append(f"ROUTE stopped after {i + 1} of {len(todo)} actions: the real frame differed from step()")
+                break
+        if len(todo) > 1:
+            sim_lines.append(f"ROUTE played {len(played)} of {len(todo)} actions: " + route_text(played))
         tx = time.time()
         after = np.asarray(obs.grid)
-        level_up = obs.levels_completed > before.levels_completed
-        if level_up:
-            hud.reset()
-            move_steps, last_pos = [], None
-        else:
-            hud.update(prev_grid, after)
         diff, facts = vision.diff_text(prev_grid, after, None if level_up else hud.mask())
-        anim = vision.anim_text([np.asarray(f) for f in obs.frames], prev_grid)
+        anim = vision.anim_text([np.asarray(f) for f in obs.frames], prev_grid) if len(played) == 1 else ""
         if anim:
             diff += "\n" + anim
         facts.update(level_up=level_up, game_over=obs.state.name == "GAME_OVER")
-        if not level_up and facts["moves"]:
+        if not level_up and facts["moves"] and len(played) == 1:
             m0 = facts["moves"][0]
             move_steps += [abs(v) for v in (m0["dx"], m0["dy"]) if v]
             same = [m for m in facts["moves"] if (m["dx"], m["dy"]) == (m0["dx"], m0["dy"])]  # parts of one mover
             last_pos = (min(m["x"] for m in same), min(m["y"] for m in same))
         ok, verdict = prompt.check_prediction(pred, facts)
+        if sim_lines:
+            verdict += "\n" + "\n".join(sim_lines)
         needed = ok is not True or level_up or facts["game_over"]
         if policy == "exception":
             think_next = needed or step < 2 or answer.get("think_next") is True
@@ -203,7 +296,8 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
             diff = "(new level: the whole frame changed)"
         if facts["game_over"]:
             verdict += "\nGAME_OVER: the level must be restarted with action 0 (RESET)."
-        act_text = ACTION_NAMES.get(aid, str(aid)) + (f" at ({x},{y})" if aid == 6 else "")
+        act_text = route_text(played) if len(played) > 1 else \
+            ACTION_NAMES.get(aid, str(aid)) + (f" at ({x},{y})" if aid == 6 else "")
         act_id = graph.add_node("action", f"{act_text}; predicted: {pred.get('text', '')}", before.levels_completed, step)
         out_id = graph.add_node("outcome", verdict.splitlines()[0][:300], before.levels_completed, step,
                                 "confirmed" if ok else "refuted" if ok is False else "open")
@@ -218,7 +312,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         graph.save(out_dir / "graph.json")
         rec["timing"] = {"prep": round(tl - tp, 2), "llm": round(te - tl, 2), "env": round(tx - te, 2),
                          "post": round(time.time() - tx, 2)}
-        rec.update(action=aid, x=x, y=y, prediction=pred, verdict=verdict, ok=ok, facts=facts,
+        rec.update(played=played, sim_version=sim_version, action=aid, x=x, y=y, prediction=pred, verdict=verdict, ok=ok, facts=facts,
                    new_nodes=len(new_ids), handoff=handoff, actions=s.actions, state=obs.state.name,
                    levels=obs.levels_completed)
         log.write(json.dumps(rec, default=str) + "\n")

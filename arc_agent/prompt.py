@@ -13,6 +13,7 @@ import re
 from typing import Any, Optional
 
 from arc_agent.graph import EDGE_TYPES, NODE_TYPES
+from arc_agent.sim import HELP as SIM_HELP
 
 SYSTEM = f"""You are playing an unknown turn-based game. Nobody tells you the rules or the goal: you find
 them by acting and observing. The screen is a 64x64 grid of colours 0-15 (hex digits 0-f). The game
@@ -35,8 +36,8 @@ the diff, the new graph nodes, the frame). It is compacted from time to time (an
 or GAME_OVER): a fresh segment opens with the whole graph and your last handoff, and nothing else
 survives. So whatever you will need later must be in the graph or the handoff.
 
-Each step, answer with exactly one JSON object (you may think first, but the reply must end with the
-JSON in a ```json block):
+Each step, answer with exactly one JSON object (you may think first; the reply must end with the
+JSON in a ```json block, optionally followed by a ```python simulator block):
 {{
   "graph_update": {{
     "nodes": [{{"type": one of {list(NODE_TYPES[:6])}, "text": "short, specific, with coordinates/colours"}}],
@@ -53,7 +54,8 @@ JSON in a ```json block):
   }},
   "handoff": "note to your next step: current goal, plan for the next few actions, what is still uncertain",
   "think_next": true | false,
-  "need_grid": false
+  "need_grid": false,
+  "plan": false
 }}
 
 Rules for the graph:
@@ -86,7 +88,9 @@ Playing well: first learn what each action does (one test each is usually enough
 control and what the goal is, then move straight to it. The HUD (a bar or counter that changes every
 action) is usually a move budget, not the board. A predicted move (color, dx, dy) counts as seen when an
 object of that colour moved by it, or when an edge of that colour's extent moved by it (so a bar that
-grows by 2 upwards is {{"color": c, "dx": 0, "dy": -2}}); dx is right, dy is down, in grid cells."""
+grows by 2 upwards is {{"color": c, "dx": 0, "dy": -2}}); dx is right, dy is down, in grid cells.
+
+""" + SIM_HELP
 
 
 HURRY = ("Your previous attempt at this step thought past the time limit and was discarded. Decide now: keep "
@@ -100,7 +104,8 @@ def status_text(obs: dict[str, Any]) -> str:
 
 
 def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: str, diff: str,
-                 objects: str, grid: str, image_b64: Optional[str], problems: list[str], lattice: str = "") -> dict:
+                 objects: str, grid: str, image_b64: Optional[str], problems: list[str], lattice: str = "",
+                 sim: str = "") -> dict:
     """Ordered for the server's prefix cache: the graph (which mostly grows at its end) comes right after
     the fixed system prompt, and everything that changes every step (handoff, check, diff, status,
     frame) follows it."""
@@ -108,6 +113,8 @@ def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: st
              f"THE HANDOFF (from your previous step):\n{handoff or '(none: first step)'}", "",
              f"PREDICTION CHECK for the last action:\n{verdict or '(no previous action)'}", "",
              f"WHAT THE LAST ACTION CHANGED:\n{diff or '(no previous action)'}"]
+    if sim:
+        parts += ["", "YOUR CURRENT SIMULATOR (send a new ```python block to replace it):", "```python", sim, "```"]
     if problems:
         parts += ["", "PROBLEMS WITH YOUR LAST ANSWER (fix them this step):", *problems]
     parts += ["", f"STATUS: {status_text(obs)}", "", "CURRENT FRAME objects:", objects]
@@ -145,16 +152,32 @@ def step_message(obs: dict[str, Any], new_nodes: str, verdict: str, diff: str, o
 
 
 def parse(text: str) -> Optional[dict]:
-    """The last JSON object in the reply (a ```json block if there is one)."""
-    blocks = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S)
-    cands = blocks[::-1] or [text[text.find("{"): text.rfind("}") + 1]]
-    for c in cands:
+    """The answer object of a reply: the last JSON object holding an "action" (in a ```json block or
+    bare; a ```python simulator block is not searched), else the last parsable object."""
+    text = re.sub(r"```python\s*\n.*?```", "", text, flags=re.S)
+    dec = json.JSONDecoder()
+    found: list[dict] = []
+    for m in re.finditer(r"\{", text):
         try:
-            d = json.loads(c)
-            if isinstance(d, dict):
-                return d
+            d, _ = dec.raw_decode(text, m.start())
         except json.JSONDecodeError:
             continue
+        if isinstance(d, dict):
+            found.append(d)
+    with_action = [d for d in found if "action" in d]
+    return (with_action or found or [None])[-1]
+
+
+def parse_code(text: str, answer: Optional[dict] = None) -> Optional[str]:
+    """The simulator code of a reply: its last ```python block, or a code string in the JSON answer
+    (models often put it there)."""
+    blocks = [b for b in re.findall(r"```python\s*\n(.*?)```", text, re.S) if "def step" in b]
+    if blocks:
+        return blocks[-1].strip()
+    for k in ("python", "simulator", "sim", "code", "sim_code"):
+        v = (answer or {}).get(k)
+        if isinstance(v, str) and "def step" in v:
+            return v.strip()
     return None
 
 
