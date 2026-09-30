@@ -5,7 +5,7 @@
 # runs/dots3/log.txt. Safe to start again after a container restart: it continues numbering.
 cd "$(dirname "$0")/.."
 D=runs/dots3; mkdir -p $D
-[ -f $D/arms ] || printf 'fresh|--context fresh\nrolling|--context rolling\n' > $D/arms
+[ -f $D/arms ] || printf 'rolling|--context rolling --compact-tokens 60000\n' > $D/arms
 GAMES=${GAMES:-cd82,tu93,wa30}
 while [ ! -f $D/STOP ]; do
   R=$(date -u +%m%d-%H%M); mkdir -p $D/$R

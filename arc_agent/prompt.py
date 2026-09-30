@@ -120,22 +120,20 @@ def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: st
 def step_message(obs: dict[str, Any], new_nodes: str, verdict: str, diff: str, objects: str,
                  lattice: str, grid: Optional[str], image_b64: Optional[str], problems: list[str],
                  rows: str = "") -> dict:
-    """The next turn of a continuing conversation: only what is new since the last answer. The graph
-    and the handoff are already in the conversation (the full graph opens every segment)."""
-    parts = [f"GRAPH NODES ADDED BY THIS STEP (your nodes with their ids, and the loop's action/outcome):\n{new_nodes}",
-             "", f"PREDICTION CHECK for the last action:\n{verdict}", "",
-             f"WHAT THE LAST ACTION CHANGED:\n{diff}"]
+    """The next turn of a continuing conversation: only what is new since the last answer. The graph,
+    the handoff and the first full frame (grid and objects) are already in the conversation; every
+    token here stays in it until the next compaction, so the turn is kept short."""
+    parts = [f"NEW GRAPH NODES:\n{new_nodes}", f"CHECK: {verdict}", f"DIFF:\n{diff}"]
     if problems:
-        parts += ["", "PROBLEMS WITH YOUR LAST ANSWER (fix them this step):", *problems]
-    parts += ["", f"STATUS: {status_text(obs)}", "", "CURRENT FRAME objects:", objects]
+        parts += ["PROBLEMS WITH YOUR LAST ANSWER (fix them now):", *problems]
+    parts += [f"STATUS: {status_text(obs)}"]
     if lattice:
-        parts += ["", "CURRENT FRAME as a cell map:", lattice]
+        parts += ["CELL MAP:", lattice]
     if grid:
-        parts += ["", "CURRENT FRAME grid (hex; background-only rows and columns left out, labels absolute):", grid]
+        parts += ["FULL GRID (hex, labels absolute):", grid, "OBJECTS:", objects]
     elif rows:
-        parts += ["", "ROWS OF THE FRAME THAT CHANGED (hex, full width; every other row is as in the last full grid "
-                  "or row update; set \"need_grid\": true to get the whole frame next step):", rows]
-    parts += ["", "Update the graph and answer with the JSON object now."]
+        parts += ["CHANGED ROWS (hex, full width; other rows unchanged; need_grid for the whole frame):", rows]
+    parts += ["Answer with the JSON object (graph_update required)."]
     content: list[dict] = [{"type": "text", "text": "\n".join(parts)}]
     if image_b64:
         content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}})

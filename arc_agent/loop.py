@@ -131,8 +131,11 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
                             ". Reply again with the complete JSON object."}]
         te = time.time()
         if context == "rolling":
-            # the segment keeps this turn: the user message and the final answer (not the reasoning)
-            convo += [user, {"role": "assistant", "content": rep.content if rep else ""}]
+            # the segment keeps this turn: the user message and the answer itself, as compact JSON (not
+            # the reasoning, nor any prose written before the JSON)
+            kept = json.dumps(answer, ensure_ascii=False, separators=(",", ":")) if answer is not None else \
+                (rep.content[-2000:] if rep else "")
+            convo += [user, {"role": "assistant", "content": kept}]
             used = int((rep.usage or {}).get("prompt_tokens") or 0) if rep else compact_tokens + 1
             if used > compact_tokens:
                 compact = True

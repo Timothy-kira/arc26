@@ -50,7 +50,7 @@
     "thinking": true,
     "call_seconds": 180,
     "context": "rolling",
-    "compact_tokens": 30000,
+    "compact_tokens": 60000,
     "think_policy": "model"
   },
   "thinking": true,
