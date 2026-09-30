@@ -19,6 +19,7 @@ import io
 import json
 import tarfile
 from pathlib import Path
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -199,8 +200,11 @@ pd.DataFrame([["1_0", "1", True, 1]], columns=["row_id", "game_id", "end_of_game
 '''
 
 
-def build(variant: str, out: Path) -> Path:
+def build(variant: str, out: Path, overrides: Optional[dict] = None) -> Path:
     cfg = json.loads((ROOT / "kaggle" / "config.json").read_text())
+    for k, v in (overrides or {}).items():  # "api.games" style keys reach into nested sections
+        sect, _, key = k.rpartition(".")
+        (cfg[sect] if sect else cfg)[key] = v
     submit = SUBMIT_RUN.replace(
         "BATCH_SUBMIT",
         batch_cmd('"--out-dir", WORK + "/run", "--games", "all", "--gateway", "http://gateway:8001", "--hours", str(CFG["hours"])'),
@@ -261,8 +265,17 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", default="dev", choices=["submit", "dev", "api"])
     ap.add_argument("--out", default="")
+    ap.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
+                    help="override a config value (JSON value), e.g. --set kernel_slug=\"arc26-val\" --set api.k=2")
     a = ap.parse_args()
-    out = build(a.variant, Path(a.out or ROOT / "build" / a.variant))
+    over = {}
+    for kv in a.set:
+        k, _, v = kv.partition("=")
+        try:
+            over[k] = json.loads(v)
+        except json.JSONDecodeError:
+            over[k] = v
+    out = build(a.variant, Path(a.out or ROOT / "build" / a.variant), over)
     print(f"built {out}/notebook.ipynb")
 
 
