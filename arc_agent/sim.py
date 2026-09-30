@@ -30,21 +30,25 @@ from typing import Any, Optional
 
 import numpy as np
 
-HELP = """THE SIMULATOR (optional, strongly recommended once you know how the actions work): write Python in a
-```python block after your JSON; it replaces the previous version. numpy is available as np. Define
+HELP = """THE SIMULATOR (part of every answer, like the graph update): Python in a ```python block after
+your JSON, replacing the previous version. numpy is available as np. Define
   step(grid, action, x, y) -> grid   the next frame (grid: 64x64 int numpy array, index grid[y, x]; action
                                      1-7; x, y only for 6). Return a new array; do not modify the input.
   goal(grid) -> bool                 the frame clears the level (your current goal hypothesis)
   key(grid) -> hashable              optional: the state that matters (e.g. the avatar position and the
                                      board without the move counter); default the whole frame
   clicks(grid) -> [(x, y), ...]      optional: where ACTION6 is worth trying
-Model the board, not the HUD (cells in the HUD band are not counted). Every action is then checked
-against your step() and each new version is replayed on the level's recent actions: the report says
-which cells it got wrong, so fix the code from that. With "plan": true in the JSON the game loop
-searches your simulator for the shortest route from the current frame to goal() and plays it while the
-real frames match your predictions (it stops at the first mismatch, at a new level or GAME_OVER); your
-"action" is used when no route is found. A route costs real actions, so plan only when you trust
-step() and goal()."""
+The game loop enforces it:
+- from the 3rd action of a level an answer without a simulator is sent back; so is one that keeps a
+  simulator that got the last action wrong (send the corrected version);
+- a new version is replayed on the level's recent real actions and rejected if it crashes or gets more
+  cells wrong than the current one;
+- every real action is checked against step() (HUD cells are not counted) and the result is linked to
+  the simulator's node in the graph;
+- once step() has predicted 3 actions in a row exactly, the loop searches it (BFS) for the shortest
+  route to goal() before each step and shows the route; "plan": true plays it while the real frames
+  match step() (it stops at the first mismatch, a new level or GAME_OVER); without a route your
+  "action" is played."""
 
 
 def _load(code: str) -> dict:

@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-NODE_TYPES = ("observation", "rule", "hypothesis", "goal", "plan", "question", "action", "outcome")
+NODE_TYPES = ("observation", "rule", "hypothesis", "goal", "plan", "question", "action", "outcome", "simulator")
 EDGE_TYPES = ("supports", "refutes", "causes", "part_of", "leads_to", "about", "tests", "revises")
 STATUSES = ("open", "confirmed", "refuted", "done")
 
