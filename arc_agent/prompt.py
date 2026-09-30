@@ -30,6 +30,11 @@ deciding anything:
 - THE HANDOFF: the note you left yourself last step, and the PREDICTION you made for that step, with
   the verdict of whether it came true.
 
+The conversation may continue across steps: then each new turn brings only what changed (the check,
+the diff, the new graph nodes, the frame). It is compacted from time to time (and at every new level
+or GAME_OVER): a fresh segment opens with the whole graph and your last handoff, and nothing else
+survives. So whatever you will need later must be in the graph or the handoff.
+
 Each step, answer with exactly one JSON object (you may think first, but the reply must end with the
 JSON in a ```json block):
 {{
@@ -47,7 +52,8 @@ JSON in a ```json block):
     "text": "what exactly you expect to see after this action"
   }},
   "handoff": "note to your next step: current goal, plan for the next few actions, what is still uncertain",
-  "think_next": true | false
+  "think_next": true | false,
+  "need_grid": false
 }}
 
 Rules for the graph:
@@ -105,6 +111,29 @@ def user_message(obs: dict[str, Any], graph_text: str, handoff: str, verdict: st
         parts += ["", "CURRENT FRAME as a cell map (use it for maps and paths; the full grid follows):", lattice]
     parts += ["", "CURRENT FRAME grid (hex; rows and columns that are only background are left out, labels "
               "are absolute y and x):", grid, "", "Answer with the JSON object now."]
+    content: list[dict] = [{"type": "text", "text": "\n".join(parts)}]
+    if image_b64:
+        content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}})
+    return {"role": "user", "content": content}
+
+
+def step_message(obs: dict[str, Any], new_nodes: str, verdict: str, diff: str, objects: str,
+                 lattice: str, grid: Optional[str], image_b64: Optional[str], problems: list[str]) -> dict:
+    """The next turn of a continuing conversation: only what is new since the last answer. The graph
+    and the handoff are already in the conversation (the full graph opens every segment)."""
+    parts = [f"GRAPH NODES ADDED BY THIS STEP (your nodes with their ids, and the loop's action/outcome):\n{new_nodes}",
+             "", f"PREDICTION CHECK for the last action:\n{verdict}", "",
+             f"WHAT THE LAST ACTION CHANGED:\n{diff}"]
+    if problems:
+        parts += ["", "PROBLEMS WITH YOUR LAST ANSWER (fix them this step):", *problems]
+    parts += ["", f"STATUS: {status_text(obs)}", "", "CURRENT FRAME objects:", objects]
+    if lattice:
+        parts += ["", "CURRENT FRAME as a cell map:", lattice]
+    if grid:
+        parts += ["", "CURRENT FRAME grid (hex; background-only rows and columns left out, labels absolute):", grid]
+    else:
+        parts += ["", "(full hex grid left out: set \"need_grid\": true in your answer to get it next step)"]
+    parts += ["", "Update the graph and answer with the JSON object now."]
     content: list[dict] = [{"type": "text", "text": "\n".join(parts)}]
     if image_b64:
         content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}})

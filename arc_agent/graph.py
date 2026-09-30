@@ -149,6 +149,21 @@ class Graph:
             text = text[: max_chars // 3] + "\n  ...\n" + text[-(2 * max_chars) // 3:]
         return text
 
+    def lines(self, ids: list[int]) -> str:
+        """The given nodes as graph lines (same format as ``render``), for a step that continues a
+        conversation and only needs what was added since the last one."""
+        out_edges: dict[int, list[Edge]] = {}
+        for e in self.edges:
+            out_edges.setdefault(e.src, []).append(e)
+        rows = []
+        for i in ids:
+            if 0 <= i < len(self.nodes):
+                n = self.nodes[i]
+                edges = "".join(f" -{e.rel}->{e.dst}" for e in out_edges.get(n.id, []))
+                mark = "" if n.status == "open" else f" [{n.status}]"
+                rows.append(f"  {n.id} {n.type}{mark} s{n.step}: {n.text}{edges}")
+        return "\n".join(rows)
+
     def save(self, path: Path) -> None:
         tmp = path.with_suffix(".tmp")
         tmp.write_text(json.dumps({"nodes": [asdict(n) for n in self.nodes],
