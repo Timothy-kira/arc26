@@ -39,20 +39,26 @@
   "api": {
     "base_url": "https://note3-prev-api.askdiandian.com/v1",
     "model": "dots3-note-prev",
-    "games": "ls20,vc33,tu93",
-    "conc": 3,
-    "hours": 2.7,
-    "game_seconds": 2700,
+    "games": "cd82,tu93,wa30",
+    "conc": 6,
+    "hours": 1.2,
+    "game_seconds": 1800,
     "dataset_sources": [
       "xishengfeng/arc26-secrets"
     ],
-    "k": 3,
+    "k": 2,
     "thinking": true,
-    "call_seconds": 180
+    "call_seconds": 180,
+    "context": "rolling",
+    "compact_tokens": 30000,
+    "think_policy": "model"
   },
   "thinking": true,
   "game_seconds": 2400,
   "call_seconds": 180,
   "dev_games": "all",
-  "think_policy": "exception"
+  "think_policy": "exception",
+  "context": "rolling",
+  "compact_tokens": 40000,
+  "image": true
 }
