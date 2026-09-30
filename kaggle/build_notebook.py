@@ -178,6 +178,7 @@ def batch_cmd(extra: str) -> str:
         '"--max-actions", str(CFG["max_actions"]), "--game-seconds", str(CFG["game_seconds"]), '
         '"--call-seconds", str(CFG["call_seconds"]), ' + extra + "]"
         ' + ([] if CFG.get("thinking", True) else ["--no-thinking"]) + ["--think-policy", CFG.get("think_policy", "model")]'
+        ' + ([] if CFG.get("image", True) else ["--no-image"])'
     )
 
 

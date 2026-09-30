@@ -33,7 +33,7 @@ def one(game: str, k: int, a: dict[str, Any], card: Optional[str], seconds: floa
     llm = LLM(a["base_url"], a["model"], key, thinking=not a["no_thinking"], call_seconds=a["call_seconds"], hurry=HURRY)
     out = Path(a["out_dir"]) / "games" / f"{game}_k{k}"
     try:
-        return play(game, out, llm, a["env_dir"], a["gateway"], card, seconds, a["max_actions"], a["think_policy"])
+        return play(game, out, llm, a["env_dir"], a["gateway"], card, seconds, a["max_actions"], a["think_policy"], not a["no_image"])
     except Exception as exc:  # one broken game must not stop the batch
         return {"game": game, "k": k, "error": f"{type(exc).__name__}: {exc}"}
 
@@ -50,6 +50,7 @@ def main() -> int:
     p.add_argument("--model", required=True)
     p.add_argument("--api-key-file", default="")
     p.add_argument("--no-thinking", action="store_true")
+    p.add_argument("--no-image", action="store_true", help="text only (no frame image in the prompt)")
     p.add_argument("--think-policy", default="model", choices=["always", "model", "exception"],
                    help="which steps think: every step, those the model does not mark routine (default), or "
                         "only when needed (first steps, failed prediction, new level, game over, model asks)")

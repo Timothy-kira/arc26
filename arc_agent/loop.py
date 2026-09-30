@@ -43,7 +43,7 @@ def make_session(game: str, env_dir: str, gateway: Optional[str], card: Optional
 
 def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optional[str] = None,
          card: Optional[str] = None, seconds: float = 2700.0, max_actions: int = 2000,
-         policy: str = "model") -> dict[str, Any]:
+         policy: str = "model", image: bool = True) -> dict[str, Any]:
     """Play one game. ``policy`` decides which steps run with thinking:
       always     every step
       model      the model marks routine next steps (``think_next`` false): those run without thinking
@@ -88,7 +88,7 @@ def play(game: str, out_dir: Path, llm: LLM, env_dir: str = "", gateway: Optiona
         grid_text = vision.hex_grid(grid) if thinks or not lattice else "(left out on routine steps: use the cell map and objects)"
         msgs = [{"role": "system", "content": prompt.SYSTEM},
                 prompt.user_message(view, graph.render(), handoff, verdict, diff, vision.objects_text(grid),
-                                    grid_text, vision.png(grid), problems, lattice)]
+                                    grid_text, vision.png(grid) if image else None, problems, lattice)]
         answer, errs, rep = None, [], None
         tl = time.time()
         for _ in range(2):  # one repair round when the answer is unusable

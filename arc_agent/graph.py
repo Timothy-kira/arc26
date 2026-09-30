@@ -135,7 +135,9 @@ class Graph:
             if folded_acts or folded_obs:  # noted at the end so the text above stays stable (prefix cache)
                 folded_note.append(f"level {lv + 1}: {folded_acts} earlier actions whose predictions came true and "
                                    f"{folded_obs} old observations/plans are folded")
-            for n in shown:
+            # knowledge first (it only grows, so the text stays stable for the prefix cache), then the
+            # level's action history (which shifts as old RIGHT pairs fold)
+            for n in sorted(shown, key=lambda n: (n.type in ("action", "outcome"), n.id)):
                 edges = "".join(f" -{e.rel}->{e.dst}" for e in out_edges.get(n.id, []))
                 mark = "" if n.status == "open" else f" [{n.status}]"
                 text = "RIGHT" if n.type == "outcome" and n.status == "confirmed" else n.text
